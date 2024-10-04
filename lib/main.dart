@@ -168,6 +168,8 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
       var consultId = Int64(1);
       Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId);
+      //回复消息
+      //Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId, replyMsgId: 12344555555555544433);
     });
   }
 
@@ -179,7 +181,6 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
       lineDetect.getLine();
       lineDetect.delegate = this;
     }
-
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -235,13 +236,14 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   @override
   void lineError(Result error) {
+    if (error.code == 1008){
+      //无可用线路
+    }
     print(error.message);
   }
 
   @override
   void useTheLine(String line) {
-    // TODO: implement useTheLine
-    print(line);
     initSDK();
   }
 
