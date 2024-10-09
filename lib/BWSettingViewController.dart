@@ -61,13 +61,13 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
   Future<void> submitButtonTapped() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String lines = controllers[0].text.trim();
-    String cert = controllers[1].text.trim();
-    int merchantId = int.tryParse(controllers[2].text.trim()) ?? 0;
-    int userId = int.tryParse(controllers[3].text.trim()) ?? 0;
-    String baseUrlImage = controllers[5].text.trim();
-    String userName = controllers[4].text.trim();
-    int maxSessionMins = int.tryParse(controllers[6].text.trim()) ?? 0;
+     lines = controllers[0].text.trim();
+     cert = controllers[1].text.trim();
+     merchantId = int.tryParse(controllers[2].text.trim()) ?? 0;
+     userId = int.tryParse(controllers[3].text.trim()) ?? 0;
+     baseUrlImage = controllers[5].text.trim();
+     userName = controllers[4].text.trim();
+     maxSessionMins = int.tryParse(controllers[6].text.trim()) ?? 0;
 
     await prefs.setString(PARAM_LINES, lines);
     await prefs.setString('PARAM_CERT', cert);
@@ -76,6 +76,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     await prefs.setString('PARAM_ImageBaseURL', baseUrlImage);
     await prefs.setString('PARAM_USERNAME', userName);
     await prefs.setInt('PARAM_MAXSESSIONMINS', maxSessionMins);
+
 
     if (widget.callBack != null) {
       widget.callBack!();
