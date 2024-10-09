@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qichatsdk_demo_flutter/BWSettingViewController.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 import 'package:fixnum/src/int64.dart';
@@ -160,6 +161,12 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
     setState(() {
       var consultId = Int64(1);
       Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId);
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+          builder: (context) => BWSettingViewController())
+      );
       //回复消息
       //Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId, replyMsgId: 12344555555555544433);
     });
