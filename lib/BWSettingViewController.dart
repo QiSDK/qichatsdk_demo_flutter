@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Constant.dart';
+
 typedef DismissedCallback = void Function();
 
 class BWSettingViewController extends StatefulWidget {
@@ -14,13 +16,18 @@ class BWSettingViewController extends StatefulWidget {
 }
 
 class _BWSettingViewControllerState extends State<BWSettingViewController> {
-  final TextEditingController linesController = TextEditingController();
-  final TextEditingController certController = TextEditingController();
-  final TextEditingController merchantIdController = TextEditingController();
-  final TextEditingController userIdController = TextEditingController();
-  final TextEditingController userNameController = TextEditingController();
-  final TextEditingController imgBaseUrlController = TextEditingController();
-  final TextEditingController maxSessionMinsController = TextEditingController();
+
+  final List<String> labels = [
+    'Lines',
+    'Cert',
+    'Merchant Id',
+    'User Id',
+    'User Name',
+    'Image Base URL',
+    'Max Session Mins'
+  ];
+  final List<TextEditingController> controllers = List.generate(7, (index) => TextEditingController());
+
 
   @override
   void initState() {
@@ -30,25 +37,21 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
 
   @override
   void dispose() {
-    linesController.dispose();
-    certController.dispose();
-    merchantIdController.dispose();
-    userIdController.dispose();
-    userNameController.dispose();
-    imgBaseUrlController.dispose();
-    maxSessionMinsController.dispose();
+    for (var controller in controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
   void setupUI() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    linesController.text = prefs.getString('PARAM_LINES') ?? '';
-    certController.text = prefs.getString('PARAM_CERT') ?? '';
-    merchantIdController.text = (prefs.getInt('PARAM_MERCHANT_ID') ?? 0).toString();
-    userIdController.text = (prefs.getInt('PARAM_USER_ID') ?? 0).toString();
-    imgBaseUrlController.text = prefs.getString('PARAM_ImageBaseURL') ?? '';
-    userNameController.text = prefs.getString('PARAM_USERNAME') ?? '';
-    maxSessionMinsController.text = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? 0).toString();
+    controllers[0].text = prefs.getString('PARAM_LINES') ?? lines;
+    controllers[1].text = prefs.getString('PARAM_CERT') ?? cert;
+    controllers[2].text = (prefs.getInt('PARAM_MERCHANT_ID') ?? merchantId).toString();
+    controllers[3].text = (prefs.getInt('PARAM_USER_ID') ?? userId).toString();
+    controllers[4].text = prefs.getString('PARAM_USERNAME') ?? userName;
+    controllers[5].text = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
+    controllers[6].text = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins).toString();
   }
 
   void dismissKeyboard() {
@@ -58,15 +61,15 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
   Future<void> submitButtonTapped() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String lines = linesController.text.trim();
-    String cert = certController.text.trim();
-    int merchantId = int.tryParse(merchantIdController.text.trim()) ?? 0;
-    int userId = int.tryParse(userIdController.text.trim()) ?? 0;
-    String baseUrlImage = imgBaseUrlController.text.trim();
-    String userName = userNameController.text.trim();
-    int maxSessionMins = int.tryParse(maxSessionMinsController.text.trim()) ?? 0;
+    String lines = controllers[0].text.trim();
+    String cert = controllers[1].text.trim();
+    int merchantId = int.tryParse(controllers[2].text.trim()) ?? 0;
+    int userId = int.tryParse(controllers[3].text.trim()) ?? 0;
+    String baseUrlImage = controllers[5].text.trim();
+    String userName = controllers[4].text.trim();
+    int maxSessionMins = int.tryParse(controllers[6].text.trim()) ?? 0;
 
-    await prefs.setString('PARAM_LINES', lines);
+    await prefs.setString(PARAM_LINES, lines);
     await prefs.setString('PARAM_CERT', cert);
     await prefs.setInt('PARAM_MERCHANT_ID', merchantId);
     await prefs.setInt('PARAM_USER_ID', userId);
@@ -94,13 +97,22 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField('Lines', linesController),
-              _buildTextField('Cert', certController),
-              _buildTextField('Merchant Id', merchantIdController),
-              _buildTextField('User Id', userIdController),
-              _buildTextField('User Name', userNameController),
-              _buildTextField('Image Base URL', imgBaseUrlController),
-              _buildTextField('Max Session Mins', maxSessionMinsController),
+              Expanded(
+                  child: ListView.builder(
+                    itemCount: labels.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(labels[index], controllers[index])
+                          ],
+                        ),
+                      );
+                      },
+          )),
+
               SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
@@ -117,7 +129,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
 
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
