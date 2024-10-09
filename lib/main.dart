@@ -71,7 +71,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, TeneasySDKDelegate{
-  int _counter = 0;
   String _textContent = "正在初始化。。。";
 
   void initSDK(){
@@ -159,13 +158,6 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-
       var consultId = Int64(1);
       Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId);
       //回复消息
