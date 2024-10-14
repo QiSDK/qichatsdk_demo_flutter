@@ -1,28 +1,30 @@
-class Result {
+class Result<T> {
   int? code;
   String? msg;
-  Data? data;
+  T? data;
 
   Result({this.code, this.msg, this.data});
 
-  Result.fromJson(Map<String, dynamic> json) {
+  // This method requires a function to convert JSON into the desired generic type T
+  Result.fromJson(Map<String, dynamic> json, T Function(Object? json) fromJsonT) {
     code = json['code'];
     msg = json['msg'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? fromJsonT(json['data']) : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['code'] = this.code;
-    data['msg'] = this.msg;
-    if (this.data != null) {
-      data['data'] = this.data!.toJson();
+  Map<String, dynamic> toJson(Object Function(T? data) toJsonT) {
+    final Map<String, dynamic> json = {};
+    json['code'] = code;
+    json['msg'] = msg;
+    if (data != null) {
+      json['data'] = toJsonT(data);
     }
-    return data;
+    return json;
   }
 }
 
-class Data {
+
+class Entrance {
   String? name;
   String? nick;
   String? avatar;
@@ -31,7 +33,7 @@ class Data {
   String? changeDefaultTime;
   List<Consults>? consults;
 
-  Data(
+  Entrance(
       {this.name,
         this.nick,
         this.avatar,
@@ -40,7 +42,7 @@ class Data {
         this.changeDefaultTime,
         this.consults});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Entrance.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     nick = json['nick'];
     avatar = json['avatar'];

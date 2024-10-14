@@ -65,7 +65,7 @@ class ArticleRepository {
     }
   }
 
-  static Future<dynamic> queryEntrance() async {
+  static Future<Entr> queryEntrance() async {
     Resource res = Resource();
     res.path = queryEntrancePath;
     debugPrint("queryEntrance 请求参数：${res.queryParams}");
