@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:logman/logman.dart';
+import 'package:uuid/uuid.dart';
 
 import '../Constant.dart';
 
@@ -25,15 +26,15 @@ class CustomInterceptors extends Interceptor {
     if (xToken.isEmpty){
       header = {'x-token': cert};
     }
-    final requestId = UniqueKey().toString();
-    var traceHeader = {"x-trace-id": requestId};
+    String uuid = Uuid().v4();
+    var traceHeader = {"x-trace-id": uuid};
     options.headers.addAll(header);
     options.headers.addAll(traceHeader);
     if (kDebugMode) {
-      _cache[options] = requestId;
+      _cache[options] = uuid;
       final sentAt = DateTime.now();
       final requestRecord = NetworkRequestLogmanRecord(
-        id: requestId,
+        id: uuid,
         url: options.uri.toString(),
         method: options.method,
         headers: options.headers,

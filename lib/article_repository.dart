@@ -61,8 +61,8 @@ class ArticleRepository {
     Resource res = Resource();
     res.path = syncMessagePath;
     var map = {'chatId': 0, "count": 50, "consultId": 1, "userId": 666665};
-    var formData = FormData.fromMap(map);
-    res.bodyParams = formData;
+    //var formData = FormData.fromMap(map);
+    res.bodyParams = map;
 
     try {
       var resp = await Api().post(res);

@@ -14,7 +14,7 @@ const String PARAM_ImageBaseURL = "IMAGEURL";
 
 // These are the values to be configured in settings
 String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
-String cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ";
+String cert = "COYBEAIYwNgoIPIBKIOzgtGXMg.-t5P7JEo-Dg7nlJpu6uZzNJE3QtRaJV9bE1yhZqduThDLHE6MGxCBFuwF38v5z5SJhoD40fmwAtPj4iIL9iPAQ";
 int merchantId = 230;
 int userId = 666665; // Example: 1125324
 String baseUrlImage = "https://sssacc.wwc09.com"; // For constructing image URLs
