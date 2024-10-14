@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   Future<void> getEntrance() async {
     var d = await ArticleRepository.queryEntrance();
-    print(d);
+    //print(d);
   }
 
   void initSDK(){
