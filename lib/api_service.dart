@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'base/custom_interceptors.dart';
+import 'package:dio/dio.dart';
 
 class Resource {
   String path = '';
@@ -23,9 +25,8 @@ class Api {
     required String method,
     Object? data,
     Map<String, dynamic>? queryParameters,
-    int serverIndex = 0,
   }) async {
-    final url = '$baseUrlApi:8093$path';
+    final url = '$baseUrlApi$path';
 
     try {
       final response = await dio.request(
@@ -37,7 +38,7 @@ class Api {
       //AppConfig.globalStore.currentApi = server;
       return response.data;
     } catch (e) {
-
+      debugPrint(e.toString());
     }
   }
 

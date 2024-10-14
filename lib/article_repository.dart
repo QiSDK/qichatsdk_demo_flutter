@@ -20,7 +20,7 @@ class ArticleRepository {
   static const String updateWorkPath = '/api/PublishWork';
   static const String uploadAudioPath = '/api/PublishWork/';
   static const String addToWorkPath = '/api/PublishWork/addTextToWork';
-  static const String copyWorkPath = '/api/MyWorks/copyWork';
+  static const String queryEntrancePath = '/v1/api/query-entrance';
 
   //即时翻译，服务器不会保存结果
   static const String instantTranslatePath = '/api/Translate';
@@ -65,11 +65,10 @@ class ArticleRepository {
     }
   }
 
-  static Future<dynamic> thumbups(Works model) async {
+  static Future<dynamic> queryEntrance() async {
     Resource res = Resource();
-    res.path = thumbupsPath;
-    var map = model.toJson();
-    res.bodyParams = map;
+    res.path = queryEntrancePath;
+    debugPrint("queryEntrance 请求参数：${res.queryParams}");
     try {
       var result = await Api().post(res);
       var data = result;
@@ -80,11 +79,13 @@ class ArticleRepository {
     }
   }
 
-  static Future<dynamic> delWork(int id) async {
+  static Future<dynamic> thumbups(Works model) async {
     Resource res = Resource();
-    res.path = '$delWorkPath/$id';
+    res.path = thumbupsPath;
+    var map = model.toJson();
+    res.bodyParams = map;
     try {
-      var result = await Api().delete(res);
+      var result = await Api().post(res);
       var data = result;
       return data;
     } catch (e) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qichatsdk_demo_flutter/BWSettingViewController.dart';
+import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 import 'package:fixnum/src/int64.dart';
@@ -11,7 +12,8 @@ import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 import 'Constant.dart';
 import 'model/Custom.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -74,6 +76,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, TeneasySDKDelegate{
   String _textContent = "正在初始化。。。";
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> getEntrance() async {
+    var d = await ArticleRepository.queryEntrance();
+    print(d);
+  }
 
   void initSDK(){
     if (Constant.instance.isConnected){
@@ -244,7 +256,9 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   @override
   void useTheLine(String line) {
-    initSDK();
+    //initSDK();
+    domain = line;
+    getEntrance();
   }
 
 }

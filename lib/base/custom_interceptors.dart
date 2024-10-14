@@ -12,8 +12,6 @@ class CustomInterceptors extends Interceptor {
   final _cache = <RequestOptions, String>{};
   final Logman _logman = Logman.instance;
 
-  String loginToken =
-      'Bearer ${const String.fromEnvironment('LOGIN_TOKEN', defaultValue: '')}';
   // 是否有网
   Future<bool> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -23,14 +21,17 @@ class CustomInterceptors extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     print('REQUEST[${options.method}] => PATH: ${options.path}');
-    final header = {'x-token': xToken};
+    var header = {'x-token': xToken};
+    if (xToken.isEmpty){
+      header = {'x-token': cert};
+    }
+    final requestId = UniqueKey().toString();
+    var traceHeader = {"x-trace-id": requestId};
     options.headers.addAll(header);
+    options.headers.addAll(traceHeader);
     if (kDebugMode) {
-      debugPrint("loginToken:" + loginToken);
-      final requestId = UniqueKey().toString();
       _cache[options] = requestId;
       final sentAt = DateTime.now();
-
       final requestRecord = NetworkRequestLogmanRecord(
         id: requestId,
         url: options.uri.toString(),
