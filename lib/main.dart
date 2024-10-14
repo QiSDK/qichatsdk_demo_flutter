@@ -9,6 +9,7 @@ import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 
 
 import 'Constant.dart';
+import 'model/Custom.dart';
 
 void main() {
   runApp(const MyApp());
@@ -89,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
         token: "",
         baseUrl: "wss://csapi.hfxg.xyz/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: "%7B%22username%22%3A%22xiaoming%22%7D"
+        custom: getCustomParam("wang wu", 1, 0)
     );
 
     // Now the listener will receive the delegate events
