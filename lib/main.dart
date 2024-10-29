@@ -6,12 +6,7 @@ import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart';
-import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
-
-
 import 'Constant.dart';
-import 'model/Custom.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,8 +70,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, TeneasySDKDelegate{
-  String _textContent = "正在初始化。。。";
+class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate{
+  String _textContent = "正在线路检测。。。";
 
   @override
   void initState() {
@@ -84,89 +79,9 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
   }
 
   Future<void> getEntrance() async {
-    //entrance数据
-    var d = await ArticleRepository.queryEntrance();
-
     //聊天记录
-    //var e = await ArticleRepository.queryHistory();
-    //print(d);
-  }
-
-  void initSDK(){
-    if (Constant.instance.isConnected){
-      return;
-    }
-    print("正在初始化sdk");
-    // Assign the listener to the ChatLib delegate
-    Constant.instance.chatLib.delegate = this;
-
-    // Initialize the chat library with necessary parameters
-    Constant.instance.chatLib.initialize(
-        userId: userId,
-        cert: cert,
-        token: "",
-        baseUrl: "wss://" + domain + "/v1/gateway/h5",
-        sign: "9zgd9YUc",
-        custom: getCustomParam("wang wu", 1, 0)
-    );
-
-    // Now the listener will receive the delegate events
-    Constant.instance.chatLib.callWebSocket();
-  }
-
-  @override
-  void receivedMsg(Message msg) {
-    print("Received Message: ${msg}");
-    if (msg.image.uri.isNotEmpty){
-      _updateUI("Received Message: ${msg.image.uri}");
-    }else if(msg.video.uri.isNotEmpty){
-      _updateUI("Received Message: ${msg.video.uri}");
-    }else{
-      _updateUI("Received Message: ${msg.content}");
-    }
-  }
-
-  @override
-  void systemMsg(Result result) {
-    print("System Message: ${result.message}");
-    Constant.instance.isConnected = false;
-    _updateUI("已断开：${result.code} ${result.message})");
-    if (result.code == 1002 || result.code == 1010) {
-      if (result.code == 1002){
-        //showTip("无效的Token")
-        //有时候服务器反馈的这个消息不准，可忽略它
-      }else {
-        //showTip("在别处登录了")
-        //toast("在别处登录了")
-        //在此处退出聊天
-      }
-    }
-  }
-
-  @override
-  void connected(SCHi c) {
-    print("Connected with token: ${c.token}");
-    Constant.instance.isConnected = true;
-    _updateUI("连接成功！");
-  }
-
-  @override
-  void workChanged(SCWorkerChanged msg) {
-    print("Worker Changed for Consult ID: ${msg.consultId}");
-    _updateUI("客服更换成功，新worker id:${msg.workerId}");
-    //客服更换之后，在这重新调用历史记录的接口，和更换客服头像、名字
-  }
-
-  @override
-  void msgDeleted(Message msg, Int64 payloadId, String? errMsg) {
-    _updateUI("删除成功 msgId:${msg.msgId}");
-    print("删除成功: ${msg.msgId} ");
-  }
-
-  @override
-  void msgReceipt(Message msg, Int64 payloadId, String? errMsg) {
-    _updateUI("收到回执 payloadId:${payloadId}");
-    print("收到回执 payloadId:${payloadId} msgId: ${msg.msgId}");
+    var e = await ArticleRepository.queryHistory();
+    print(e);
   }
 
   void _updateUI(String content){
@@ -177,9 +92,6 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   void _incrementCounter() {
     setState(() {
-      var consultId = Int64(1);
-      Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId);
-
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -192,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   @override
   Widget build(BuildContext context) {
-    if (!Constant.instance.isConnected){
+    if (domain.isEmpty){
       print("开始线路检测");
       var lineDetect = LineDetectLib("https://xxxcsapi.hfxg.xyz,https://csapi.hfxg.xyz,https://csapi.hfxg.xyz000", tenantId: 230);
       lineDetect.getLine();
@@ -242,11 +154,14 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
                   );
                 },
                 child: const Text('联系客服', style: TextStyle(fontSize: 15))),
-            Text(
+
+            Padding(
+              padding: EdgeInsets.all(16.0), child:   Text(
               '$_textContent',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.labelSmall,
             ),
-          ],
+            ),
+          ]
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -261,15 +176,18 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
   void lineError(Result error) {
     if (error.code == 1008){
       //无可用线路
+      _updateUI("无可用线路");
+      print("无可用线路");
     }
-    print(error.message);
+    //print(error.message);
   }
 
   @override
   void useTheLine(String line) {
     domain = line;
-    initSDK();
-    getEntrance();
+    _updateUI("正在使用线路：${domain}");
+    //initSDK();
+    //getEntrance();
   }
 
 }
