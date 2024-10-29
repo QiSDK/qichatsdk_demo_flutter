@@ -56,9 +56,10 @@ class _ChatPageState extends State<ChatPage> {
       body: Chat(
         messages: _messages,
         onSendPressed: _handleSendPressed,
+        disableImageGallery: false,
         user: _user,
         theme: const DefaultChatTheme(
-          inputBackgroundColor: Colors.white,
+          inputBackgroundColor: Colors.lightBlue,
           primaryColor: Colors.blueAccent,
         ),
       ),
