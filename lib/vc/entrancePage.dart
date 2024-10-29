@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qichatsdk_demo_flutter/model/Entrance.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:qichatsdk_demo_flutter/vc/ChatPage.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 
@@ -36,7 +37,6 @@ class _EntrancePageState extends State<EntrancePage> {
   }
 
   _initBody() {
-
     return entrance?.consults == null
         ? Container()
         : Column(
@@ -46,8 +46,25 @@ class _EntrancePageState extends State<EntrancePage> {
                 itemCount: entrance!.consults!.length,
                 itemBuilder: (ctx, index) {
                   Consults model = entrance!.consults![index];
-                  return _initCell(model);
-                })),
+                  return GestureDetector(
+                      onTap: () {
+                        print("Tapped on: ${model.name}");
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChatPage()));
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Tapped on: ${model.name}")),
+                        );
+                      },
+
+                  child: _initCell(model),
+
+                  );
+                }
+            )),
         SizedBox(
           height: MediaQuery.of(context).padding.bottom + 15,
         )
@@ -70,7 +87,6 @@ class _EntrancePageState extends State<EntrancePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
               Row(
                 children: [
                   CachedNetworkImage(

@@ -77,6 +77,8 @@ dev_dependencies:
   path: ^1.8.3
   logman: ^0.0.16
   uuid: ^4.5.1
+  flutter_chat_ui: ^1.6.13
+  flutter_chat_types: ^3.6.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
