@@ -260,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   @override
   void useTheLine(String line) {
-    //initSDK();
+    initSDK();
     domain = line;
     getEntrance();
   }
