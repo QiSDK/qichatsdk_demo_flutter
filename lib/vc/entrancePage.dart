@@ -55,9 +55,9 @@ class _EntrancePageState extends State<EntrancePage> {
                             MaterialPageRoute(
                                 builder: (context) => ChatPage()));
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Tapped on: ${model.name}")),
-                        );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(content: Text("Tapped on: ${model.name}")),
+                        // );
                       },
 
                   child: _initCell(model),
