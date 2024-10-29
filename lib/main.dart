@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:qichatsdk_demo_flutter/BWSettingViewController.dart';
+import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
+import 'package:qichatsdk_demo_flutter/vc/entrancePage.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 import 'package:fixnum/src/int64.dart';
@@ -84,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   Future<void> getEntrance() async {
     //entrance数据
-    //var d = await ArticleRepository.queryEntrance();
+    var d = await ArticleRepository.queryEntrance();
 
     //聊天记录
     //var e = await ArticleRepository.queryHistory();
@@ -101,10 +102,10 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
     // Initialize the chat library with necessary parameters
     Constant.instance.chatLib.initialize(
-        userId: 230,
-        cert: "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ",
+        userId: userId,
+        cert: cert,
         token: "",
-        baseUrl: "wss://csapi.hfxg.xyz/v1/gateway/h5",
+        baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
         custom: getCustomParam("wang wu", 1, 0)
     );
@@ -232,9 +233,15 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              '消息演示:',
-            ),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EntrancePage())
+                  );
+                },
+                child: const Text('联系客服', style: TextStyle(fontSize: 15))),
             Text(
               '$_textContent',
               style: Theme.of(context).textTheme.headlineMedium,
@@ -260,8 +267,8 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate, 
 
   @override
   void useTheLine(String line) {
-    initSDK();
     domain = line;
+    initSDK();
     getEntrance();
   }
 
