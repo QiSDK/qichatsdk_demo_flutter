@@ -101,6 +101,11 @@ class MsgItem {
   String? msgSourceType;
   String? payloadId;
   Content? content;
+  Media? image;
+  Media? video;
+  // "image": {
+  // "uri": "/session/20240927/230/666688/ASSET_KIND_SESSION/2bf88b8337752f72e72aefff4ce99082.jpg"
+  // }
 
   MsgItem(
       {this.chatId,
@@ -116,7 +121,10 @@ class MsgItem {
         this.withAutoReplies,
         this.msgSourceType,
         this.payloadId,
-        this.content});
+        this.content,
+        this.image,
+        this.video
+      });
 
   MsgItem.fromJson(Map<String, dynamic> json) {
     chatId = json['chatId'];
@@ -137,6 +145,8 @@ class MsgItem {
     }
     msgSourceType = json['msgSourceType'];
     payloadId = json['payloadId'];
+    image = json['image'];
+    video = json['video'];
     content =
     json['content'] != null ? new Content.fromJson(json['content']) : null;
   }
@@ -162,6 +172,9 @@ class MsgItem {
     if (this.content != null) {
       data['content'] = this.content!.toJson();
     }
+
+    data['image'] = this.image;
+    data['video'] = this.video;
     return data;
   }
 }
@@ -229,6 +242,23 @@ class Content {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['data'] = this.data;
+    return data;
+  }
+}
+
+
+class Media {
+  String? uri;
+
+  Media({this.uri});
+
+  Media.fromJson(Map<String, dynamic> json) {
+    uri = json['uri'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['uri'] = this.uri;
     return data;
   }
 }

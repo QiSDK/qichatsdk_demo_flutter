@@ -6,6 +6,7 @@ import 'package:fixnum/src/int64.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart' as cMessage;
@@ -30,7 +31,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   @override
   void initState() {
     super.initState();
-    _loadInitialMessages();
+   // _loadInitialMessages();
     initSDK();
   }
 
@@ -193,11 +194,59 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   }
 
   Future<void> getChatData() async {
-    //var d = consultId.toInt();
     //聊天记录
-    //var e = await ArticleRepository.queryHistory(consultId);
+    var h = await ArticleRepository.queryHistory(consultId);
+
+
+      _buildHistory(h?.list);
+
+    //自动回复
     var f = await ArticleRepository.queryAutoReply(consultId, workerId);
     print(f);
   }
 
+  _buildHistory(List<MsgItem>? msgItems) {
+    if (msgItems == null){
+      return;
+    }
+    for (var item in msgItems) {
+      if ((item.image?.uri ?? "").isNotEmpty) {
+        final sender = types.User(id: item.sender.toString());
+        final imgUrl = baseUrlImage + (item.image?.uri ?? "");
+        _messages.add(types.ImageMessage(
+            author: sender,
+            uri: imgUrl,
+            id: _generateRandomId(),
+            name: 'dd',
+            size: 200,
+            status: types.Status.seen,
+            remoteId: item.msgId
+        ));
+      } else if ((item.video?.uri ?? "").isNotEmpty) {
+        final sender = types.User(id: item.sender.toString());
+        final videoUrl = baseUrlImage + (item.video?.uri ?? "");
+        _messages.add(types.VideoMessage(
+            author: sender,
+            uri: videoUrl,
+            id: _generateRandomId(),
+            name: 'dd',
+            size: 200,
+            status: types.Status.seen,
+            remoteId: item.msgId
+        ));
+      }
+      else if ((item.content?.data ?? "").isNotEmpty) {
+        final sender = types.User(id: item.sender.toString());
+        final text = item.content?.data ?? "";
+        _messages.add(types.TextMessage(
+            author: sender,
+            text: text,
+            id: _generateRandomId(),
+            status: types.Status.seen,
+            remoteId: item.msgId
+        ));
+      }
+    }
+    setState(() {} );
+  }
 }
