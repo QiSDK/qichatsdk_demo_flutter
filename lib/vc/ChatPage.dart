@@ -1,3 +1,5 @@
+
+
 import 'dart:ffi';
 
 import 'package:fixnum/src/int64.dart';
@@ -23,6 +25,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   final List<types.Message> _messages = [];
   final _user = types.User(id: 'user1'); // Local user ID
   final _user1 = types.User(id: 'user2'); // Local user ID
+  var consultId = Int64(1);
 
   @override
   void initState() {
@@ -51,7 +54,6 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
 
   void _handleSendPressed(types.PartialText message) {
 
-    var consultId = Int64(1);
 
     Constant.instance.chatLib.sendMessage("hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
     print("payloadid:${  Constant.instance.chatLib.payloadId }");
@@ -149,6 +151,8 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
     print("Connected with token: ${c.token}");
     Constant.instance.isConnected = true;
     _updateUI("连接成功！");
+
+    getChatData();
   }
 
   @override
@@ -189,10 +193,11 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   }
 
   Future<void> getChatData() async {
+    //var d = consultId.toInt();
     //聊天记录
-    var e = await ArticleRepository.queryHistory();
-    print(e);
-
+    //var e = await ArticleRepository.queryHistory(consultId);
+    var f = await ArticleRepository.queryAutoReply(consultId, workerId);
+    print(f);
   }
 
 }

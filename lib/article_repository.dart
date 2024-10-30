@@ -2,10 +2,13 @@ import 'dart:developer';
 import 'dart:ffi';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:qichatsdk_demo_flutter/Constant.dart';
+import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'api_service.dart';
 import 'model/Entrance.dart';
 import 'model/Result.dart';
+import 'package:fixnum/src/int64.dart' as fixNum;
 
 class ArticleRepository {
   static const String publishPath = '/api/PublishWork';
@@ -60,10 +63,10 @@ class ArticleRepository {
     }
   }
 
-  static Future<Sync?> queryHistory() async {
+  static Future<Sync?> queryHistory(fixNum.Int64 consultId) async {
     Resource res = Resource();
     res.path = syncMessagePath;
-    var map = {'chatId': 0, "count": 50, "consultId": 1, "userId": 666665};
+    var map = {'chatId': 0, "count": 50, "consultId": consultId.toInt(), "userId": userId};
     //var formData = FormData.fromMap(map);
     res.bodyParams = map;
 
@@ -84,22 +87,22 @@ class ArticleRepository {
       rethrow;
     }
   }
-  static Future<Sync?> queryAutoReply(Int consultId, Int workerId) async {
+  static Future<AutoReply?> queryAutoReply(fixNum.Int64 consultId, int workerId) async {
     Resource res = Resource();
     res.path = queryAutoReplyPath;
     //{
     //   "consultId": 2,
     //   "workerId": 4
     // }
-    var map = {"consultId": consultId, "workerId": workerId};
+    var map = {"consultId": consultId.toInt(), "workerId": workerId};
     //var formData = FormData.fromMap(map);
     res.bodyParams = map;
 
     try {
       var resp = await Api().post(res);
-      var result = Result<Sync>.fromJson(
+      var result = Result<AutoReply>.fromJson(
         resp,
-            (json) => Sync.fromJson(json as Map<String, dynamic>),
+            (json) => AutoReply.fromJson(json as Map<String, dynamic>),
       );
 
       if (result != null && (result.code ?? -1) == 0 ){
