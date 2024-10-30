@@ -78,12 +78,6 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate{
     super.initState();
   }
 
-  Future<void> getEntrance() async {
-    //聊天记录
-    var e = await ArticleRepository.queryHistory();
-    print(e);
-  }
-
   void _updateUI(String content){
     setState(() {
       _textContent = "${content} \n" ;
@@ -185,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate{
   @override
   void useTheLine(String line) {
     domain = line;
-    _updateUI("正在使用线路：${domain}");
+    _updateUI("当前线路：${domain}");
     //initSDK();
     //getEntrance();
   }

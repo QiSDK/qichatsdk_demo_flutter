@@ -10,6 +10,7 @@ import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart' as c
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 
 import '../Constant.dart';
+import '../article_repository.dart';
 import '../model/Custom.dart';
 
 
@@ -21,6 +22,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   final List<types.Message> _messages = [];
   final _user = types.User(id: 'user1'); // Local user ID
+  final _user1 = types.User(id: 'user2'); // Local user ID
 
   @override
   void initState() {
@@ -49,20 +51,24 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
 
   void _handleSendPressed(types.PartialText message) {
 
+    var consultId = Int64(1);
+
+    Constant.instance.chatLib.sendMessage("hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
+    print("payloadid:${  Constant.instance.chatLib.payloadId }");
+    var msg = types.ImageMessage(author: _user, uri: "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg", id: "${Constant.instance.chatLib.payloadId}", name: 'dd', size: 200, status: types.Status.sending, remoteId: '0');
+
+
     final textMessage = types.TextMessage(
-      author: _user,
+      author: _user1,
       id: _generateRandomId(),
       text: message.text,
+      status: types.Status.sending
     );
 
-    var consultId = Int64(1);
-    Constant.instance.chatLib.sendMessage("hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
-print("payloadid:${  Constant.instance.chatLib.payloadId }");
-    var msg = types.ImageMessage(author: _user, uri: "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg", id: "${Constant.instance.chatLib.payloadId}", name: 'dd', size: 200, status: types.Status.sending, remoteId: '0');
-    
+
     
     setState(() {
-     // _messages.insert(0, textMessage);
+      _messages.insert(0, textMessage);
       _messages.insert(0, msg);
     });
   }
@@ -180,6 +186,13 @@ print("payloadid:${  Constant.instance.chatLib.payloadId }");
         _messages[index] = _messages[index].copyWith(status: newStatus);
       });
     }
+  }
+
+  Future<void> getChatData() async {
+    //聊天记录
+    var e = await ArticleRepository.queryHistory();
+    print(e);
+
   }
 
 }

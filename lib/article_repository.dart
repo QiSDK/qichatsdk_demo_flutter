@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ffi';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
@@ -12,6 +13,8 @@ class ArticleRepository {
   static const String uploadAudioPath = '/api/PublishWork/';
   static const String queryEntrancePath = '/v1/api/query-entrance';
   static const String syncMessagePath = '/v1/api/message/sync';
+  static const String queryAutoReplyPath = '/v1/api/query-auto-reply';
+  //v1/api/query-auto-reply
 
   static Future<dynamic> articleList(int pageNum, {int? thumpCount}) async {
     Resource res = Resource();
@@ -81,6 +84,35 @@ class ArticleRepository {
       rethrow;
     }
   }
+  static Future<Sync?> queryAutoReply(Int consultId, Int workerId) async {
+    Resource res = Resource();
+    res.path = queryAutoReplyPath;
+    //{
+    //   "consultId": 2,
+    //   "workerId": 4
+    // }
+    var map = {"consultId": consultId, "workerId": workerId};
+    //var formData = FormData.fromMap(map);
+    res.bodyParams = map;
+
+    try {
+      var resp = await Api().post(res);
+      var result = Result<Sync>.fromJson(
+        resp,
+            (json) => Sync.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (result != null && (result.code ?? -1) == 0 ){
+        return result.data;
+      }else{
+        return null;
+      }
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
 
 
   static Future<dynamic> uploadAudio(
