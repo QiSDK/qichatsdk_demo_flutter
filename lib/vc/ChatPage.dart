@@ -24,13 +24,14 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   final List<types.Message> _messages = [];
-  final _user = const types.User(
+  var _user = const types.User(
     id: 'user',
   );
   final _client = const types.User(
     firstName: 'client',
     id: 'client',
   );
+
   var consultId = Int64(1);
 
   @override
@@ -62,7 +63,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         "hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
     print("payloadid:${Constant.instance.chatLib.payloadId}");
     var msg = types.ImageMessage(
-        author: _client,
+        author: _user,
         uri:
             "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
         id: "${Constant.instance.chatLib.payloadId}",
@@ -221,6 +222,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   Future<void> getChatData() async {
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
+    _user = types.User(id: h?.request?.chatId ?? "");
 
     _buildHistory(h?.list);
 
@@ -238,7 +240,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
               author: _client,
               text: 'autoReplay', // 根据这个字段来自定义界面
               id: _generateRandomId(),
-              status: types.Status.seen,
+              status: types.Status.sent,
             ));
       });
     }
@@ -265,7 +267,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
             id: _generateRandomId(),
             name: 'dd',
             size: 200,
-            status: types.Status.seen,
+            status: types.Status.sent,
             remoteId: item.msgId));
       } else if ((item.video?.uri ?? "").isNotEmpty) {
         final sender = types.User(id: item.sender.toString());
@@ -276,7 +278,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
             id: _generateRandomId(),
             name: 'dd',
             size: 200,
-            status: types.Status.seen,
+            status: types.Status.sent,
             remoteId: item.msgId));
       } else if ((item.content?.data ?? "").isNotEmpty) {
         final sender = types.User(id: item.sender.toString());
@@ -285,7 +287,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
             author: sender,
             text: text,
             id: _generateRandomId(),
-            status: types.Status.seen,
+            status: types.Status.sent,
             remoteId: item.msgId));
       }
     }
