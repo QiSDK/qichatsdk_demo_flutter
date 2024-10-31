@@ -1,42 +1,46 @@
-
-
 import 'dart:ffi';
 
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/vc/text_message.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart' as cMessage;
+import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+    as cMessage;
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 
 import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
 
-
 class ChatPage extends StatefulWidget {
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
+class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   final List<types.Message> _messages = [];
-  final _user = types.User(id: 'user1'); // Local user ID
-  final _user1 = types.User(id: 'user2'); // Local user ID
+  final _user = const types.User(
+    id: 'user',
+  );
+  final _client = const types.User(
+    firstName: 'client',
+    id: 'client',
+  );
   var consultId = Int64(1);
 
   @override
   void initState() {
     super.initState();
-   // _loadInitialMessages();
+    // _loadInitialMessages();
     initSDK();
   }
 
   void _loadInitialMessages() {
-
     // Load any initial messages if needed, or keep it empty for a new chat
     setState(() {
       _messages.addAll([
@@ -54,22 +58,26 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   }
 
   void _handleSendPressed(types.PartialText message) {
+    Constant.instance.chatLib.sendMessage(
+        "hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
+    print("payloadid:${Constant.instance.chatLib.payloadId}");
+    var msg = types.ImageMessage(
+        author: _client,
+        uri:
+            "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
+        id: "${Constant.instance.chatLib.payloadId}",
+        name: 'dd',
+        size: 200,
+        status: types.Status.sending,
+        remoteId: '0');
 
-
-    Constant.instance.chatLib.sendMessage("hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
-    print("payloadid:${  Constant.instance.chatLib.payloadId }");
-    var msg = types.ImageMessage(author: _user, uri: "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg", id: "${Constant.instance.chatLib.payloadId}", name: 'dd', size: 200, status: types.Status.sending, remoteId: '0');
-
-
+    // sending是转圈的状态
     final textMessage = types.TextMessage(
-      author: _user1,
-      id: _generateRandomId(),
-      text: message.text,
-      status: types.Status.sending
-    );
+        author: _user,
+        id: _generateRandomId(),
+        text: message.text,
+        status: types.Status.sent);
 
-
-    
     setState(() {
       _messages.insert(0, textMessage);
       _messages.insert(0, msg);
@@ -87,17 +95,37 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
         user: _user,
+        showUserAvatars: true,
+        showUserNames: true,
         theme: const DefaultChatTheme(
           inputBackgroundColor: Colors.lightBlue,
           primaryColor: Colors.blueAccent,
         ),
+        textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
+          return TextMessageWidget(
+            message: message,
+            messageWidth: messageWidth ?? 0,
+          );
+        },
+        avatarBuilder: (types.User user) {
+          return customAvatarBuilder(user.id);
+        },
       ),
     );
   }
 
+  Widget customAvatarBuilder(String userId) {
+    return Container(
+      padding: const EdgeInsets.only(right: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: const Icon(Icons.av_timer_sharp),
+      ),
+    );
+  }
 
-  void initSDK(){
-    if (Constant.instance.isConnected){
+  void initSDK() {
+    if (Constant.instance.isConnected) {
       return;
     }
     print("正在初始化sdk");
@@ -111,8 +139,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
         token: "",
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: getCustomParam("wang wu", 1, 0)
-    );
+        custom: getCustomParam("wang wu", 1, 0));
 
     // Now the listener will receive the delegate events
     Constant.instance.chatLib.callWebSocket();
@@ -121,11 +148,11 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
   @override
   void receivedMsg(cMessage.Message msg) {
     print("Received Message: ${msg}");
-    if (msg.image.uri.isNotEmpty){
+    if (msg.image.uri.isNotEmpty) {
       _updateUI("Received Message: ${msg.image.uri}");
-    }else if(msg.video.uri.isNotEmpty){
+    } else if (msg.video.uri.isNotEmpty) {
       _updateUI("Received Message: ${msg.video.uri}");
-    }else{
+    } else {
       _updateUI("Received Message: ${msg.content}");
     }
   }
@@ -136,10 +163,10 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
     Constant.instance.isConnected = false;
     _updateUI("已断开：${result.code} ${result.message})");
     if (result.code == 1002 || result.code == 1010) {
-      if (result.code == 1002){
+      if (result.code == 1002) {
         //showTip("无效的Token")
         //有时候服务器反馈的这个消息不准，可忽略它
-      }else {
+      } else {
         //showTip("在别处登录了")
         //toast("在别处登录了")
         //在此处退出聊天
@@ -172,13 +199,11 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
 
   @override
   void msgDeleted(cMessage.Message msg, Int64 payloadId, String? errMsg) {
-      _updateUI("删除成功 msgId:${msg.msgId}");
-      print("删除成功: ${msg.msgId} ");
+    _updateUI("删除成功 msgId:${msg.msgId}");
+    print("删除成功: ${msg.msgId} ");
   }
 
-  _updateUI(String info){
-
-  }
+  _updateUI(String info) {}
 
   void updateMessageStatus(String payloadId, types.Status newStatus) {
     // Find the message by its id
@@ -197,19 +222,40 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
 
-
-      _buildHistory(h?.list);
+    _buildHistory(h?.list);
 
     //自动回复
-    var f = await ArticleRepository.queryAutoReply(consultId, workerId);
-    print(f);
+    AutoReply? model =
+        await ArticleRepository.queryAutoReply(consultId, workerId);
+    print(model?.autoReplyItem?.qa);
+    print(model?.autoReplyItem?.title);
+    if (model != null) {
+      setState(() {
+        _messages.insert(
+            0,
+            types.TextMessage(
+              metadata: model.toJson(),
+              author: _client,
+              text: 'autoReplay', // 根据这个字段来自定义界面
+              id: _generateRandomId(),
+              status: types.Status.seen,
+            ));
+      });
+    }
   }
 
+  // func setup(model: QuestionModel) {
+  //       sectionList = model.autoReplyItem?.qa ?? []
+  //       titleLabel.text = model.autoReplyItem?.title
+  //       updateTableViewHeight()
+  //   }
+
   _buildHistory(List<MsgItem>? msgItems) {
-    if (msgItems == null){
+    if (msgItems == null) {
       return;
     }
     for (var item in msgItems) {
+      // print('----------------------${item.sender}');
       if ((item.image?.uri ?? "").isNotEmpty) {
         final sender = types.User(id: item.sender.toString());
         final imgUrl = baseUrlImage + (item.image?.uri ?? "");
@@ -220,8 +266,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
             name: 'dd',
             size: 200,
             status: types.Status.seen,
-            remoteId: item.msgId
-        ));
+            remoteId: item.msgId));
       } else if ((item.video?.uri ?? "").isNotEmpty) {
         final sender = types.User(id: item.sender.toString());
         final videoUrl = baseUrlImage + (item.video?.uri ?? "");
@@ -232,10 +277,8 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
             name: 'dd',
             size: 200,
             status: types.Status.seen,
-            remoteId: item.msgId
-        ));
-      }
-      else if ((item.content?.data ?? "").isNotEmpty) {
+            remoteId: item.msgId));
+      } else if ((item.content?.data ?? "").isNotEmpty) {
         final sender = types.User(id: item.sender.toString());
         final text = item.content?.data ?? "";
         _messages.add(types.TextMessage(
@@ -243,10 +286,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate{
             text: text,
             id: _generateRandomId(),
             status: types.Status.seen,
-            remoteId: item.msgId
-        ));
+            remoteId: item.msgId));
       }
     }
-    setState(() {} );
+    setState(() {});
   }
 }

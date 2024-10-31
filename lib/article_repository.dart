@@ -47,14 +47,16 @@ class ArticleRepository {
     try {
       var resp = await Api().post(res);
 
-      var result = Result<Entrance>.fromJson(
+      var result = Result<Entrance?>.fromJson(
         resp,
-            (json) => Entrance.fromJson(json as Map<String, dynamic>),
+        (json) => json == null
+            ? null
+            : Entrance.fromJson(json as Map<String, dynamic>),
       );
 
-      if (result != null && (result.code ?? -1) == 0 ){
+      if ((result.code ?? -1) == 0) {
         return result.data;
-      }else{
+      } else {
         return null;
       }
     } catch (e) {
@@ -66,7 +68,12 @@ class ArticleRepository {
   static Future<Sync?> queryHistory(fixNum.Int64 consultId) async {
     Resource res = Resource();
     res.path = syncMessagePath;
-    var map = {'chatId': 0, "count": 50, "consultId": consultId.toInt(), "userId": userId};
+    var map = {
+      'chatId': 0,
+      "count": 50,
+      "consultId": consultId.toInt(),
+      "userId": userId
+    };
     //var formData = FormData.fromMap(map);
     res.bodyParams = map;
 
@@ -74,12 +81,12 @@ class ArticleRepository {
       var resp = await Api().post(res);
       var result = Result<Sync>.fromJson(
         resp,
-            (json) => Sync.fromJson(json as Map<String, dynamic>),
+        (json) => Sync.fromJson(json as Map<String, dynamic>),
       );
 
-      if (result != null && (result.code ?? -1) == 0 ){
+      if (result != null && (result.code ?? -1) == 0) {
         return result.data;
-      }else{
+      } else {
         return null;
       }
     } catch (e) {
@@ -87,7 +94,9 @@ class ArticleRepository {
       rethrow;
     }
   }
-  static Future<AutoReply?> queryAutoReply(fixNum.Int64 consultId, int workerId) async {
+
+  static Future<AutoReply?> queryAutoReply(
+      fixNum.Int64 consultId, int workerId) async {
     Resource res = Resource();
     res.path = queryAutoReplyPath;
     //{
@@ -102,12 +111,12 @@ class ArticleRepository {
       var resp = await Api().post(res);
       var result = Result<AutoReply>.fromJson(
         resp,
-            (json) => AutoReply.fromJson(json as Map<String, dynamic>),
+        (json) => AutoReply.fromJson(json as Map<String, dynamic>),
       );
 
-      if (result != null && (result.code ?? -1) == 0 ){
+      if (result != null && (result.code ?? -1) == 0) {
         return result.data;
-      }else{
+      } else {
         return null;
       }
     } catch (e) {
@@ -115,8 +124,6 @@ class ArticleRepository {
       rethrow;
     }
   }
-
-
 
   static Future<dynamic> uploadAudio(
       int workId, MultipartFile file, String lang) async {

@@ -1,5 +1,3 @@
-
-
 import 'dart:ffi';
 
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
@@ -35,12 +33,12 @@ class AutoReplyItem {
 
   AutoReplyItem(
       {this.id,
-        this.name,
-        this.title,
-        this.qa,
-        this.delaySec,
-        this.workerId,
-        this.workerNames});
+      this.name,
+      this.title,
+      this.qa,
+      this.delaySec,
+      this.workerId,
+      this.workerNames});
 
   AutoReplyItem.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -92,6 +90,7 @@ class Qa {
   String? content;
   List<Question>? answer;
   List<Related>? related;
+  bool? isExpanded;
 
   Qa({this.id, this.question, this.content, this.answer, this.related});
 
@@ -150,19 +149,19 @@ class Question {
 
   Question(
       {this.chatId,
-        this.msgId,
-        this.msgTime,
-        this.sender,
-        this.replyMsgId,
-        this.msgOp,
-        this.worker,
-        this.autoReplyFlag,
-        this.msgFmt,
-        this.consultId,
-        this.withAutoReplies,
-        this.msgSourceType,
-        this.payloadId,
-        this.content});
+      this.msgId,
+      this.msgTime,
+      this.sender,
+      this.replyMsgId,
+      this.msgOp,
+      this.worker,
+      this.autoReplyFlag,
+      this.msgFmt,
+      this.consultId,
+      this.withAutoReplies,
+      this.msgSourceType,
+      this.payloadId,
+      this.content});
 
   Question.fromJson(Map<String, dynamic> json) {
     chatId = json['chatId'];
@@ -184,7 +183,7 @@ class Question {
     msgSourceType = json['msgSourceType'];
     payloadId = json['payloadId'];
     content =
-    json['content'] != null ? new Content.fromJson(json['content']) : null;
+        json['content'] != null ? new Content.fromJson(json['content']) : null;
   }
 
   Map<String, dynamic> toJson() {
