@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
@@ -144,6 +145,14 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             )
           ],
         ),
+      );
+    }
+    if (widget.message.type == types.MessageType.image) {
+      return CachedNetworkImage(
+        key: Key(widget.message.text),
+        width: 200,
+        height: 150,
+        imageUrl: widget.message.text,
       );
     }
     return Container(

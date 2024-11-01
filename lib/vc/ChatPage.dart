@@ -6,6 +6,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/text_message.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
@@ -111,6 +112,28 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         avatarBuilder: (types.User user) {
           return customAvatarBuilder(user.id);
         },
+        customBottomWidget: ChatCustomBottom(
+          onSubmitted: (value) {
+            final trimmedText = value.trim();
+            if (trimmedText.isEmpty) return;
+            final partialText = types.PartialText(text: trimmedText);
+            _handleSendPressed(partialText);
+          },
+          onUploadSuccess: (String url, bool isVideo) {
+            var msg = types.ImageMessage(
+                author: _user,
+                uri:
+                    "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
+                id: "${Constant.instance.chatLib.payloadId}",
+                name: 'dd',
+                size: 200,
+                status: types.Status.sending,
+                remoteId: '0');
+            setState(() {
+              _messages.insert(0, msg);
+            });
+          },
+        ),
       ),
     );
   }
