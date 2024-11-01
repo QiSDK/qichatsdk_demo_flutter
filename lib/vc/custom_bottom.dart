@@ -168,7 +168,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         final String filePath = response.data.toString();
         debugPrint(filePath);
         if (filePath.isNotEmpty) {
-          widget.onUploadSuccess(filePath, isVideo);
+          widget.onUploadSuccess(baseUrlImage + filePath, isVideo);
         }
         debugPrint('上传成功: $filePath');
       } else {

@@ -122,13 +122,12 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
           },
           onUploadSuccess: (String url, bool isVideo) {
             var msg = types.ImageMessage(
-                author: _user,
-                uri:
-                    "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
+                author: _me,
+                uri: url,
                 id: "${Constant.instance.chatLib.payloadId}",
                 name: 'dd',
                 size: 200,
-                status: types.Status.sending,
+                status: types.Status.sent,
                 remoteId: '0');
             setState(() {
               _messages.insert(0, msg);
