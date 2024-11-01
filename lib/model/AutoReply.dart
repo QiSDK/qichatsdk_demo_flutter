@@ -1,7 +1,5 @@
-import 'dart:ffi';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 
-import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'Sync.dart';
 
 class AutoReply {
   AutoReplyItem? autoReplyItem;
@@ -29,7 +27,7 @@ class AutoReplyItem {
   String? title;
   List<Qa>? qa;
   int? delaySec;
-  List<Int64>? workerId;
+  List<int>? workerId;
   List<String>? workerNames;
 
   AutoReplyItem(
@@ -86,12 +84,12 @@ class AutoReplyItem {
 }
 
 class Qa {
-  Int64? id;
+  int? id;
   bool clicked = false;
   Question? question;
   String? content;
   List<Question>? answer;
-  List<Related>? related;
+  List<Qa>? related;
   bool? isExpanded;
 
   Qa({this.id, this.question, this.content, this.answer, this.related});
@@ -109,9 +107,9 @@ class Qa {
       });
     }
     if (json['related'] != null) {
-      related = <Related>[];
+      related = <Qa>[];
       json['related'].forEach((v) {
-        related!.add(new Related.fromJson(v));
+        related!.add(new Qa.fromJson(v));
       });
     }
   }
@@ -148,6 +146,7 @@ class Question {
   String? msgSourceType;
   String? payloadId;
   Content? content;
+  Media? image;
 
   Question(
       {this.chatId,
@@ -163,7 +162,9 @@ class Question {
       this.withAutoReplies,
       this.msgSourceType,
       this.payloadId,
-      this.content});
+      this.content,
+      this.image
+      });
 
   Question.fromJson(Map<String, dynamic> json) {
     chatId = json['chatId'];
@@ -184,6 +185,7 @@ class Question {
     // }
     msgSourceType = json['msgSourceType'];
     payloadId = json['payloadId'];
+    image = json['image'] != null ? new Media.fromJson(json['image']) : null;
     content =
         json['content'] != null ? new Content.fromJson(json['content']) : null;
   }
@@ -209,6 +211,9 @@ class Question {
     if (this.content != null) {
       data['content'] = this.content!.toJson();
     }
+    if (this.image != null) {
+      data['image'] = this.image!.toJson();
+    }
     return data;
   }
 }
@@ -229,38 +234,19 @@ class Content {
   }
 }
 
-class Related {
-  int? id;
-  Question? question;
-  String? content;
-  List<Question>? answer;
-
-  Related({this.id, this.question, this.content, this.answer});
-
-  Related.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    question = json['question'] != null
-        ? new Question.fromJson(json['question'])
-        : null;
-    content = json['content'];
-    if (json['answer'] != null) {
-      answer = <Question>[];
-      json['answer'].forEach((v) {
-        answer!.add(new Question.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    if (this.question != null) {
-      data['question'] = this.question!.toJson();
-    }
-    data['content'] = this.content;
-    if (this.answer != null) {
-      data['answer'] = this.answer!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
+//
+// class Media {
+//   String? uri;
+//
+//   Media({this.uri});
+//
+//   Media.fromJson(Map<String, dynamic> json) {
+//     uri = json['uri'];
+//   }
+//
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = new Map<String, dynamic>();
+//     data['uri'] = this.uri;
+//     return data;
+//   }
+// }
