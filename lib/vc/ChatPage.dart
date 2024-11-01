@@ -17,13 +17,14 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
+import '../model/MessageItemOperateListener.dart';
 
 class ChatPage extends StatefulWidget {
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
+class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, MessageItemOperateListener {
   final List<types.Message> _messages = [];
   var _me = const types.User(
     id: 'user',
@@ -81,9 +82,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
     // sending是转圈的状态
     final textMessage = types.TextMessage(
         author: _me,
-        id: _generateRandomId(),
+        id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        status: types.Status.sent);
+        status: types.Status.sending);
 
     setState(() {
       _messages.insert(0, textMessage);
@@ -102,16 +103,18 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
         user: _me,
-        showUserAvatars: true,
+        showUserAvatars: false,
         showUserNames: true,
         theme: const DefaultChatTheme(
           inputBackgroundColor: Colors.lightBlue,
           primaryColor: Colors.blueAccent,
+          inputTextColor: Colors.black
         ),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           return TextMessageWidget(
             message: message,
             chatId: _me.id,
+            listener: this,
             messageWidth: messageWidth ?? 0,
           );
         },
@@ -275,6 +278,14 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
     }
   }
 
+  @override
+  void dispose() {
+    print("chat page disposed");
+    Constant.instance.chatLib.disconnect();
+    Constant.instance.isConnected = false;
+    super.dispose();
+  }
+
   // func setup(model: QuestionModel) {
   //       sectionList = model.autoReplyItem?.qa ?? []
   //       titleLabel.text = model.autoReplyItem?.title
@@ -321,5 +332,53 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
       }
     }
     setState(() {});
+  }
+
+  @override
+  void onCopy(int position) {
+  }
+
+  @override
+  void onDelete(int position) {
+  }
+
+  @override
+  void onPlayImage(String url) {
+  }
+
+  @override
+  void onPlayVideo(String url) {
+    // TODO: implement onPlayVideo
+  }
+
+  @override
+  void onQuote(int position) {
+    // TODO: implement onQuote
+  }
+
+  @override
+  void onReSend(int position) {
+    // TODO: implement onReSend
+  }
+
+  @override
+  void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
+    setState(() {
+      if (isMe){
+        _messages.insert(0, types.TextMessage(
+          author: _me,
+          status: types.Status.sent,
+          id: _generateRandomId(),
+          text: msg,
+        ));
+      }else {
+        _messages.insert(0, types.TextMessage(
+          author: _client,
+          status: types.Status.sent,
+          id: _generateRandomId(),
+          text: msg,
+        ));
+      }
+    });
   }
 }

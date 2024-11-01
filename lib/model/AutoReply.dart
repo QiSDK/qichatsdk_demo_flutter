@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 
@@ -85,7 +86,8 @@ class AutoReplyItem {
 }
 
 class Qa {
-  int? id;
+  Int64? id;
+  bool clicked = false;
   Question? question;
   String? content;
   List<Question>? answer;

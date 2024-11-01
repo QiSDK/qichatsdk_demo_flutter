@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+as CMessage;
+import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
+import '../model/MessageItemOperateListener.dart';
 
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
   int messageWidth;
   String chatId;
+  MessageItemOperateListener listener;
   TextMessageWidget({
     super.key,
     required this.chatId,
     required this.message,
     required this.messageWidth,
+    required this.listener
   });
 
   @override
@@ -46,9 +52,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (state != null && state == types.Status.error) {
       return buildFail(context);
     }
-    if (state != null && state == types.Status.sending) {
-      return buildLoading();
-    }
+    // if (state != null && state == types.Status.sending) {
+    //   return buildLoading();
+    // }
     return buildGptMessage(context);
   }
 
@@ -136,9 +142,17 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: List.generate(relatedList.length, (i) {
                           Related data = relatedList[i];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(data.question?.content?.data ?? ''),
+                          return InkWell(
+                            onTap: () {
+                              //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
+                              //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
+                              //print('Tapped on: ${data.question?.content ?? 'No data'}');
+                              qaClicked(qa);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(data.question?.content?.data ?? ''),
+                            ),
                           );
                         }),
                       ),
@@ -158,7 +172,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       );
     }
     return Container(
-      color: widget.message.author.id == 'user'
+      color: widget.message.author.id == widget.chatId
           ? Colors.blue
           : Colors.blue.shade100,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -168,4 +182,51 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       ),
     );
   }
-}
+
+  void qaClicked(Qa? qa) {
+    if (qa == null) return;
+
+    if (qa.clicked) {
+      return;
+    }
+
+    String questionTxt = qa.question?.content?.data ?? "";
+    String txtAnswer = qa.content ?? "null";
+
+    var withAutoReplyBuilder = CMessage.WithAutoReply();
+
+    withAutoReplyBuilder.title = questionTxt;
+    withAutoReplyBuilder.id = qa.id ?? 0;
+    //withAutoReplyBuilder.createdTime = Utils().getNowTimeStamp();
+
+    String multipAnswer = qa.answer?.map((a) => a.content?.data ?? "").join(
+        "\n") ?? "";
+
+    // Sending question message
+    if (txtAnswer.isNotEmpty) {
+      widget.listener?.onSendLocalMsg(questionTxt, false);
+      // Auto-reply
+      widget.listener?.onSendLocalMsg(txtAnswer, true);
+      qa.clicked = true;
+
+      var uAnswer = CMessage.MessageUnion();
+      var uQC = CMessage.MessageContent();
+      uQC.data = txtAnswer;
+      uAnswer.content = uQC;
+      withAutoReplyBuilder.answers.add(uAnswer);
+    }
+
+    if (multipAnswer.isNotEmpty) {
+      for (var a in qa.answer ?? []) {
+        if (a?.image?.uri != null) {
+          // Auto-reply with image
+          widget.listener?.onSendLocalMsg(a!.image!.uri!, true, "MSG_IMG");
+
+          var uAnswer = CMessage.MessageUnion();
+          var uQC = CMessage.MessageImage();
+          uQC.uri = a.image!.uri!;
+          uAnswer.image = uQC;
+        }
+      }
+    }
+  }
