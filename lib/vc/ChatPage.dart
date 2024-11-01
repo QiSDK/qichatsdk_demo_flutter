@@ -13,7 +13,7 @@ import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
-
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
@@ -60,10 +60,15 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   }
 
   void _handleSendPressed(types.PartialText message) {
+    if (message.text.isEmpty){
+      SmartDialog.showToast("消息不能为空");
+      return;
+    }
+
     Constant.instance.chatLib.sendMessage(
-        "hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
-    print("payloadid:${Constant.instance.chatLib.payloadId}");
-    var msg = types.ImageMessage(
+        message.text, cMessage.MessageFormat.MSG_TEXT, consultId);
+    //print("payloadid:${Constant.instance.chatLib.payloadId}");
+    var imgMsg = types.ImageMessage(
         author: _me,
         uri:
             "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
@@ -82,7 +87,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
 
     setState(() {
       _messages.insert(0, textMessage);
-      _messages.insert(0, msg);
+      //_messages.insert(0, imgMsg);
     });
   }
 
