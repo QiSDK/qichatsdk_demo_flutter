@@ -25,7 +25,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   final List<types.Message> _messages = [];
-  var _user = const types.User(
+  var _me = const types.User(
     id: 'user',
   );
   final _client = const types.User(
@@ -47,7 +47,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
     setState(() {
       _messages.addAll([
         types.TextMessage(
-          author: _user,
+          author: _me,
           id: _generateRandomId(),
           text: 'Hello! How can I help you today?',
         ),
@@ -64,7 +64,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         "hello chat sdk!", cMessage.MessageFormat.MSG_TEXT, consultId);
     print("payloadid:${Constant.instance.chatLib.payloadId}");
     var msg = types.ImageMessage(
-        author: _user,
+        author: _me,
         uri:
             "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
         id: "${Constant.instance.chatLib.payloadId}",
@@ -75,7 +75,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
 
     // sending是转圈的状态
     final textMessage = types.TextMessage(
-        author: _user,
+        author: _me,
         id: _generateRandomId(),
         text: message.text,
         status: types.Status.sent);
@@ -96,7 +96,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         messages: _messages,
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
-        user: _user,
+        user: _me,
         showUserAvatars: true,
         showUserNames: true,
         theme: const DefaultChatTheme(
@@ -106,6 +106,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           return TextMessageWidget(
             message: message,
+            chatId: _me.id,
             messageWidth: messageWidth ?? 0,
           );
         },
@@ -201,6 +202,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   @override
   void connected(SCHi c) {
     print("Connected with token: ${c.token}");
+    xToken = c.token;
     Constant.instance.isConnected = true;
     _updateUI("连接成功！");
 
@@ -245,7 +247,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   Future<void> getChatData() async {
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
-    _user = types.User(id: h?.request?.chatId ?? "");
+    _me = types.User(id: h?.request?.chatId ?? "");
 
     _buildHistory(h?.list);
 

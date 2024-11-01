@@ -6,8 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
   int messageWidth;
+  String chatId;
   TextMessageWidget({
     super.key,
+    required this.chatId,
     required this.message,
     required this.messageWidth,
   });
@@ -88,7 +90,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     var textStyle = TextStyle(
         fontSize: 14,
         color:
-            widget.message.author.id == 'user' ? Colors.white : Colors.black);
+            widget.message.author.id == widget.chatId ? Colors.white : Colors.black);
     if (content == 'autoReplay' && widget.message.metadata != null) {
       var bgColor = Colors.blue.shade100;
       return Container(
