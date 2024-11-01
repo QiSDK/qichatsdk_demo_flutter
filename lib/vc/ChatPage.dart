@@ -179,6 +179,7 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate {
   @override
   void connected(SCHi c) {
     print("Connected with token: ${c.token}");
+    xToken = c.token;
     Constant.instance.isConnected = true;
     _updateUI("连接成功！");
 
