@@ -372,12 +372,24 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
           text: msg,
         ));
       }else {
-        _messages.insert(0, types.TextMessage(
-          author: _client,
-          status: types.Status.sent,
-          id: _generateRandomId(),
-          text: msg,
-        ));
+
+        if (msgType == "MSG_IMAGE") {
+          final imgUrl = baseUrlImage + msg;
+          _messages.insert(0, types.ImageMessage(
+            author: _client,
+            status: types.Status.sent,
+            id: _generateRandomId(),
+            uri: imgUrl, name: '', size: 200,
+          ));
+        }else{
+          _messages.insert(0, types.TextMessage(
+            author: _client,
+            status: types.Status.sent,
+            id: _generateRandomId(),
+            text: msg,
+          ));
+        }
+
       }
     });
   }
