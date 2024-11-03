@@ -132,7 +132,18 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                                 bottom: BorderSide(
                                     width: 1,
                                     color: Colors.white.withOpacity(0.3)))),
-                        child: Text(qa.question?.content?.data ?? ""),
+                        child: InkWell(
+                          onTap: () {
+                            //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
+                            //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
+                            //print('Tapped on: ${data.question?.content ?? 'No data'}');
+                            qaClicked(qa);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Text(qa.question?.content?.data ?? ''),
+                          ),
+                        ),
                       );
                     },
                     body: Container(
