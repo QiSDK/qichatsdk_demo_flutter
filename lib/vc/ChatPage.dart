@@ -18,6 +18,7 @@ import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -227,8 +228,15 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
 
   @override
   void msgDeleted(cMessage.Message msg, Int64 payloadId, String? errMsg) {
-    _updateUI("删除成功 msgId:${msg.msgId}");
-    print("删除成功: ${msg.msgId} ");
+    //_messages.removeWhere((p) => p.remoteId == msg.msgId );
+    var p = _messages.where((p) => p.remoteId == msg.msgId.toString());
+    if (p != null) {
+      composeLocalMsg("", "", "对方撤回了1条消息", "system", "", append: true);
+      _updateUI("删除成功 msgId:${msg.msgId}");
+      print("删除成功: ${msg.msgId} ");
+    }else{
+      print("删除失败");
+    }
   }
 
   _updateUI(String info) {
@@ -249,6 +257,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
   }
 
   Future<void> getChatData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PARAM_XTOKEN, xToken);
+
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
     _me = types.User(id: h?.request?.chatId ?? "");
@@ -282,12 +293,6 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
     Constant.instance.isConnected = false;
     super.dispose();
   }
-
-  // func setup(model: QuestionModel) {
-  //       sectionList = model.autoReplyItem?.qa ?? []
-  //       titleLabel.text = model.autoReplyItem?.title
-  //       updateTableViewHeight()
-  //   }
 
   _buildHistory(List<MsgItem>? msgItems) {
     if (msgItems == null) {
