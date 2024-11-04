@@ -68,6 +68,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
      baseUrlImage = controllers[5].text.trim();
      userName = controllers[4].text.trim();
      maxSessionMins = int.tryParse(controllers[6].text.trim()) ?? 0;
+     xToken = "";
 
     await prefs.setString(PARAM_LINES, lines);
     await prefs.setString('PARAM_CERT', cert);
@@ -76,7 +77,6 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     await prefs.setString('PARAM_ImageBaseURL', baseUrlImage);
     await prefs.setString('PARAM_USERNAME', userName);
     await prefs.setInt('PARAM_MAXSESSIONMINS', maxSessionMins);
-
 
     if (widget.callBack != null) {
       widget.callBack!();

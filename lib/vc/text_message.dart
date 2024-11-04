@@ -124,8 +124,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               children: List.generate(sectionList.length, (index) {
                 Qa qa = sectionList[index];
                 List<Qa> relatedList = qa.related ?? [];
+                var canTapOnHeader = relatedList.length <= 0;
                 return ExpansionPanel(
                     backgroundColor: bgColor,
+                    canTapOnHeader: canTapOnHeader,
                     isExpanded: qa.isExpanded ?? false,
                     headerBuilder: (ctx, val) {
                       return Container(
@@ -140,7 +142,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                             //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
                             //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
                             //print('Tapped on: ${data.question?.content ?? 'No data'}');
-                            qaClicked(qa);
+                            if (relatedList.length <= 0) {
+                              qaClicked(qa);
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),

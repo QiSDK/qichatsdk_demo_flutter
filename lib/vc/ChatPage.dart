@@ -179,14 +179,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
 
   @override
   void receivedMsg(cMessage.Message msg) {
+    composeLocalMsg(msg.image.uri, msg.video.uri, msg.content.data, msg.sender.toString(), msg.msgId.toString(), append: true);
     print("Received Message: ${msg}");
-    if (msg.image.uri.isNotEmpty) {
-      _updateUI("Received Message: ${msg.image.uri}");
-    } else if (msg.video.uri.isNotEmpty) {
-      _updateUI("Received Message: ${msg.video.uri}");
-    } else {
-      _updateUI("Received Message: ${msg.content}");
-    }
+    _updateUI("info");
   }
 
   @override
@@ -236,7 +231,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
     print("删除成功: ${msg.msgId} ");
   }
 
-  _updateUI(String info) {}
+  _updateUI(String info) {
+    setState(() {});
+  }
 
   void updateMessageStatus(String payloadId, types.Status newStatus) {
     // Find the message by its id
@@ -296,42 +293,50 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
     if (msgItems == null) {
       return;
     }
-    for (var item in msgItems) {
-      // print('----------------------${item.sender}');
-      if ((item.image?.uri ?? "").isNotEmpty) {
-        final sender = types.User(id: item.sender.toString());
-        final imgUrl = baseUrlImage + (item.image?.uri ?? "");
-        _messages.add(types.ImageMessage(
-            author: sender,
-            uri: imgUrl,
-            id: _generateRandomId(),
-            name: 'dd',
-            size: 200,
-            status: types.Status.sent,
-            remoteId: item.msgId));
-      } else if ((item.video?.uri ?? "").isNotEmpty) {
-        final sender = types.User(id: item.sender.toString());
-        final videoUrl = baseUrlImage + (item.video?.uri ?? "");
-        _messages.add(types.VideoMessage(
-            author: sender,
-            uri: videoUrl,
-            id: _generateRandomId(),
-            name: 'dd',
-            size: 200,
-            status: types.Status.sent,
-            remoteId: item.msgId));
-      } else if ((item.content?.data ?? "").isNotEmpty) {
-        final sender = types.User(id: item.sender.toString());
-        final text = item.content?.data ?? "";
-        _messages.add(types.TextMessage(
-            author: sender,
-            text: text,
-            id: _generateRandomId(),
-            status: types.Status.sent,
-            remoteId: item.msgId));
-      }
+    for (var msg in msgItems) {
+      composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
     setState(() {});
+  }
+
+  void composeLocalMsg(String imgUri, String videoUri, String text, String senderId, String msgId, {bool append = false}){
+    final sender = types.User(id: senderId);
+    final imgUrl = baseUrlImage + imgUri;
+    types.Message msg;
+    if (imgUri.isNotEmpty) {
+      msg = types.ImageMessage(
+        author: sender,
+        uri: imgUrl,
+        id: _generateRandomId(),
+        name: 'dd',
+        size: 200,
+        status: types.Status.sent,
+        remoteId: msgId);
+  } else if (videoUri .isNotEmpty) {
+      final videoUrl = baseUrlImage + videoUri;
+      msg = types.VideoMessage(
+          author: sender,
+          uri: videoUrl,
+          id: _generateRandomId(),
+          name: 'dd',
+          size: 200,
+          status: types.Status.sent,
+          remoteId: msgId);
+    }
+   else {
+      msg = types.TextMessage(
+          author: sender,
+          text: text,
+          id: _generateRandomId(),
+          status: types.Status.sent,
+          remoteId: msgId);
+
+  }
+
+    if (msg != null) {
+      append ? _messages.insert(0, msg) : _messages.add(msg);
+    }
+   // setState(() {});
   }
 
   @override

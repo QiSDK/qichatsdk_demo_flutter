@@ -145,8 +145,10 @@ class MsgItem {
     }
     msgSourceType = json['msgSourceType'];
     payloadId = json['payloadId'];
-    image = json['image'];
-    video = json['video'];
+    image =
+    json['image'] != null ? new Media.fromJson(json['image']) : null;
+    video =
+    json['video'] != null ? new Media.fromJson(json['video']) : null;
     content =
     json['content'] != null ? new Content.fromJson(json['content']) : null;
   }
@@ -172,9 +174,12 @@ class MsgItem {
     if (this.content != null) {
       data['content'] = this.content!.toJson();
     }
-
-    data['image'] = this.image;
-    data['video'] = this.video;
+    if (this.image != null) {
+      data['image'] = this.image!.toJson();
+    }
+    if (this.video != null) {
+      data['video'] = this.video!.toJson();
+    }
     return data;
   }
 }
