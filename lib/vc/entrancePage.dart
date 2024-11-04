@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/vc/ChatPage.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EntrancePage extends StatefulWidget {
   const EntrancePage({super.key});
@@ -20,6 +21,7 @@ class _EntrancePageState extends State<EntrancePage> {
   @override
   void initState() {
     super.initState();
+
     loadData();
   }
 
@@ -120,6 +122,9 @@ class _EntrancePageState extends State<EntrancePage> {
   }
 
   loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
+
     entrance = await ArticleRepository.queryEntrance();
     setState(() {});
   }

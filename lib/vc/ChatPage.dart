@@ -180,8 +180,35 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
 
   @override
   void receivedMsg(cMessage.Message msg) {
-    composeLocalMsg(msg.image.uri, msg.video.uri, msg.content.data, msg.sender.toString(), msg.msgId.toString(), append: true);
-    print("Received Message: ${msg}");
+    /*
+    if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT){
+                var index = mlMsgList.value?.indexOfFirst { it.cMsg?.msgId == newItem.cMsg?.msgId}
+                if (index != null && index != -1){
+                    mlMsgList.value!![index].cMsg = newItem.cMsg
+                    mlMsgList.postValue(mlMsgList.value)
+                    return
+                }
+            }
+     */
+
+    if (msg.msgOp == cMessage.MessageOperate.MSG_OP_EDIT){
+      var index = _messages.indexWhere( (p) => p.remoteId == msg.msgId.toString());
+       if (index >= 0){
+       //  editMsg.first.
+         _messages.removeAt(index);
+         _messages.insert(index, types.TextMessage(
+             author: types.User(id: msg.sender.toString()),
+             text: msg.content.data,
+             id: _generateRandomId(),
+             status: types.Status.sent,
+             remoteId: msg.msgId.toString()));
+       }
+    }else {
+      composeLocalMsg(
+          msg.image.uri, msg.video.uri, msg.content.data, msg.sender.toString(),
+          msg.msgId.toString(), append: true);
+      print("Received Message: ${msg}");
+    }
     _updateUI("info");
   }
 
