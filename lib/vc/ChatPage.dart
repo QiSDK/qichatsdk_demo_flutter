@@ -256,8 +256,9 @@ class _ChatPageState extends State<ChatPage> implements TeneasySDKDelegate, Mess
   @override
   void msgDeleted(cMessage.Message msg, Int64 payloadId, String? errMsg) {
     //_messages.removeWhere((p) => p.remoteId == msg.msgId );
-    var p = _messages.where((p) => p.remoteId == msg.msgId.toString());
-    if (p != null) {
+    var index = _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
+    if (index >= 0) {
+      _messages.removeAt(index);
       composeLocalMsg("", "", "对方撤回了1条消息", "system", "", append: true);
       _updateUI("删除成功 msgId:${msg.msgId}");
       print("删除成功: ${msg.msgId} ");
