@@ -45,19 +45,16 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: getWidget(context),
-    );
+    return getWidget(context);
   }
 
   getWidget(context) {
     if (state != null && state == types.Status.error) {
       return buildFail(context);
     }
-    // if (state != null && state == types.Status.sending) {
-    //   return buildLoading();
-    // }
+    if (state != null && state == types.Status.sending) {
+      return buildLoading();
+    }
     return buildGptMessage(context);
   }
 
@@ -71,12 +68,15 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             onTap: () {},
             child: const Row(
               children: [
-                // SvgPicture.asset('assets/common/warn_error.svg'),
+                Icon(
+                  Icons.error,
+                  color: Colors.redAccent,
+                ),
                 SizedBox(
                   width: 4,
                 ),
                 Text(
-                  '失败的样式',
+                  '消息失败了哦~',
                   style: TextStyle(fontSize: 14, color: Colors.black),
                 )
               ],
@@ -90,9 +90,13 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   buildLoading() {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: const Text('loading')
-        // Lottie.asset(ThemeLottie.buttonLoading.path(), width: 80, height: 22),
-        );
+        child: const SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ));
   }
 
   buildGptMessage(BuildContext context) {
@@ -141,9 +145,22 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   initWithdraws() {
-    return Text(
-      content,
-      style: const TextStyle(fontSize: 14, color: Colors.grey),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          msgTime,
+          style: TextStyle(
+              fontSize: 12,
+              color: widget.message.author.id == widget.chatId
+                  ? Colors.white.withOpacity(0.5)
+                  : Colors.grey),
+        ),
+        Text(
+          content,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        )
+      ],
     );
   }
 

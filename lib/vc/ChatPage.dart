@@ -89,6 +89,9 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
+        metadata: {
+          'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())
+        },
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
 
@@ -303,7 +306,6 @@ class _ChatPageState extends State<ChatPage>
   void updateMessageStatus(String payloadId, types.Status newStatus) {
     // Find the message by its id
     var index = _messages.indexWhere((p) => p.id == payloadId);
-
     // Check if message exists
     if (index != -1) {
       setState(() {
