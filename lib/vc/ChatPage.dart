@@ -21,7 +21,6 @@ import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-
 import '../view/tip_message.dart';
 
 class ChatPage extends StatefulWidget {

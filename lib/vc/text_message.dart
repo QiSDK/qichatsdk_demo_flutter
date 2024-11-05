@@ -7,6 +7,9 @@ import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 import '../model/MessageItemOperateListener.dart';
+import 'package:super_tooltip/super_tooltip.dart';
+import 'package:clipboard/clipboard.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
@@ -32,6 +35,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   List<Qa> sectionList = [];
   AutoReply? autoReplyModel;
+  final _toolTipController = SuperTooltipController();
 
   @override
   void initState() {
@@ -103,11 +107,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    var textStyle = TextStyle(
-        fontSize: 14,
-        color: widget.message.author.id == widget.chatId
-            ? Colors.white
-            : Colors.black);
     if (content == 'autoReplay' && widget.message.metadata != null) {
       return initAutoReplay();
     }
@@ -122,6 +121,63 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         imageUrl: widget.message.text,
       );
     }
+    return SuperTooltip(
+      content: buildToolAction(),
+      controller: _toolTipController,
+      child: GestureDetector(
+        onLongPress: () {
+          _toolTipController.showTooltip();
+        },
+        child: buildNormalMessage(),
+      ),
+    );
+  }
+
+  buildToolAction() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextButton(onPressed: () {}, child: buildRowText(Icons.sms, '回复')),
+        TextButton(
+            onPressed: () {
+              FlutterClipboard.copy(content).then((value) {
+                _toolTipController.hideTooltip().then((val) {
+                  SmartDialog.showToast("已复制到剪切板");
+                });
+              });
+            },
+            child: buildRowText(Icons.copy, '复制'))
+      ],
+    );
+  }
+
+  buildRowText(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: Colors.black54,
+          size: 16,
+        ),
+        const SizedBox(
+          width: 8,
+        ),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 16, color: Colors.black54),
+        ),
+      ],
+    );
+  }
+
+  buildNormalMessage() {
+    var textStyle = TextStyle(
+        fontSize: 14,
+        color: widget.message.author.id == widget.chatId
+            ? Colors.white
+            : Colors.black);
     return Container(
       color: widget.message.author.id == widget.chatId
           ? Colors.blue
