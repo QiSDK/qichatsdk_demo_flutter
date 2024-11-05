@@ -55,6 +55,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (state != null && state == types.Status.sending) {
       return buildLoading();
     }
+    // if (widget.message.metadata != null && widget.message.metadata!['isSystemMessage'] == true) {
+    //  return buildTipMessage(widget.message);
+    // }
     return buildGptMessage(context);
   }
 
@@ -144,6 +147,31 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     );
   }
 
+  buildTipMessage(types.TextMessage message){
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                message.metadata!['tipText'] ?? '',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      );
+
+
+  }
+
   initWithdraws() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +240,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(qa.question?.content?.data ?? ''),
+                          child: Text(qa.question?.content?.data ?? '', style: TextStyle(color: qa.clicked ? Colors.black26 : Colors.black)),
                         ),
                       ),
                     );
@@ -229,11 +257,14 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                             //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
                             //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
                             //print('Tapped on: ${data.question?.content ?? 'No data'}');
-                            qaClicked(data);
+                            setState(() {
+                              //qa.clicked = true;
+                              qaClicked(data);
+                            });
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(data.question?.content?.data ?? ''),
+                            child: Text(data.question?.content?.data ?? '', style: TextStyle(color: qa.clicked ? Colors.black26 : Colors.black)),
                           ),
                         );
                       }),
@@ -253,7 +284,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       return;
     }
 
-    String questionTxt = qa.question?.content?.data ?? "";
+
+
+      String questionTxt = qa.question?.content?.data ?? "";
     String txtAnswer = qa.content ?? "null";
 
     var withAutoReplyBuilder = CMessage.WithAutoReply();
@@ -267,8 +300,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (txtAnswer.isNotEmpty) {
       // Auto-reply
       widget.listener?.onSendLocalMsg(txtAnswer, false);
-      qa.clicked = true;
-
       var uAnswer = CMessage.MessageUnion();
       var uQC = CMessage.MessageContent();
       uQC.data = txtAnswer;

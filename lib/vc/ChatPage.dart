@@ -22,6 +22,8 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
+import '../view/tip_message.dart';
+
 class ChatPage extends StatefulWidget {
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -112,6 +114,9 @@ class _ChatPageState extends State<ChatPage>
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
         user: _me,
+        customMessageBuilder: (message, {messageWidth = 200}) {
+          return TipMessage(message: message);
+        },
         showUserAvatars: false,
         showUserNames: true,
         theme: const DefaultChatTheme(
@@ -290,6 +295,7 @@ class _ChatPageState extends State<ChatPage>
       model.msgId = msg.msgId.toString();
       model.msgTime = msg.msgTime.toDateTime();
       composeLocalMsg(model, append: true);
+
       // composeLocalMsg("", "", "对方撤回了1条消息", "system", "", append: true);
 
       _updateUI("删除成功 msgId:${msg.msgId}");
