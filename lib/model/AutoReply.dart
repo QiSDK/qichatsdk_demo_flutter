@@ -1,4 +1,3 @@
-
 import 'Sync.dart';
 
 class AutoReply {
@@ -91,6 +90,7 @@ class Qa {
   List<Question>? answer;
   List<Qa>? related;
   bool? isExpanded;
+  bool? isClicked;
 
   Qa({this.id, this.question, this.content, this.answer, this.related});
 
@@ -163,8 +163,7 @@ class Question {
       this.msgSourceType,
       this.payloadId,
       this.content,
-      this.image
-      });
+      this.image});
 
   Question.fromJson(Map<String, dynamic> json) {
     chatId = json['chatId'];

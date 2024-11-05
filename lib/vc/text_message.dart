@@ -147,53 +147,49 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     );
   }
 
-  buildTipMessage(types.TextMessage message){
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Text(
-                message.metadata!['tipText'] ?? '',
-                style: TextStyle(color: Colors.grey),
-              ),
+  buildTipMessage(types.TextMessage message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(8.0),
             ),
-          ],
-        ),
-      );
-
-
+            child: Text(
+              message.metadata!['tipText'] ?? '',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   initWithdraws() {
     return SizedBox(
-      width: 200, // Set the desired width
+        width: 200, // Set the desired width
         height: 45,
-      child:  Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          msgTime,
-          style: TextStyle(
-              fontSize: 12,
-              color: widget.message.author.id == widget.chatId
-                  ? Colors.white.withOpacity(0.5)
-                  : Colors.grey),
-        ),
-        Text(
-          content,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        )
-      ],
-    )
-    );
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              msgTime,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: widget.message.author.id == widget.chatId
+                      ? Colors.white.withOpacity(0.5)
+                      : Colors.grey),
+            ),
+            Text(
+              content,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            )
+          ],
+        ));
   }
 
   initAutoReplay() {
@@ -244,7 +240,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(qa.question?.content?.data ?? '', style: TextStyle(color: qa.clicked ? Colors.black26 : Colors.black)),
+                          child: Text(qa.question?.content?.data ?? '',
+                              style: TextStyle(
+                                  color: qa.clicked
+                                      ? Colors.black26
+                                      : Colors.black)),
                         ),
                       ),
                     );
@@ -261,14 +261,21 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                             //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
                             //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
                             //print('Tapped on: ${data.question?.content ?? 'No data'}');
+                            if (data.isClicked == true) {
+                              return;
+                            }
                             setState(() {
-                              //qa.clicked = true;
-                              qaClicked(data);
+                              data.isClicked = !(data.isClicked ?? false);
                             });
+                            qaClicked(data);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(data.question?.content?.data ?? '', style: TextStyle(color: qa.clicked ? Colors.black26 : Colors.black)),
+                            child: Text(data.question?.content?.data ?? '',
+                                style: TextStyle(
+                                    color: data.isClicked == true
+                                        ? Colors.grey
+                                        : Colors.black)),
                           ),
                         );
                       }),
@@ -288,9 +295,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       return;
     }
 
-
-
-      String questionTxt = qa.question?.content?.data ?? "";
+    String questionTxt = qa.question?.content?.data ?? "";
     String txtAnswer = qa.content ?? "null";
 
     var withAutoReplyBuilder = CMessage.WithAutoReply();
