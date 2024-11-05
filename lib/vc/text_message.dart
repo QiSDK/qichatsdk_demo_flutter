@@ -173,8 +173,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   initWithdraws() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      width: 200, // Set the desired width
+        height: 45,
+      child:  Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           msgTime,
@@ -189,6 +192,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           style: const TextStyle(fontSize: 14, color: Colors.grey),
         )
       ],
+    )
     );
   }
 
