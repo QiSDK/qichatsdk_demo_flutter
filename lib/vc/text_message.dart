@@ -231,10 +231,13 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                                   color: Colors.white.withOpacity(0.3)))),
                       child: InkWell(
                         onTap: () {
-                          //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
-                          //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
-                          //print('Tapped on: ${data.question?.content ?? 'No data'}');
                           if (relatedList.length <= 0) {
+                            if (qa.isClicked == true) {
+                              return;
+                            }
+                            setState(() {
+                              qa.isClicked = !(qa.isClicked ?? false);
+                            });
                             qaClicked(qa);
                           }
                         },
@@ -242,7 +245,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Text(qa.question?.content?.data ?? '',
                               style: TextStyle(
-                                  color: qa.clicked
+                                  color: qa.isClicked == true
                                       ? Colors.black26
                                       : Colors.black)),
                         ),
@@ -255,25 +258,25 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: List.generate(relatedList.length, (i) {
-                        Qa data = relatedList[i];
+                        Qa qa = relatedList[i];
                         return InkWell(
                           onTap: () {
                             //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
                             //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
                             //print('Tapped on: ${data.question?.content ?? 'No data'}');
-                            if (data.isClicked == true) {
+                            if (qa.isClicked == true) {
                               return;
                             }
                             setState(() {
-                              data.isClicked = !(data.isClicked ?? false);
+                              qa.isClicked = !(qa.isClicked ?? false);
                             });
-                            qaClicked(data);
+                            qaClicked(qa);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(data.question?.content?.data ?? '',
+                            child: Text(qa.question?.content?.data ?? '',
                                 style: TextStyle(
-                                    color: data.isClicked == true
+                                    color: qa.isClicked == true
                                         ? Colors.grey
                                         : Colors.black)),
                           ),
@@ -290,10 +293,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   void qaClicked(Qa? qa) {
     if (qa == null) return;
-
-    if (qa.clicked) {
-      return;
-    }
 
     String questionTxt = qa.question?.content?.data ?? "";
     String txtAnswer = qa.content ?? "null";
@@ -335,7 +334,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         uAnswer.content = uQC;
         withAutoReplyBuilder.answers.add(uAnswer);
       }
-      qa.clicked = true;
     }
     //}
   }

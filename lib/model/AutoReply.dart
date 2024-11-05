@@ -84,7 +84,6 @@ class AutoReplyItem {
 
 class Qa {
   int? id;
-  bool clicked = false;
   Question? question;
   String? content;
   List<Question>? answer;
