@@ -114,9 +114,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (content.contains('对方撤回')) {
       return initWithdraws();
     }
-    if (widget.message.type == types.MessageType.image) {
+    if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
       return CachedNetworkImage(
-        key: Key(widget.message.text),
+        key: Key(widget.message.remoteId.toString()),
         width: 200,
         height: 150,
         imageUrl: widget.message.text,
@@ -309,12 +309,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                       child: InkWell(
                         onTap: () {
                           if (relatedList.length <= 0) {
-                            if (qa.isClicked == true) {
-                              return;
-                            }
-                            setState(() {
-                              qa.isClicked = !(qa.isClicked ?? false);
-                            });
                             qaClicked(qa);
                           }
                         },
@@ -338,15 +332,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                         Qa qa = relatedList[i];
                         return InkWell(
                           onTap: () {
-                            //widget.listener.onSendLocalMsg(data.question?.content?.data ?? 'No data', true);
-                            //widget.listener.onSendLocalMsg(data.content ?? 'No data', false);
-                            //print('Tapped on: ${data.question?.content ?? 'No data'}');
-                            if (qa.isClicked == true) {
-                              return;
-                            }
-                            setState(() {
-                              qa.isClicked = !(qa.isClicked ?? false);
-                            });
                             qaClicked(qa);
                           },
                           child: Padding(
@@ -370,6 +355,13 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   void qaClicked(Qa? qa) {
     if (qa == null) return;
+
+    if (qa.isClicked == true) {
+      return;
+    }
+    setState(() {
+      qa.isClicked = !(qa.isClicked ?? false);
+    });
 
     String questionTxt = qa.question?.content?.data ?? "";
     String txtAnswer = qa.content ?? "null";
