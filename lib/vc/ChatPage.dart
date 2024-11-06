@@ -38,7 +38,7 @@ class _ChatPageState extends State<ChatPage>
     firstName: 'client',
     id: 'client',
   );
-
+  GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
 
   @override
@@ -140,6 +140,7 @@ class _ChatPageState extends State<ChatPage>
         //   return '';
         // },
         customBottomWidget: ChatCustomBottom(
+          key: _sendViewKey,
           onSubmitted: (value) {
             final trimmedText = value.trim();
             if (trimmedText.isEmpty) return;
@@ -469,7 +470,13 @@ class _ChatPageState extends State<ChatPage>
   }
 
   @override
+  void onReply(String val) {
+    (_sendViewKey.currentState as ChatCustomBottomState).showReply(val);
+  }
+
+  @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
+    (_sendViewKey.currentState as ChatCustomBottomState).hideReply();
     setState(() {
       if (isMe) {
         _messages.insert(

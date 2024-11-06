@@ -11,8 +11,11 @@ class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
   Function(String, bool) onUploadSuccess;
 
-  ChatCustomBottom(
-      {super.key, required this.onSubmitted, required this.onUploadSuccess});
+  ChatCustomBottom({
+    super.key,
+    required this.onSubmitted,
+    required this.onUploadSuccess,
+  });
 
   @override
   State<StatefulWidget> createState() => ChatCustomBottomState();
@@ -29,12 +32,13 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         topLeft: Radius.circular(16), topRight: Radius.circular(16)),
   );
   void Function(void Function())? setDialogState;
-
+  String replyText = '';
   final ImagePicker picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
+
     inputController.text = lastWords;
     focusNode.addListener(
       () {},
@@ -44,12 +48,39 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     });
   }
 
+  showReply(String val) {
+    setState(() {
+      replyText = val;
+    });
+  }
+
+  hideReply() {
+    setState(() {
+      replyText = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        replyText.isEmpty ? Container() : _initReply(),
+        Container(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+          color: Colors.blue.shade100,
+          child: buildInput(),
+        )
+      ],
+    );
+  }
+
+  _initReply() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-      color: Colors.blue.shade100,
-      child: buildInput(),
+      color: Colors.grey.shade200,
+      width: MediaQuery.of(context).size.width,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      child: Text('回复：$replyText'),
     );
   }
 

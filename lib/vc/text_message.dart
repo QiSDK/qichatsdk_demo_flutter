@@ -138,7 +138,12 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextButton(onPressed: () {}, child: buildRowText(Icons.sms, '回复')),
+        TextButton(
+            onPressed: () {
+              widget.listener.onReply(content);
+              _toolTipController.hideTooltip();
+            },
+            child: buildRowText(Icons.sms, '回复')),
         TextButton(
             onPressed: () {
               FlutterClipboard.copy(content).then((value) {
@@ -359,11 +364,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     withAutoReplyBuilder.id = Int64(qa.id ?? 0);
     //withAutoReplyBuilder.createdTime = Utils().getNowTimeStamp();
 
-    widget.listener?.onSendLocalMsg(questionTxt, true);
+    widget.listener.onSendLocalMsg(questionTxt, true);
     // Sending question message
     if (txtAnswer.isNotEmpty) {
       // Auto-reply
-      widget.listener?.onSendLocalMsg(txtAnswer, false);
+      widget.listener.onSendLocalMsg(txtAnswer, false);
       var uAnswer = CMessage.MessageUnion();
       var uQC = CMessage.MessageContent();
       uQC.data = txtAnswer;
@@ -375,7 +380,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     for (var a in qa.answer ?? []) {
       if (a?.image?.uri != null) {
         // Auto-reply with image
-        widget.listener?.onSendLocalMsg(a!.image!.uri!, false, "MSG_IMAGE");
+        widget.listener.onSendLocalMsg(a!.image!.uri!, false, "MSG_IMAGE");
 
         var uAnswer = CMessage.MessageUnion();
         var uQC = CMessage.MessageImage();
@@ -383,7 +388,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         uAnswer.image = uQC;
         withAutoReplyBuilder.answers.add(uAnswer);
       } else if (a?.content?.data != null) {
-        widget.listener?.onSendLocalMsg(a?.content?.data ?? "", false);
+        widget.listener.onSendLocalMsg(a?.content?.data ?? "", false);
         var uAnswer = CMessage.MessageUnion();
         var uQC = CMessage.MessageContent();
         uQC.data = txtAnswer;
