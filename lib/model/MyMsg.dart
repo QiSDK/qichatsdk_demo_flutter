@@ -4,6 +4,7 @@ class MyMsg {
   String? text;
   String? senderId;
   String? msgId;
+  String? replyMsgId;
   DateTime? msgTime;
 
   MyMsg({
@@ -13,6 +14,7 @@ class MyMsg {
     this.senderId,
     this.msgId,
     this.msgTime,
+    this.replyMsgId
   });
 
   MyMsg.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class MyMsg {
     senderId = json['senderId'];
     msgId = json['msgId'];
     msgTime = json['msgTime'];
+    replyMsgId = json['replyMsgId'];
   }
 
   Map<String, dynamic> toJson() {
@@ -32,7 +35,7 @@ class MyMsg {
     data['senderId'] = this.senderId;
     data['msgId'] = this.msgId;
     data['msgTime'] = this.msgTime;
-
+    data['replyMsgId'] = this.replyMsgId;
     return data;
   }
 }

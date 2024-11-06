@@ -1,9 +1,11 @@
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:dio/dio.dart';
+import 'package:fixnum/src/int64.dart';
 
 typedef SubmittedAction = void Function(String val);
 
@@ -33,7 +35,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   );
   void Function(void Function())? setDialogState;
   String replyText = '';
-  int replyId = 0;
+  Int64 replyId = Int64();
   final ImagePicker picker = ImagePicker();
 
   @override
@@ -49,7 +51,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     });
   }
 
-  showReply(String val, int id) {
+  showReply(String val, Int64 id) {
     setState(() {
       replyText = val;
       replyId = id;
@@ -59,7 +61,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   hideReply() {
     setState(() {
       replyText = '';
-      replyId = 0;
+      replyId = Int64(0);
     });
   }
 

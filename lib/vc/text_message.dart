@@ -141,7 +141,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       children: [
         TextButton(
             onPressed: () {
-              widget.listener.onReply(content, int.parse(widget.message.id));
+              widget.listener.onReply(content,  Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),

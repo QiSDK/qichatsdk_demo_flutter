@@ -68,29 +68,19 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void _handleSendPressed(types.PartialText message) {
-    int replyId = (_sendViewKey.currentState as ChatCustomBottomState).replyId;
+    var replyId = (_sendViewKey.currentState as ChatCustomBottomState).replyId;
     Constant.instance.chatLib.sendMessage(
         message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
-        replyMsgId: Int64(replyId));
+        replyMsgId: replyId);
     debugPrint("replyId:$replyId");
-    types.TextMessage? replyModel;
-    try {
-      replyModel = _messages.firstWhere((item) => item.id == '$replyId')
-          as types.TextMessage;
-      debugPrint("replyModel:${replyModel.toJson()}");
-    } catch (e) {
-      print(e);
-    }
-
-    var imgMsg = types.ImageMessage(
-        author: _me,
-        uri:
-            "https://www.bing.com/th?id=OHR.GreatOwl_ROW5336296654_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
-        id: "${Constant.instance.chatLib.payloadId}",
-        name: 'dd',
-        size: 200,
-        status: types.Status.sending,
-        remoteId: '0');
+    // types.TextMessage? replyModel;
+    // try {
+    //   replyModel = _messages.firstWhere((item) => item.id == '$replyId')
+    //       as types.TextMessage;
+    //   debugPrint("replyModel:${replyModel.toJson()}");
+    // } catch (e) {
+    //   print(e);
+    // }
 
     // sending是转圈的状态
     final textMessage = types.TextMessage(
@@ -99,7 +89,7 @@ class _ChatPageState extends State<ChatPage>
         text: message.text,
         metadata: {
           'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-          'replyText': replyModel?.text
+          'replyText': _getReplyText(replyId.toString(), false)
         },
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
@@ -244,6 +234,7 @@ class _ChatPageState extends State<ChatPage>
       model.senderId = msg.sender.toString();
       model.msgId = msg.msgId.toString();
       model.msgTime = msg.msgTime.toDateTime();
+      model.replyMsgId = msg.replyMsgId.toString();
       composeLocalMsg(model, append: true);
       print("Received Message: ${msg}");
     }
@@ -288,7 +279,7 @@ class _ChatPageState extends State<ChatPage>
   void msgReceipt(cMessage.Message msg, Int64 payloadId, String? errMsg) {
     _updateUI("收到回执 payloadId:${payloadId}");
     print("收到回执 payloadId:${payloadId} msgId: ${msg.msgId}");
-    updateMessageStatus(payloadId.toString(), types.Status.sent);
+    updateMessageStatus(payloadId.toString(), types.Status.sent, msg.msgId.toString());
   }
 
   @override
@@ -320,14 +311,14 @@ class _ChatPageState extends State<ChatPage>
     setState(() {});
   }
 
-  void updateMessageStatus(String payloadId, types.Status newStatus) {
+  void updateMessageStatus(String payloadId, types.Status newStatus, String msgId) {
     // Find the message by its id
     var index = _messages.indexWhere((p) => p.id == payloadId);
     // Check if message exists
     if (index != -1) {
       setState(() {
         // Create a new message object with the updated status
-        _messages[index] = _messages[index].copyWith(status: newStatus);
+        _messages[index] = _messages[index].copyWith(status: newStatus, remoteId: msgId);
       });
     }
   }
@@ -383,6 +374,7 @@ class _ChatPageState extends State<ChatPage>
       model.senderId = msg.sender;
       model.msgId = msg.msgId;
       model.msgTime = parseStringToDateTime(msg.msgTime);
+      model.replyMsgId = msg.replyMsgId;
       composeLocalMsg(model);
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
@@ -408,11 +400,13 @@ class _ChatPageState extends State<ChatPage>
     String senderId = msgModel.senderId ?? '';
     String msgId = msgModel.msgId ?? '';
     String? msgTime;
-    int? msgInt;
+    int? milliSeconds;
     if (msgModel.msgTime != null) {
       msgTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(msgModel.msgTime!);
-      msgInt = msgModel.msgTime!.millisecondsSinceEpoch;
+      milliSeconds = msgModel.msgTime!.millisecondsSinceEpoch;
     }
+
+    var replyText = _getReplyText(msgModel.replyMsgId ?? "", append);
 
     final sender = types.User(id: senderId);
     final imgUrl = baseUrlImage + imgUri;
@@ -420,7 +414,7 @@ class _ChatPageState extends State<ChatPage>
     if (imgUri.isNotEmpty) {
       msg = types.ImageMessage(
           author: sender,
-          createdAt: msgInt,
+          createdAt: milliSeconds,
           uri: imgUrl,
           id: _generateRandomId(),
           name: 'dd',
@@ -433,7 +427,7 @@ class _ChatPageState extends State<ChatPage>
       msg = types.VideoMessage(
           author: sender,
           uri: videoUrl,
-          createdAt: msgInt,
+          createdAt: milliSeconds,
           id: _generateRandomId(),
           name: 'dd',
           size: 200,
@@ -444,8 +438,8 @@ class _ChatPageState extends State<ChatPage>
       msg = types.TextMessage(
           author: sender,
           text: text,
-          createdAt: msgInt,
-          metadata: {'msgTime': msgTime},
+          createdAt: milliSeconds,
+          metadata: {'msgTime': msgTime,  'replyText': replyText},
           id: _generateRandomId(),
           status: types.Status.sent,
           remoteId: msgId);
@@ -454,6 +448,24 @@ class _ChatPageState extends State<ChatPage>
     append ? _messages.insert(0, msg) : _messages.add(msg);
 
     setState(() {});
+  }
+
+  String _getReplyText(String replyMsgId, bool append){
+    String replyTxt = "";
+    types.Message? replyModel;
+      var index = _messages.indexWhere((item) => item.remoteId == '$replyMsgId');
+      if (index >= 0) {
+        replyModel = _messages[index];
+        if (replyModel is types.TextMessage) {
+          replyTxt = (replyModel as types.TextMessage).text;
+        } else if (replyModel is types.ImageMessage) {
+          replyTxt = "[图片]";
+        } else if (replyModel is types.VideoMessage) {
+          replyTxt = "[视频]";
+        }
+        debugPrint("replyModel:${replyModel.toJson()}");
+      }
+    return replyTxt;
   }
 
   @override
@@ -481,7 +493,7 @@ class _ChatPageState extends State<ChatPage>
   }
 
   @override
-  void onReply(String val, int replyId) {
+  void onReply(String val, Int64 replyId) {
     (_sendViewKey.currentState as ChatCustomBottomState)
         .showReply(val, replyId);
   }
