@@ -33,6 +33,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   );
   void Function(void Function())? setDialogState;
   String replyText = '';
+  int replyId = 0;
   final ImagePicker picker = ImagePicker();
 
   @override
@@ -48,15 +49,17 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     });
   }
 
-  showReply(String val) {
+  showReply(String val, int id) {
     setState(() {
       replyText = val;
+      replyId = id;
     });
   }
 
   hideReply() {
     setState(() {
       replyText = '';
+      replyId = 0;
     });
   }
 
@@ -130,6 +133,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 onSubmitted: (value) {
                   inputController.clear();
                   widget.onSubmitted(value);
+                  hideReply();
                 },
               ),
             ),
@@ -139,6 +143,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 widget.onSubmitted(inputController.text);
                 inputController.clear();
                 FocusScope.of(context).unfocus();
+                // 放在最后，清空
+                hideReply();
               },
               icon: const Icon(
                 Icons.send,

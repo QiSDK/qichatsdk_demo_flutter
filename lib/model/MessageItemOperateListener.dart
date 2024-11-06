@@ -6,5 +6,5 @@ abstract class MessageItemOperateListener {
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]);
   void onPlayVideo(String url);
   void onPlayImage(String url);
-  void onReply(String val);
+  void onReply(String val, int replyId);
 }

@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'package:fixnum/src/int64.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -67,14 +68,20 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void _handleSendPressed(types.PartialText message) {
-    if (message.text.isEmpty) {
-      SmartDialog.showToast("消息不能为空");
-      return;
+    int replyId = (_sendViewKey.currentState as ChatCustomBottomState).replyId;
+    Constant.instance.chatLib.sendMessage(
+        message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
+        replyMsgId: Int64(replyId));
+    debugPrint("replyId:$replyId");
+    types.TextMessage? replyModel;
+    try {
+      replyModel = _messages.firstWhere((item) => item.id == '$replyId')
+          as types.TextMessage;
+      debugPrint("replyModel:${replyModel.toJson()}");
+    } catch (e) {
+      print(e);
     }
 
-    Constant.instance.chatLib
-        .sendMessage(message.text, cMessage.MessageFormat.MSG_TEXT, consultId);
-    //print("payloadid:${Constant.instance.chatLib.payloadId}");
     var imgMsg = types.ImageMessage(
         author: _me,
         uri:
@@ -91,7 +98,8 @@ class _ChatPageState extends State<ChatPage>
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
         metadata: {
-          'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())
+          'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+          'replyText': replyModel?.text
         },
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
@@ -143,7 +151,10 @@ class _ChatPageState extends State<ChatPage>
           key: _sendViewKey,
           onSubmitted: (value) {
             final trimmedText = value.trim();
-            if (trimmedText.isEmpty) return;
+            if (trimmedText.isEmpty) {
+              SmartDialog.showToast("消息不能为空");
+              return;
+            }
             final partialText = types.PartialText(text: trimmedText);
             _handleSendPressed(partialText);
           },
@@ -470,13 +481,13 @@ class _ChatPageState extends State<ChatPage>
   }
 
   @override
-  void onReply(String val) {
-    (_sendViewKey.currentState as ChatCustomBottomState).showReply(val);
+  void onReply(String val, int replyId) {
+    (_sendViewKey.currentState as ChatCustomBottomState)
+        .showReply(val, replyId);
   }
 
   @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
-    (_sendViewKey.currentState as ChatCustomBottomState).hideReply();
     setState(() {
       if (isMe) {
         _messages.insert(

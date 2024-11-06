@@ -32,6 +32,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   String get content => widget.message.text;
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get replyText => widget.message.metadata?['replyText'] ?? '';
 
   List<Qa> sectionList = [];
   AutoReply? autoReplyModel;
@@ -140,7 +141,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       children: [
         TextButton(
             onPressed: () {
-              widget.listener.onReply(content);
+              widget.listener.onReply(content, int.parse(widget.message.id));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
@@ -199,6 +200,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     ? Colors.white.withOpacity(0.5)
                     : Colors.grey),
           ),
+          replyText.isEmpty
+              ? const SizedBox()
+              : Text(replyText,
+                  style: const TextStyle(fontSize: 12, color: Colors.black)),
           Text(
             content,
             style: textStyle,
