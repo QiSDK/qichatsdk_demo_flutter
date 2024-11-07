@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
-
+import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+as cmessage;
 
 import 'package:intl/intl.dart';
 
@@ -46,6 +47,9 @@ const Color chatBackColor = Colors.grey;
 const Color panelBack = Colors.lightBlueAccent;
 
 const String serverDateFormat = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+//var withAutoReplyBuilder = cmessage.WithAutoReply();
+cmessage.WithAutoReply? withAutoReplyBuilder;
 
 // Function to convert a date string to another formatted string
 String convertDateStringToString(String datStr) {

@@ -3,9 +3,10 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
-    as CMessage;
+    as cmessage;
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
+import '../Constant.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
@@ -366,10 +367,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     String questionTxt = qa.question?.content?.data ?? "";
     String txtAnswer = qa.content ?? "null";
 
-    var withAutoReplyBuilder = CMessage.WithAutoReply();
+    withAutoReplyBuilder = cmessage.WithAutoReply();
 
-    withAutoReplyBuilder.title = questionTxt;
-    withAutoReplyBuilder.id = Int64(qa.id ?? 0);
+    withAutoReplyBuilder?.title = questionTxt;
+    withAutoReplyBuilder?.id = Int64(qa.id ?? 0);
     //withAutoReplyBuilder.createdTime = Utils().getNowTimeStamp();
 
     widget.listener.onSendLocalMsg(questionTxt, true);
@@ -377,11 +378,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (txtAnswer.isNotEmpty) {
       // Auto-reply
       widget.listener.onSendLocalMsg(txtAnswer, false);
-      var uAnswer = CMessage.MessageUnion();
-      var uQC = CMessage.MessageContent();
+      var uAnswer = cmessage.MessageUnion();
+      var uQC = cmessage.MessageContent();
       uQC.data = txtAnswer;
       uAnswer.content = uQC;
-      withAutoReplyBuilder.answers.add(uAnswer);
+      withAutoReplyBuilder?.answers.add(uAnswer);
     }
 
     //if (multipAnswer.isNotEmpty) {
@@ -390,18 +391,18 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         // Auto-reply with image
         widget.listener.onSendLocalMsg(a!.image!.uri!, false, "MSG_IMAGE");
 
-        var uAnswer = CMessage.MessageUnion();
-        var uQC = CMessage.MessageImage();
+        var uAnswer = cmessage.MessageUnion();
+        var uQC = cmessage.MessageImage();
         uQC.uri = a.image!.uri!;
         uAnswer.image = uQC;
-        withAutoReplyBuilder.answers.add(uAnswer);
+        withAutoReplyBuilder?.answers.add(uAnswer);
       } else if (a?.content?.data != null) {
         widget.listener.onSendLocalMsg(a?.content?.data ?? "", false);
-        var uAnswer = CMessage.MessageUnion();
-        var uQC = CMessage.MessageContent();
+        var uAnswer = cmessage.MessageUnion();
+        var uQC = cmessage.MessageContent();
         uQC.data = txtAnswer;
         uAnswer.content = uQC;
-        withAutoReplyBuilder.answers.add(uAnswer);
+        withAutoReplyBuilder?.answers.add(uAnswer);
       }
     }
     //}

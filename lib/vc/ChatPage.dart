@@ -9,7 +9,7 @@ import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
-import 'package:qichatsdk_demo_flutter/vc/text_message.dart';
+import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -41,6 +41,7 @@ class _ChatPageState extends State<ChatPage>
   );
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
+  List<MsgItem>? replyList;
 
   @override
   void initState() {
@@ -71,7 +72,8 @@ class _ChatPageState extends State<ChatPage>
     var replyId = (_sendViewKey.currentState as ChatCustomBottomState).replyId;
     Constant.instance.chatLib.sendMessage(
         message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
-        replyMsgId: replyId);
+        replyMsgId: replyId, withAutoReply: withAutoReplyBuilder);
+    withAutoReplyBuilder = null;
     debugPrint("replyId:$replyId");
     // types.TextMessage? replyModel;
     // try {
@@ -149,6 +151,8 @@ class _ChatPageState extends State<ChatPage>
             _handleSendPressed(partialText);
           },
           onUploadSuccess: (String url, bool isVideo) {
+            Constant.instance.chatLib.sendMessage(
+                url, cMessage.MessageFormat.MSG_IMG, consultId, withAutoReply: withAutoReplyBuilder);
             var msg = types.ImageMessage(
                 author: _me,
                 uri: url,
@@ -235,7 +239,7 @@ class _ChatPageState extends State<ChatPage>
       model.msgId = msg.msgId.toString();
       model.msgTime = msg.msgTime.toDateTime();
       model.replyMsgId = msg.replyMsgId.toString();
-      composeLocalMsg(model, append: true);
+      composeLocalMsg(model, insert: true);
       print("Received Message: ${msg}");
     }
     _updateUI("info");
@@ -296,7 +300,7 @@ class _ChatPageState extends State<ChatPage>
       model.senderId = msg.sender.toString();
       model.msgId = msg.msgId.toString();
       model.msgTime = msg.msgTime.toDateTime();
-      composeLocalMsg(model, append: true);
+      composeLocalMsg(model, insert: true);
 
       // composeLocalMsg("", "", "对方撤回了1条消息", "system", "", append: true);
 
@@ -331,6 +335,7 @@ class _ChatPageState extends State<ChatPage>
     var h = await ArticleRepository.queryHistory(consultId);
     _me = types.User(id: h?.request?.chatId ?? "");
 
+    replyList = h?.replyList;
     _buildHistory(h?.list);
 
     //自动回复
@@ -393,7 +398,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  void composeLocalMsg(MyMsg msgModel, {bool append = false}) {
+  void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {
     String imgUri = msgModel.imgUri ?? '';
     String videoUri = msgModel.videoUri ?? '';
     String text = msgModel.text ?? '';
@@ -406,8 +411,7 @@ class _ChatPageState extends State<ChatPage>
       milliSeconds = msgModel.msgTime!.millisecondsSinceEpoch;
     }
 
-    var replyText = _getReplyText(msgModel.replyMsgId ?? "", append);
-
+    var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     final sender = types.User(id: senderId);
     final imgUrl = baseUrlImage + imgUri;
     types.Message msg;
@@ -445,25 +449,46 @@ class _ChatPageState extends State<ChatPage>
           remoteId: msgId);
     }
 
-    append ? _messages.insert(0, msg) : _messages.add(msg);
-
+    insert ? _messages.insert(0, msg) : _messages.add(msg);
     setState(() {});
   }
 
   String _getReplyText(String replyMsgId, bool append){
+    if (replyMsgId.isEmpty){
+      return "";
+    }
     String replyTxt = "";
     types.Message? replyModel;
-      var index = _messages.indexWhere((item) => item.remoteId == '$replyMsgId');
-      if (index >= 0) {
-        replyModel = _messages[index];
-        if (replyModel is types.TextMessage) {
-          replyTxt = (replyModel as types.TextMessage).text;
-        } else if (replyModel is types.ImageMessage) {
-          replyTxt = "[图片]";
-        } else if (replyModel is types.VideoMessage) {
-          replyTxt = "[视频]";
+      var index = -1;
+      if (append) {
+        index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
+        if (index >= 0) {
+          replyModel = _messages[index];
+          if (replyModel is types.TextMessage) {
+            replyTxt = (replyModel as types.TextMessage).text;
+          } else if (replyModel is types.ImageMessage) {
+            replyTxt = "[图片]";
+          } else if (replyModel is types.VideoMessage) {
+            replyTxt = "[视频]";
+          }
+          debugPrint("replyModel:${replyModel.toJson()}");
         }
-        debugPrint("replyModel:${replyModel.toJson()}");
+      }else{
+        //历史记录
+        if (replyList != null) {
+          index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
+
+          if (index >= 0) {
+              var msg = replyList![index];
+             if ((msg.image?.uri ?? "").isNotEmpty) {
+              replyTxt = "[图片]";
+            } else if ((msg.video?.uri ?? "").isNotEmpty) {
+              replyTxt = "[视频]";
+            }else {
+               replyTxt = msg.content?.data ?? "";
+             } 
+          }
+        }
       }
     return replyTxt;
   }
