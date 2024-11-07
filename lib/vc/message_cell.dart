@@ -301,7 +301,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                   isExpanded: qa.isExpanded ?? false,
                   headerBuilder: (ctx, val) {
                     return Container(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(2.0),
                       decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(
