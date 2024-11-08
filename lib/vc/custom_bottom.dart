@@ -163,7 +163,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage() async {
-    final XFile? photo = await picker.pickImage(source: ImageSource.gallery);
+    //await picker.pickImage(source: ImageSource.gallery);
+    final XFile? photo = await picker.pickMedia();
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
