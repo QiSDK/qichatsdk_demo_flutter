@@ -1,4 +1,6 @@
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class Sync {
   Request? request;
@@ -187,7 +189,7 @@ class MsgItem {
 class WithAutoReplies {
   String? id;
   String? title;
-  Null? createdTime;
+  String? createdTime;
   List<Answers>? answers;
 
   WithAutoReplies({this.id, this.title, this.createdTime, this.answers});

@@ -195,7 +195,7 @@ class _ChatPageState extends State<ChatPage>
         token: "",
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: getCustomParam("wang wu", 1, 0));
+        custom: getCustomParam(userName, 1, 0));
 
     // Now the listener will receive the delegate events
     Constant.instance.chatLib.callWebSocket();
@@ -203,21 +203,10 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void receivedMsg(cMessage.Message msg) {
-    /*
-    if (newItem.cMsg?.msgOp == CMessage.MessageOperate.MSG_OP_EDIT){
-                var index = mlMsgList.value?.indexOfFirst { it.cMsg?.msgId == newItem.cMsg?.msgId}
-                if (index != null && index != -1){
-                    mlMsgList.value!![index].cMsg = newItem.cMsg
-                    mlMsgList.postValue(mlMsgList.value)
-                    return
-                }
-            }
-     */
     if (msg.msgOp == cMessage.MessageOperate.MSG_OP_EDIT) {
       var index =
           _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
       if (index >= 0) {
-        //  editMsg.first.
         _messages.removeAt(index);
         _messages.insert(
             index,
@@ -249,11 +238,13 @@ class _ChatPageState extends State<ChatPage>
   void systemMsg(Result result) {
     print("System Message: ${result.message}");
     Constant.instance.isConnected = false;
-    _updateUI("已断开：${result.code} ${result.message})");
-    if (result.code == 1002 || result.code == 1010) {
+    print("已经断开");
+    if (result.code == 1002 || result.code == 1010 || result.code == 1005) {
       if (result.code == 1002) {
         //showTip("无效的Token")
         //有时候服务器反馈的这个消息不准，可忽略它
+      } else if (result.code == 1005) {
+        Navigator.pop(context);
       } else {
         //showTip("在别处登录了")
         //toast("在别处登录了")
@@ -450,7 +441,9 @@ class _ChatPageState extends State<ChatPage>
     }
 
     insert ? _messages.insert(0, msg) : _messages.add(msg);
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   String _getReplyText(String replyMsgId, bool append){

@@ -15,15 +15,26 @@ class EntrancePage extends StatefulWidget {
   State<EntrancePage> createState() => _EntrancePageState();
 }
 
-class _EntrancePageState extends State<EntrancePage> {
+class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver{
   //final AppPurchaseV2 _appPurchase = AppPurchaseV2.instance;
    Entrance? entrance;
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addObserver(this);
     loadData();
   }
+
+   @override
+   void didChangeAppLifecycleState(AppLifecycleState state) {
+     super.didChangeAppLifecycleState(state);
+     if (state == AppLifecycleState.resumed) {
+       // This is similar to `onResume`
+       print("App has resumed");
+       // Perform the actions you want when the page is resumed
+       loadData();
+     }
+   }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +91,7 @@ class _EntrancePageState extends State<EntrancePage> {
         ? baseUrlImage + model.works![0].avatar!
         : "default_thumbnail_url"; // Provide a default or fallback URL if `works` is null or empty
     print(thumbnail);
+    var unread = model.unread ?? 0;
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(8),
@@ -114,6 +126,9 @@ class _EntrancePageState extends State<EntrancePage> {
                   Text('${model.name}',
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
+                   SizedBox(
+                      child: unread > 0 ? const Icon(Icons.circle, color: Colors.red, size: 15) : Container()
+                  )
                 ],
               )
             ],
@@ -128,4 +143,10 @@ class _EntrancePageState extends State<EntrancePage> {
     entrance = await ArticleRepository.queryEntrance();
     setState(() {});
   }
+
+   @override
+   void dispose() {
+     WidgetsBinding.instance.removeObserver(this);
+     super.dispose();
+   }
 }
