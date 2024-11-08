@@ -374,6 +374,8 @@ class _ChatPageState extends State<ChatPage>
       composeLocalMsg(model);
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
+
+    ArticleRepository.markRead(consultId);
   }
 
   DateTime? parseStringToDateTime(String? str) {
@@ -404,9 +406,12 @@ class _ChatPageState extends State<ChatPage>
 
     var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     final sender = types.User(id: senderId);
-    final imgUrl = baseUrlImage + imgUri;
     types.Message msg;
     if (imgUri.isNotEmpty) {
+      var imgUrl = imgUri;
+      if (!imgUri.contains("http")){
+        imgUrl = baseUrlImage + imgUri;
+      }
       msg = types.ImageMessage(
           author: sender,
           createdAt: milliSeconds,
@@ -418,10 +423,13 @@ class _ChatPageState extends State<ChatPage>
           status: types.Status.sent,
           remoteId: msgId);
     } else if (videoUri.isNotEmpty) {
-      final videoUrl = baseUrlImage + videoUri;
+      var  url = videoUri;
+      if (!imgUri.contains("http")){
+        url = baseUrlImage + videoUri;
+      }
       msg = types.VideoMessage(
           author: sender,
-          uri: videoUrl,
+          uri: url,
           createdAt: milliSeconds,
           id: _generateRandomId(),
           name: 'dd',

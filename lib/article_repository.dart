@@ -16,6 +16,7 @@ class ArticleRepository {
   static const String uploadAudioPath = '/api/PublishWork/';
   static const String queryEntrancePath = '/v1/api/query-entrance';
   static const String syncMessagePath = '/v1/api/message/sync';
+  static const String markReadPath = '/v1/api/chat/mark-read';
   static const String queryAutoReplyPath = '/v1/api/query-auto-reply';
   //v1/api/query-auto-reply
 
@@ -61,7 +62,7 @@ class ArticleRepository {
       }
     } catch (e) {
       log(e.toString());
-      rethrow;
+      //rethrow;
     }
   }
 
@@ -92,6 +93,34 @@ class ArticleRepository {
     } catch (e) {
       log(e.toString());
       rethrow;
+    }
+  }
+
+  static Future<bool> markRead(fixNum.Int64 consultId) async {
+    Resource res = Resource();
+    res.path = markReadPath;
+    var map = {
+      "consultId": consultId.toInt(),
+    };
+    //var formData = FormData.fromMap(map);
+    res.bodyParams = map;
+
+    try {
+      var resp = await Api().post(res);
+      var result = Result<Sync>.fromJson(
+        resp,
+            (json) => Sync.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (result != null && (result.code ?? -1) == 0) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      log(e.toString());
+      return false;
+      //rethrow;
     }
   }
 
