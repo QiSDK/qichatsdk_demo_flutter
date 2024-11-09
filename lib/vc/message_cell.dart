@@ -115,14 +115,14 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (content.contains('对方撤回')) {
       return initWithdraws();
     }
-    if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
-      return CachedNetworkImage(
-        key: Key(widget.message.remoteId.toString()),
-        width: 200,
-        height: 150,
-        imageUrl: widget.message.text,
-      );
-    }
+    // if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
+    //   return CachedNetworkImage(
+    //     key: Key(widget.message.remoteId.toString()),
+    //     width: 200,
+    //     height: 150,
+    //     imageUrl: widget.message.text,
+    //   );
+    // }
     return SuperTooltip(
       content: buildToolAction(),
       controller: _toolTipController,

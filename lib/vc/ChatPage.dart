@@ -113,9 +113,9 @@ class _ChatPageState extends State<ChatPage>
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
         user: _me,
-        customMessageBuilder: (message, {messageWidth = 200}) {
-          return TipMessage(message: message);
-        },
+        // customMessageBuilder: (message, {messageWidth = 200}) {
+        //   return TipMessage(message: message);
+        // },
         showUserAvatars: false,
         showUserNames: true,
         theme: const DefaultChatTheme(
@@ -374,7 +374,9 @@ class _ChatPageState extends State<ChatPage>
       composeLocalMsg(model);
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
-
+    if (mounted) {
+      setState(() {});
+    }
     ArticleRepository.markRead(consultId);
   }
 
@@ -418,7 +420,7 @@ class _ChatPageState extends State<ChatPage>
           uri: imgUrl,
           id: _generateRandomId(),
           name: 'dd',
-          size: 200,
+          size: 150,
           metadata: {'msgTime': msgTime},
           status: types.Status.sent,
           remoteId: msgId);
@@ -433,7 +435,7 @@ class _ChatPageState extends State<ChatPage>
           createdAt: milliSeconds,
           id: _generateRandomId(),
           name: 'dd',
-          size: 200,
+          size: 150,
           metadata: {'msgTime': msgTime},
           status: types.Status.sent,
           remoteId: msgId);
@@ -449,9 +451,7 @@ class _ChatPageState extends State<ChatPage>
     }
 
     insert ? _messages.insert(0, msg) : _messages.add(msg);
-    if (mounted) {
-      setState(() {});
-    }
+
   }
 
   String _getReplyText(String replyMsgId, bool append){
@@ -549,9 +549,9 @@ class _ChatPageState extends State<ChatPage>
                 id: _generateRandomId(),
                 uri: imgUrl,
                 name: '',
-                size: 200,
+                size: 150,
               ));
-        } else {
+        }  else {
           _messages.insert(
               0,
               types.TextMessage(

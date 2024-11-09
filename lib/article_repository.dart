@@ -102,7 +102,6 @@ class ArticleRepository {
     var map = {
       "consultId": consultId.toInt(),
     };
-    //var formData = FormData.fromMap(map);
     res.bodyParams = map;
 
     try {
@@ -120,7 +119,6 @@ class ArticleRepository {
     } catch (e) {
       log(e.toString());
       return false;
-      //rethrow;
     }
   }
 
@@ -150,7 +148,7 @@ class ArticleRepository {
       }
     } catch (e) {
       log(e.toString());
-      rethrow;
+      //rethrow;
     }
   }
 
