@@ -9,6 +9,7 @@ import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
+import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
@@ -45,27 +46,14 @@ class _ChatPageState extends State<ChatPage>
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
   List<MsgItem>? replyList;
-   bool isFirstLoad = true;
+   bool _isFirstLoad = true;
+   var store = ChatStore();
 
   @override
   void initState() {
     super.initState();
     // _loadInitialMessages();
     initSDK();
-  }
-
-  void _loadInitialMessages() {
-    // Load any initial messages if needed, or keep it empty for a new chat
-    setState(() {
-      _messages.addAll([
-        types.TextMessage(
-          author: _me,
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-          id: _generateRandomId(),
-          text: 'Hello! How can I help you today?',
-        ),
-      ]);
-    });
   }
 
   String _generateRandomId() {
@@ -110,7 +98,7 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat'),
+        title: Text(store.loadingMsg),
       ),
       body: Chat(
         messages: _messages,
@@ -292,6 +280,7 @@ class _ChatPageState extends State<ChatPage>
      ArticleRepository.assignWorker(consultId).then((onValue){
        if (onValue != null)
           getChatData(onValue.nick ?? "_");
+       store.loadingMsg = onValue?.nick ?? "..";
      });
   }
 
@@ -307,6 +296,7 @@ class _ChatPageState extends State<ChatPage>
           0,
           types.TextMessage(
             author: _client,
+            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
             createdAt: DateTime
                 .now()
                 .millisecondsSinceEpoch,
@@ -380,14 +370,8 @@ class _ChatPageState extends State<ChatPage>
     replyList = h?.replyList;
     _buildHistory(h?.list);
 
-    /*
-       if (isFirstLoad){
-                   isFirstLoad = false
-                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", true, false)
-               }
-     */
-    if (isFirstLoad) {
-      isFirstLoad = false;
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
       //自动回复
       AutoReply? model =
       await ArticleRepository.queryAutoReply(consultId, workerId);
@@ -414,6 +398,7 @@ class _ChatPageState extends State<ChatPage>
             0,
             types.TextMessage(
               author: _client,
+              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
               createdAt: DateTime
                   .now()
                   .millisecondsSinceEpoch,
@@ -594,6 +579,7 @@ class _ChatPageState extends State<ChatPage>
             0,
             types.TextMessage(
               author: _me,
+              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
               status: types.Status.sent,
               createdAt: DateTime.now().millisecondsSinceEpoch,
               id: _generateRandomId(),
@@ -606,6 +592,7 @@ class _ChatPageState extends State<ChatPage>
               0,
               types.ImageMessage(
                 author: _client,
+                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 status: types.Status.sent,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: _generateRandomId(),
@@ -618,6 +605,7 @@ class _ChatPageState extends State<ChatPage>
               0,
               types.TextMessage(
                 author: _client,
+                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 status: types.Status.sent,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: _generateRandomId(),
