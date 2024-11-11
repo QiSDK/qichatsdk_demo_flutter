@@ -61,6 +61,7 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
           )
         : Container(
             padding: EdgeInsets.all(8.0),
+            height: 300,
             child: _chewieController != null &&
                     _chewieController
                             ?.videoPlayerController.value.isInitialized ==
