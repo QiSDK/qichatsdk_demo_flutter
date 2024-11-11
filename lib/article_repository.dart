@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'api_service.dart';
 import 'model/Entrance.dart';
 import 'model/Result.dart';
@@ -17,8 +18,8 @@ class ArticleRepository {
   static const String queryEntrancePath = '/v1/api/query-entrance';
   static const String syncMessagePath = '/v1/api/message/sync';
   static const String markReadPath = '/v1/api/chat/mark-read';
+  static const String assignWorkerPath = '/v1/api/assign-worker';
   static const String queryAutoReplyPath = '/v1/api/query-auto-reply';
-  //v1/api/query-auto-reply
 
   static Future<dynamic> articleList(int pageNum, {int? thumpCount}) async {
     Resource res = Resource();
@@ -66,36 +67,6 @@ class ArticleRepository {
     }
   }
 
-  static Future<Sync?> queryHistory(fixNum.Int64 consultId) async {
-    Resource res = Resource();
-    res.path = syncMessagePath;
-    var map = {
-      'chatId': 0,
-      "count": 50,
-      "consultId": consultId.toInt(),
-      "userId": userId
-    };
-    //var formData = FormData.fromMap(map);
-    res.bodyParams = map;
-
-    try {
-      var resp = await Api().post(res);
-      var result = Result<Sync>.fromJson(
-        resp,
-        (json) => Sync.fromJson(json as Map<String, dynamic>),
-      );
-
-      if (result != null && (result.code ?? -1) == 0) {
-        return result.data;
-      } else {
-        return null;
-      }
-    } catch (e) {
-      log(e.toString());
-      rethrow;
-    }
-  }
-
   static Future<bool> markRead(fixNum.Int64 consultId) async {
     Resource res = Resource();
     res.path = markReadPath;
@@ -122,6 +93,37 @@ class ArticleRepository {
     }
   }
 
+  static Future<Sync?> queryHistory(fixNum.Int64 consultId) async {
+    Resource res = Resource();
+    res.path = syncMessagePath;
+    var map = {
+      'chatId': 0,
+      "count": 50,
+      "consultId": consultId.toInt(),
+      "userId": userId
+    };
+    //var formData = FormData.fromMap(map);
+    res.bodyParams = map;
+
+    try {
+      var resp = await Api().post(res);
+      var result = Result<Sync>.fromJson(
+        resp,
+            (json) => Sync.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (result != null && (result.code ?? -1) == 0) {
+        return result.data;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+
   static Future<AutoReply?> queryAutoReply(
       fixNum.Int64 consultId, int workerId) async {
     Resource res = Resource();
@@ -138,7 +140,32 @@ class ArticleRepository {
       var resp = await Api().post(res);
       var result = Result<AutoReply>.fromJson(
         resp,
-        (json) => AutoReply.fromJson(json as Map<String, dynamic>),
+            (json) => AutoReply.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (result != null && (result.code ?? -1) == 0) {
+        return result.data;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      log(e.toString());
+      //rethrow;
+    }
+  }
+
+  static Future<Worker?> assignWorker(
+      fixNum.Int64 consultId) async {
+    Resource res = Resource();
+    res.path = assignWorkerPath;
+    var map = {"consultId": consultId.toInt()};
+    res.bodyParams = map;
+
+    try {
+      var resp = await Api().post(res);
+      var result = Result<Worker>.fromJson(
+        resp,
+            (json) => Worker.fromJson(json as Map<String, dynamic>),
       );
 
       if (result != null && (result.code ?? -1) == 0) {

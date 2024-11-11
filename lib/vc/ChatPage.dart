@@ -8,6 +8,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
@@ -23,7 +24,8 @@ import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-import '../view/tip_message.dart';
+
+import '../util/util.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -43,6 +45,7 @@ class _ChatPageState extends State<ChatPage>
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
   List<MsgItem>? replyList;
+   bool isFirstLoad = true;
 
   @override
   void initState() {
@@ -285,8 +288,11 @@ class _ChatPageState extends State<ChatPage>
     xToken = c.token;
     Constant.instance.isConnected = true;
     _updateUI("连接成功！");
-
-    getChatData();
+    //c.workerId;
+     ArticleRepository.assignWorker(consultId).then((onValue){
+       if (onValue != null)
+          getChatData(onValue.nick ?? "_");
+     });
   }
 
   @override
@@ -294,6 +300,22 @@ class _ChatPageState extends State<ChatPage>
     print("Worker Changed for Consult ID: ${msg.consultId}");
     _updateUI("客服更换成功，新worker id:${msg.workerId}");
     //客服更换之后，在这重新调用历史记录的接口，和更换客服头像、名字
+    if (workerId > 0 && workerId != msg.workerId) {
+      getChatData(msg.workerName);
+
+      _messages.insert(
+          0,
+          types.TextMessage(
+            author: _client,
+            createdAt: DateTime
+                .now()
+                .millisecondsSinceEpoch,
+            text: "您好，${msg.workerName}为您服务！",
+            // 根据这个字段来自定义界面
+            id: _generateRandomId(),
+            status: types.Status.sent,
+          ));
+     }
   }
 
   @override
@@ -347,10 +369,10 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  Future<void> getChatData() async {
+  Future<void> getChatData(String workerName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(PARAM_XTOKEN, xToken);
-
+    _messages.clear();
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
     _me = types.User(id: h?.request?.chatId ?? "");
@@ -358,20 +380,45 @@ class _ChatPageState extends State<ChatPage>
     replyList = h?.replyList;
     _buildHistory(h?.list);
 
-    //自动回复
-    AutoReply? model =
-        await ArticleRepository.queryAutoReply(consultId, workerId);
-    print(model?.autoReplyItem?.qa);
-    print(model?.autoReplyItem?.title);
-    if (model != null) {
-      setState(() {
+    /*
+       if (isFirstLoad){
+                   isFirstLoad = false
+                   viewModel.composeLocalMsg("您好，${workInfo.workerName}为您服务！", true, false)
+               }
+     */
+    if (isFirstLoad) {
+      isFirstLoad = false;
+      //自动回复
+      AutoReply? model =
+      await ArticleRepository.queryAutoReply(consultId, workerId);
+      print(model?.autoReplyItem?.qa);
+      print(model?.autoReplyItem?.title);
+      if (model != null) {
         _messages.insert(
             0,
             types.TextMessage(
               metadata: model.toJson(),
               author: _client,
-              createdAt: DateTime.now().millisecondsSinceEpoch,
-              text: 'autoReplay', // 根据这个字段来自定义界面
+              createdAt: DateTime
+                  .now()
+                  .millisecondsSinceEpoch,
+              text: 'autoReplay',
+              // 根据这个字段来自定义界面
+              id: _generateRandomId(),
+              status: types.Status.sent,
+            ));
+      }
+
+      setState(() {
+        _messages.insert(
+            0,
+            types.TextMessage(
+              author: _client,
+              createdAt: DateTime
+                  .now()
+                  .millisecondsSinceEpoch,
+              text: "您好，${workerName}为您服务！",
+              // 根据这个字段来自定义界面
               id: _generateRandomId(),
               status: types.Status.sent,
             ));
@@ -398,7 +445,7 @@ class _ChatPageState extends State<ChatPage>
       model.text = msg.content?.data ?? '';
       model.senderId = msg.sender;
       model.msgId = msg.msgId;
-      model.msgTime = parseStringToDateTime(msg.msgTime);
+      model.msgTime = Util.parseStringToDateTime(msg.msgTime);
       model.replyMsgId = msg.replyMsgId;
       composeLocalMsg(model);
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
@@ -407,19 +454,6 @@ class _ChatPageState extends State<ChatPage>
       setState(() {});
     }
     ArticleRepository.markRead(consultId);
-  }
-
-  DateTime? parseStringToDateTime(String? str) {
-    if (str == null || str.isEmpty) {
-      return null; // 如果字符串为空或为 null，返回 null
-    }
-
-    try {
-      return DateTime.parse(str); // 尝试将字符串转换为 DateTime
-    } catch (e) {
-      print('Error parsing string to DateTime: $e');
-      return null; // 如果转换失败，返回 null
-    }
   }
 
   void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {
@@ -431,7 +465,7 @@ class _ChatPageState extends State<ChatPage>
     String? msgTime;
     int? milliSeconds;
     if (msgModel.msgTime != null) {
-      msgTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(msgModel.msgTime!);
+      msgTime = Util.convertDateToString(msgModel.msgTime);
       milliSeconds = msgModel.msgTime!.millisecondsSinceEpoch;
     }
 
@@ -455,7 +489,7 @@ class _ChatPageState extends State<ChatPage>
           remoteId: msgId);
     } else if (videoUri.isNotEmpty) {
       var url = videoUri;
-      if (!imgUri.contains("http")) {
+      if (!videoUri.contains("http")) {
         url = baseUrlImage + videoUri;
       }
       msg = types.VideoMessage(
