@@ -21,25 +21,25 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
   void initState() {
     super.initState();
     debugPrint('VideoMessageWidget=${widget.message.uri}');
+    init();
+  }
+
+  init() async {
     Uri? uri;
     try {
       uri = Uri.parse(widget.message.uri);
+      _videoPlayerController = VideoPlayerController.networkUrl(uri);
+      await _videoPlayerController.initialize();
+      setState(() {
+        _chewieController = ChewieController(
+          videoPlayerController: _videoPlayerController,
+          aspectRatio: _videoPlayerController.value.aspectRatio,
+          autoPlay: false,
+          looping: false,
+        );
+      });
     } catch (e) {
       print(e);
-    }
-    if (uri != null) {
-      _videoPlayerController = VideoPlayerController.networkUrl(uri);
-      _videoPlayerController.initialize().then((_) {
-        setState(() {
-          _chewieController = ChewieController(
-            videoPlayerController: _videoPlayerController,
-            aspectRatio: _videoPlayerController.value.aspectRatio,
-            autoPlay: false,
-            looping: false,
-          );
-        });
-      });
-    } else {
       setState(() {
         urlError = true;
       });
@@ -62,7 +62,9 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
         : Container(
             padding: EdgeInsets.all(8.0),
             child: _chewieController != null &&
-                    _chewieController!.videoPlayerController.value.isInitialized
+                    _chewieController
+                            ?.videoPlayerController.value.isInitialized ==
+                        true
                 ? Chewie(
                     controller: _chewieController!,
                   )
