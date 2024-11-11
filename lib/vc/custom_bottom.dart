@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -168,7 +167,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      upload(val, false);
+      upload(val, true);
     }
   }
 

@@ -151,19 +151,39 @@ class _ChatPageState extends State<ChatPage>
             _handleSendPressed(partialText);
           },
           onUploadSuccess: (String url, bool isVideo) {
-            Constant.instance.chatLib.sendMessage(
-                url, cMessage.MessageFormat.MSG_IMG, consultId, withAutoReply: withAutoReplyBuilder);
-            var msg = types.ImageMessage(
-                author: _me,
-                uri: url,
-                id: "${Constant.instance.chatLib.payloadId}",
-                name: 'dd',
-                size: 200,
-                status: types.Status.sent,
-                remoteId: '0');
-            setState(() {
-              _messages.insert(0, msg);
-            });
+            if (isVideo) {
+              debugPrint('视频URL:$url');
+              Constant.instance.chatLib.sendMessage(
+                  url, cMessage.MessageFormat.MSG_VIDEO, consultId,
+                  withAutoReply: withAutoReplyBuilder);
+              var msg = types.VideoMessage(
+                  author: _me,
+                  uri: url,
+                  createdAt: DateTime.now().microsecondsSinceEpoch,
+                  id: "${Constant.instance.chatLib.payloadId}",
+                  name: 'dd',
+                  size: 200,
+                  status: types.Status.sent,
+                  remoteId: '0');
+              setState(() {
+                _messages.insert(0, msg);
+              });
+            } else {
+              Constant.instance.chatLib.sendMessage(
+                  url, cMessage.MessageFormat.MSG_IMG, consultId,
+                  withAutoReply: withAutoReplyBuilder);
+              var msg = types.ImageMessage(
+                  author: _me,
+                  uri: url,
+                  id: "${Constant.instance.chatLib.payloadId}",
+                  name: 'dd',
+                  size: 200,
+                  status: types.Status.sent,
+                  remoteId: '0');
+              setState(() {
+                _messages.insert(0, msg);
+              });
+            }
           },
         ),
       ),
@@ -274,7 +294,8 @@ class _ChatPageState extends State<ChatPage>
   void msgReceipt(cMessage.Message msg, Int64 payloadId, String? errMsg) {
     _updateUI("收到回执 payloadId:${payloadId}");
     print("收到回执 payloadId:${payloadId} msgId: ${msg.msgId}");
-    updateMessageStatus(payloadId.toString(), types.Status.sent, msg.msgId.toString());
+    updateMessageStatus(
+        payloadId.toString(), types.Status.sent, msg.msgId.toString());
   }
 
   @override
@@ -306,14 +327,16 @@ class _ChatPageState extends State<ChatPage>
     setState(() {});
   }
 
-  void updateMessageStatus(String payloadId, types.Status newStatus, String msgId) {
+  void updateMessageStatus(
+      String payloadId, types.Status newStatus, String msgId) {
     // Find the message by its id
     var index = _messages.indexWhere((p) => p.id == payloadId);
     // Check if message exists
     if (index != -1) {
       setState(() {
         // Create a new message object with the updated status
-        _messages[index] = _messages[index].copyWith(status: newStatus, remoteId: msgId);
+        _messages[index] =
+            _messages[index].copyWith(status: newStatus, remoteId: msgId);
       });
     }
   }
@@ -411,7 +434,7 @@ class _ChatPageState extends State<ChatPage>
     types.Message msg;
     if (imgUri.isNotEmpty) {
       var imgUrl = imgUri;
-      if (!imgUri.contains("http")){
+      if (!imgUri.contains("http")) {
         imgUrl = baseUrlImage + imgUri;
       }
       msg = types.ImageMessage(
@@ -425,8 +448,8 @@ class _ChatPageState extends State<ChatPage>
           status: types.Status.sent,
           remoteId: msgId);
     } else if (videoUri.isNotEmpty) {
-      var  url = videoUri;
-      if (!imgUri.contains("http")){
+      var url = videoUri;
+      if (!imgUri.contains("http")) {
         url = baseUrlImage + videoUri;
       }
       msg = types.VideoMessage(
@@ -444,53 +467,52 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           text: text,
           createdAt: milliSeconds,
-          metadata: {'msgTime': msgTime,  'replyText': replyText},
+          metadata: {'msgTime': msgTime, 'replyText': replyText},
           id: _generateRandomId(),
           status: types.Status.sent,
           remoteId: msgId);
     }
 
     insert ? _messages.insert(0, msg) : _messages.add(msg);
-
   }
 
-  String _getReplyText(String replyMsgId, bool append){
-    if (replyMsgId.isEmpty){
+  String _getReplyText(String replyMsgId, bool append) {
+    if (replyMsgId.isEmpty) {
       return "";
     }
     String replyTxt = "";
     types.Message? replyModel;
-      var index = -1;
-      if (append) {
-        index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
-        if (index >= 0) {
-          replyModel = _messages[index];
-          if (replyModel is types.TextMessage) {
-            replyTxt = (replyModel as types.TextMessage).text;
-          } else if (replyModel is types.ImageMessage) {
-            replyTxt = "[图片]";
-          } else if (replyModel is types.VideoMessage) {
-            replyTxt = "[视频]";
-          }
-          debugPrint("replyModel:${replyModel.toJson()}");
+    var index = -1;
+    if (append) {
+      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
+      if (index >= 0) {
+        replyModel = _messages[index];
+        if (replyModel is types.TextMessage) {
+          replyTxt = (replyModel as types.TextMessage).text;
+        } else if (replyModel is types.ImageMessage) {
+          replyTxt = "[图片]";
+        } else if (replyModel is types.VideoMessage) {
+          replyTxt = "[视频]";
         }
-      }else{
-        //历史记录
-        if (replyList != null) {
-          index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
+        debugPrint("replyModel:${replyModel.toJson()}");
+      }
+    } else {
+      //历史记录
+      if (replyList != null) {
+        index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
 
-          if (index >= 0) {
-              var msg = replyList![index];
-             if ((msg.image?.uri ?? "").isNotEmpty) {
-              replyTxt = "[图片]";
-            } else if ((msg.video?.uri ?? "").isNotEmpty) {
-              replyTxt = "[视频]";
-            }else {
-               replyTxt = msg.content?.data ?? "";
-             } 
+        if (index >= 0) {
+          var msg = replyList![index];
+          if ((msg.image?.uri ?? "").isNotEmpty) {
+            replyTxt = "[图片]";
+          } else if ((msg.video?.uri ?? "").isNotEmpty) {
+            replyTxt = "[视频]";
+          } else {
+            replyTxt = msg.content?.data ?? "";
           }
         }
       }
+    }
     return replyTxt;
   }
 
@@ -551,7 +573,7 @@ class _ChatPageState extends State<ChatPage>
                 name: '',
                 size: 150,
               ));
-        }  else {
+        } else {
           _messages.insert(
               0,
               types.TextMessage(
