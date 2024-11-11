@@ -64,7 +64,7 @@ dev_dependencies:
   loading_animation_widget: ^1.2.0+2
   # 日期格式化
   date_format: ^2.0.6
-  package_info_plus: ^4.1.0
+  package_info_plus: ^6.0.0
   throttling: ^2.0.1
   mobx: ^2.1.3
   flutter_mobx: ^2.0.6+5
@@ -82,6 +82,8 @@ dev_dependencies:
   image_picker: ^1.1.2
   super_tooltip: ^2.0.9
   clipboard: ^0.1.3
+  video_player: ^2.9.2
+  chewie: ^1.8.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

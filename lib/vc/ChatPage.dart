@@ -10,6 +10,7 @@ import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
+import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -128,6 +129,11 @@ class _ChatPageState extends State<ChatPage>
             chatId: _me.id,
             listener: this,
             messageWidth: messageWidth ?? 0,
+          );
+        },
+        videoMessageBuilder: (message, {int? messageWidth}) {
+          return VideoMessageWidget(
+            message: message,
           );
         },
         avatarBuilder: (types.User user) {
