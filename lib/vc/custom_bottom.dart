@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
-import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:dio/dio.dart';
 import 'package:fixnum/src/int64.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 typedef SubmittedAction = void Function(String val);
 
@@ -164,10 +164,21 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   _pickImage() async {
     //await picker.pickImage(source: ImageSource.gallery);
     final XFile? photo = await picker.pickMedia();
+    var isVideo = true;
+    var imageTypes = {"tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg"};
+     var ar = (photo?.name ?? "").split(".");
+     if (ar.length > 1){
+       if (imageTypes.contains(ar.last)){
+         isVideo = false;
+       }
+     }else{
+       return SmartDialog.showToast("不能识别的文件");
+     }
+
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      upload(val, true);
+      upload(val, isVideo);
     }
   }
 
@@ -197,6 +208,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     debugPrint('xToken=$xToken');
 
     try {
+      SmartDialog.showLoading(msg: "上传中");
       final Response response = await dio.post(apiUrl, data: formData,
           onSendProgress: (int sent, int total) {
         debugPrint(
@@ -209,12 +221,15 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         if (filePath.isNotEmpty) {
           widget.onUploadSuccess(baseUrlImage + filePath, isVideo);
         }
+        SmartDialog.dismiss();
         debugPrint('上传成功: $filePath');
       } else {
         debugPrint('上传失败：${response.statusMessage}');
+        SmartDialog.dismiss();
       }
     } catch (e) {
       debugPrint('上传失败：$e');
+      SmartDialog.dismiss();
     }
   }
 }

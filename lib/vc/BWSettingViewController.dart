@@ -72,6 +72,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
 
     await prefs.setString(PARAM_LINES, lines);
     await prefs.setString('PARAM_CERT', cert);
+    await prefs.setString(PARAM_XTOKEN, "");
     await prefs.setInt('PARAM_MERCHANT_ID', merchantId);
     await prefs.setInt('PARAM_USER_ID', userId);
     await prefs.setString('PARAM_ImageBaseURL', baseUrlImage);

@@ -160,11 +160,12 @@ class _ChatPageState extends State<ChatPage>
               var msg = types.VideoMessage(
                   author: _me,
                   uri: url,
+                  metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                   createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
                   name: 'dd',
                   size: 200,
-                  status: types.Status.sent,
+                  status: types.Status.sending,
                   remoteId: '0');
               setState(() {
                 _messages.insert(0, msg);
@@ -176,6 +177,8 @@ class _ChatPageState extends State<ChatPage>
               var msg = types.ImageMessage(
                   author: _me,
                   uri: url,
+                  metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+                  createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
                   name: 'dd',
                   size: 200,
@@ -420,6 +423,8 @@ class _ChatPageState extends State<ChatPage>
     print("chat page disposed");
     Constant.instance.chatLib.disconnect();
     Constant.instance.isConnected = false;
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
