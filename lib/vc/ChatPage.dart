@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:fixnum/src/int64.dart';
@@ -25,7 +26,7 @@ import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 
 class ChatPage extends StatefulWidget {
@@ -48,12 +49,23 @@ class _ChatPageState extends State<ChatPage>
   List<MsgItem>? replyList;
    bool _isFirstLoad = true;
    var store = ChatStore();
+  Timer? _timer;
+  int _timerCount = 0;
 
   @override
   void initState() {
     super.initState();
     // _loadInitialMessages();
     initSDK();
+    startTimer();
+    Connectivity().onConnectivityChanged.listen((onData) {
+      if (onData is List<ConnectivityResult>) {
+        if ((onData as List<ConnectivityResult>).first ==
+            ConnectivityResult.none) {
+          print("请检查网络${DateTime.now()}");
+          Constant.instance.isConnected = false;
+        }
+      }});
   }
 
   String _generateRandomId() {
@@ -67,14 +79,6 @@ class _ChatPageState extends State<ChatPage>
         replyMsgId: replyId, withAutoReply: withAutoReplyBuilder);
     withAutoReplyBuilder = null;
     debugPrint("replyId:$replyId");
-    // types.TextMessage? replyModel;
-    // try {
-    //   replyModel = _messages.firstWhere((item) => item.id == '$replyId')
-    //       as types.TextMessage;
-    //   debugPrint("replyModel:${replyModel.toJson()}");
-    // } catch (e) {
-    //   print(e);
-    // }
 
     // sending是转圈的状态
     final textMessage = types.TextMessage(
@@ -201,7 +205,7 @@ class _ChatPageState extends State<ChatPage>
     if (Constant.instance.isConnected) {
       return;
     }
-    print("正在初始化sdk");
+    print("正在初始化sdk${DateTime.now()}");
     // Assign the listener to the ChatLib delegate
     Constant.instance.chatLib.delegate = this;
 
@@ -614,5 +618,34 @@ class _ChatPageState extends State<ChatPage>
         }
       }
     });
+  }
+
+  void startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(
+      oneSec,
+          (Timer timer) {
+        //每8秒检查一次状态
+        if (_timerCount > 0 && _timerCount % 8 == 0) {
+          //setState(() {
+          print("检查sdk状态");
+          checkSDKStatus();
+          //});
+        }
+        _timerCount +=1;
+        // else {
+        //   setState(() {
+        //     _timerCount--;
+        //   });
+        // }
+      },
+    );
+  }
+
+  void checkSDKStatus(){
+    if (Constant.instance.isConnected == false){
+      Constant.instance.chatLib.disconnect();
+      initSDK();
+    }
   }
 }

@@ -58,9 +58,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (state != null && state == types.Status.error) {
       return buildFail(context);
     }
-    if (state != null && state == types.Status.sending) {
-      return buildLoading();
-    }
+    // if (state != null && state == types.Status.sending) {
+    //   return buildLoading();
+    // }
     // if (widget.message.metadata != null && widget.message.metadata!['isSystemMessage'] == true) {
     //  return buildTipMessage(widget.message);
     // }

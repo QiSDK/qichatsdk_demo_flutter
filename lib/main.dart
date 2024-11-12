@@ -70,6 +70,15 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
   @override
   void initState() {
     super.initState();
+
+    if (domain.isEmpty) {
+      print("开始线路检测");
+      var lineDetect = LineDetectLib(
+          "https://xxxcsapi.hfxg.xyz,https://csapi.hfxg.xyz,https://csapi.hfxg.xyz000",
+          tenantId: 230);
+      lineDetect.getLine();
+      lineDetect.delegate = this;
+    }
   }
 
   void _updateUI(String content) {
@@ -89,14 +98,6 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
 
   @override
   Widget build(BuildContext context) {
-    if (domain.isEmpty) {
-      print("开始线路检测");
-      var lineDetect = LineDetectLib(
-          "https://xxxcsapi.hfxg.xyz,https://csapi.hfxg.xyz,https://csapi.hfxg.xyz000",
-          tenantId: 230);
-      lineDetect.getLine();
-      lineDetect.delegate = this;
-    }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -134,6 +135,10 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
             children: <Widget>[
               ElevatedButton(
                   onPressed: () {
+                    if(domain.isEmpty){
+                      SmartDialog.showToast("无可用线路");
+                      return;
+                    }
                     Navigator.push(
                         context,
                         MaterialPageRoute(

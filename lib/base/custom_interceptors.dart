@@ -48,8 +48,8 @@ class CustomInterceptors extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print(
-        'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+   // print(
+     //   'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
 
     if (kDebugMode) {
       final Map<String, String> responseHeaders = response.headers.map.map(
@@ -67,7 +67,7 @@ class CustomInterceptors extends Interceptor {
         url: '',
       );
 
-      _logman.networkResponse(responseRecord);
+      //_logman.networkResponse(responseRecord);
     }
     super.onResponse(response, handler);
   }
