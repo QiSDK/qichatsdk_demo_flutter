@@ -64,6 +64,8 @@ class _ChatPageState extends State<ChatPage>
             ConnectivityResult.none) {
           print("请检查网络${DateTime.now()}");
           Constant.instance.isConnected = false;
+          //把未发送的消息保存起来
+          _getUnsentMessage();
         }
       }});
   }
@@ -267,13 +269,15 @@ class _ChatPageState extends State<ChatPage>
       if (result.code == 1002) {
         //showTip("无效的Token")
         //有时候服务器反馈的这个消息不准，可忽略它
-      } else if (result.code == 1005) {
+      } else if (result.code == 1005) {//会话超时，返回到之前页面
         Navigator.pop(context);
       } else {
         //showTip("在别处登录了")
         //toast("在别处登录了")
         //在此处退出聊天
       }
+    }else{
+      _getUnsentMessage();
     }
   }
 
@@ -416,6 +420,8 @@ class _ChatPageState extends State<ChatPage>
             ));
       });
     }
+    //处理在无网、或断网情况下未发出去的消息
+    _handleUnSent();
   }
 
   @override
@@ -425,6 +431,7 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.isConnected = false;
     _timer?.cancel();
     _timer = null;
+    _getUnsentMessage();
     super.dispose();
   }
 
@@ -448,6 +455,33 @@ class _ChatPageState extends State<ChatPage>
       setState(() {});
     }
     ArticleRepository.markRead(consultId);
+  }
+
+  _getUnsentMessage(){
+    //把未发送的消息保存起来
+    //if (Constant.instance.unSentMessage == null || Constant.instance.unSentMessage?.length == 0) {
+      Constant.instance.unSentMessage =
+          _messages.takeWhile((p) => p.status == types.Status.sending).toList();
+    //}
+    print("获取到未发送的消息总数${Constant.instance.unSentMessage?.length}");
+  }
+
+  _handleUnSent(){
+    print("处理未发送的消息 ${Constant.instance.unSentMessage?.length}");
+    if (Constant.instance.isConnected && Constant.instance.unSentMessage != null && Constant.instance.unSentMessage!.length > 0){
+      print("重发消息总数${Constant.instance.unSentMessage?.length}");
+      _messages.insertAll(0, Constant.instance.unSentMessage!);
+      _updateUI("info");
+      for (var msg in Constant.instance.unSentMessage!) {
+        print("重发消息${msg}");
+        if (msg is types.TextMessage) {
+          print("重发消息${ (msg as types.TextMessage).text}");
+          Constant.instance.chatLib.sendMessage(
+              (msg as types.TextMessage).text, cMessage.MessageFormat.MSG_TEXT, consultId);
+        }
+      }
+    }
+    Constant.instance.unSentMessage = null;
   }
 
   void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {
@@ -548,6 +582,10 @@ class _ChatPageState extends State<ChatPage>
       }
     }
     return replyTxt;
+  }
+
+  void handleUnSent(){
+
   }
 
   @override

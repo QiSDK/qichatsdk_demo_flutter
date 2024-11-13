@@ -6,6 +6,7 @@ import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
 as cmessage;
 
 import 'package:intl/intl.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 const String PARAM_USER_ID = "USER_ID";
 const String PARAM_CERT = "CERT";
@@ -30,7 +31,7 @@ String userName ='王五';
 int maxSessionMins = 5;
 
 // Unsent messages list
-Map<int, List<ChatModel>> unSentMessage = {999: []};
+//Map<int, List<ChatModel>> unSentMessage = {999: []};
 
 ReportRequest reportRequest = ReportRequest();
 
@@ -111,6 +112,7 @@ class GoogleProtobufTimestamp {
 
 class Constant {
   static Constant? _instance;
+  List<types.Message>? unSentMessage;
 
   Constant._();
 
