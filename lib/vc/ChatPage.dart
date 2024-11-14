@@ -454,21 +454,24 @@ class _ChatPageState extends State<ChatPage>
   }
 
   _getUnsentMessage(){
+    if (_messages.isEmpty){
+      return;
+    }
     //把未发送的消息保存起来
-    //if (Constant.instance.unSentMessage == null || Constant.instance.unSentMessage?.length == 0) {
-      Constant.instance.unSentMessage =
+    //if (unSentMessage == null || unSentMessage?.length == 0) {
+      unSentMessage =
           _messages.takeWhile((p) => p.status == types.Status.sending).toList();
     //}
-    print("获取到未发送的消息总数${Constant.instance.unSentMessage?.length}");
+    print("获取到未发送的消息总数${unSentMessage?.length}");
   }
 
   _handleUnSent(){
-    print("处理未发送的消息 ${Constant.instance.unSentMessage?.length}");
-    if (Constant.instance.isConnected && Constant.instance.unSentMessage != null && Constant.instance.unSentMessage!.length > 0){
-      print("重发消息总数${Constant.instance.unSentMessage?.length}");
-      _messages.insertAll(0, Constant.instance.unSentMessage!);
+    print("处理未发送的消息 ${unSentMessage?.length}");
+    if (Constant.instance.isConnected && unSentMessage != null && unSentMessage!.length > 0){
+      print("重发消息总数${unSentMessage?.length}");
+      _messages.insertAll(0, unSentMessage!);
       _updateUI("info");
-      for (var msg in Constant.instance.unSentMessage!) {
+      for (var msg in unSentMessage!) {
         print("重发消息${msg}");
         if (msg is types.TextMessage) {
           print("重发消息${ (msg as types.TextMessage).text}");
@@ -476,7 +479,7 @@ class _ChatPageState extends State<ChatPage>
         }
       }
     }
-    Constant.instance.unSentMessage = null;
+    unSentMessage = null;
   }
 
   void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {
@@ -663,8 +666,8 @@ class _ChatPageState extends State<ChatPage>
     _timer = new Timer.periodic(
       oneSec,
           (Timer timer) {
-        //每8秒检查一次状态
-        if (_timerCount > 0 && _timerCount % 8 == 0) {
+        //每6秒检查一次状态
+        if (_timerCount > 0 && _timerCount % 6 == 0) {
           //setState(() {
           print("检查sdk状态");
           checkSDKStatus();

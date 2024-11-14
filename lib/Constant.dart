@@ -32,6 +32,7 @@ int maxSessionMins = 5;
 
 // Unsent messages list
 //Map<int, List<ChatModel>> unSentMessage = {999: []};
+List<types.Message>? unSentMessage;
 
 ReportRequest reportRequest = ReportRequest();
 
@@ -112,7 +113,6 @@ class GoogleProtobufTimestamp {
 
 class Constant {
   static Constant? _instance;
-  List<types.Message>? unSentMessage;
 
   Constant._();
 
