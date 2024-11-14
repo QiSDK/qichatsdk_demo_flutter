@@ -30,6 +30,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 
 class ChatPage extends StatefulWidget {
+  Int64 consultId = Int64.ZERO;
+
+  ChatPage({super.key, required this.consultId});
   @override
   _ChatPageState createState() => _ChatPageState();
 }
@@ -55,6 +58,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void initState() {
     super.initState();
+    consultId = widget.consultId;
     // _loadInitialMessages();
     initSDK();
     startTimer();
@@ -75,6 +79,10 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void _handleSendPressed(types.PartialText message) {
+    if (_me.id == "user"){
+      SmartDialog.showToast("此时不能发消息，请检查网络或稍等片刻");
+      return;
+    }
     var replyId = (_sendViewKey.currentState as ChatCustomBottomState).replyId;
     Constant.instance.chatLib.sendMessage(
         message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
@@ -459,7 +467,7 @@ class _ChatPageState extends State<ChatPage>
     }
     //把未发送的消息保存起来
     //if (unSentMessage == null || unSentMessage?.length == 0) {
-      unSentMessage =
+      unSentMessage[consultId] =
           _messages.takeWhile((p) => p.status == types.Status.sending).toList();
     //}
     print("获取到未发送的消息总数${unSentMessage?.length}");
@@ -467,19 +475,19 @@ class _ChatPageState extends State<ChatPage>
 
   _handleUnSent(){
     print("处理未发送的消息 ${unSentMessage?.length}");
-    if (Constant.instance.isConnected && unSentMessage != null && unSentMessage!.length > 0){
+    if (Constant.instance.isConnected && unSentMessage[consultId] != null && unSentMessage[consultId]!.length > 0){
       print("重发消息总数${unSentMessage?.length}");
-      _messages.insertAll(0, unSentMessage!);
+      _messages.insertAll(0, unSentMessage[consultId]!);
       _updateUI("info");
-      for (var msg in unSentMessage!) {
+      for (var msg in unSentMessage[consultId]!!) {
         print("重发消息${msg}");
         if (msg is types.TextMessage) {
           print("重发消息${ (msg as types.TextMessage).text}");
          Constant.instance.chatLib.resendMSg(msg.text, consultId, Int64(int.parse(msg.id)));
         }
       }
+      unSentMessage[consultId]!.clear();
     }
-    unSentMessage = null;
   }
 
   void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
 as cmessage;
-
+import 'package:fixnum/src/int64.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -31,8 +31,8 @@ String userName ='王五';
 int maxSessionMins = 5;
 
 // Unsent messages list
-//Map<int, List<ChatModel>> unSentMessage = {999: []};
-List<types.Message>? unSentMessage;
+Map<Int64, List<types.Message>> unSentMessage = {Int64(0): []};
+//List<types.Message>? unSentMessage;
 
 ReportRequest reportRequest = ReportRequest();
 

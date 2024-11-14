@@ -9,6 +9,7 @@ import 'package:qichatsdk_demo_flutter/vc/ChatPage.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fixnum/src/int64.dart';
 
 class EntrancePage extends StatefulWidget {
   const EntrancePage({super.key});
@@ -64,11 +65,10 @@ class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver
                   return GestureDetector(
                       onTap: () {
                         print("Tapped on: ${model.name}");
-
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ChatPage()));
+                                builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
 
                         // ScaffoldMessenger.of(context).showSnackBar(
                         //   SnackBar(content: Text("Tapped on: ${model.name}")),
