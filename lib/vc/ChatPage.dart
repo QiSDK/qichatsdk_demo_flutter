@@ -97,7 +97,7 @@ class _ChatPageState extends State<ChatPage>
         text: message.text,
         metadata: {
           'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-          'replyText': _getReplyText(replyId.toString(), false)
+          'replyText': _getReplyText(replyId.toString(), true)
         },
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
@@ -297,9 +297,13 @@ class _ChatPageState extends State<ChatPage>
     _updateUI("连接成功！");
     //c.workerId;
      ArticleRepository.assignWorker(consultId).then((onValue){
-       if (onValue != null)
-          getChatData(onValue.nick ?? "_");
-       store.loadingMsg = onValue?.nick ?? "..";
+       if (onValue != null) {
+         getChatData(onValue.nick ?? "_");
+         store.loadingMsg = onValue?.nick ?? "..";
+       }else{
+         store.loadingMsg = "分配客服失败";
+         SmartDialog.showToast("分配客服失败");
+       }
      });
   }
 
@@ -674,8 +678,8 @@ class _ChatPageState extends State<ChatPage>
     _timer = new Timer.periodic(
       oneSec,
           (Timer timer) {
-        //每6秒检查一次状态
-        if (_timerCount > 0 && _timerCount % 6 == 0) {
+        //每8秒检查一次状态
+        if (_timerCount > 0 && _timerCount % 8 == 0) {
           //setState(() {
           print("检查sdk状态");
           checkSDKStatus();

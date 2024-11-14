@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
@@ -6,10 +8,29 @@ import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
+import 'package:window_manager/window_manager.dart';
 import 'Constant.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+
+    // Must add this line.
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(1200, 800),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+
+  }
   runApp(const MyApp());
 }
 
