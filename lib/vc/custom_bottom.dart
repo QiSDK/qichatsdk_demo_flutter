@@ -5,6 +5,8 @@ import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:dio/dio.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 typedef SubmittedAction = void Function(String val);
 
@@ -36,6 +38,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   String replyText = '';
   Int64 replyId = Int64();
   final ImagePicker picker = ImagePicker();
+  bool _emojiShowing = false;
+  final emojiEditingController = TextEditingController();
 
   @override
   void initState() {
@@ -74,7 +78,66 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
           color: Colors.blue.shade100,
           child: buildInput(),
-        )
+        ),
+        !_emojiShowing
+            ? Container()
+            : EmojiPicker(
+                onEmojiSelected: (category, Emoji emoji) {
+                  // Do something when emoji is tapped (optional)
+                  setState(() {
+                    inputController.text = inputController.text + emoji.emoji;
+                  });
+                },
+                onBackspacePressed: () {
+                  // Do something when the user taps the backspace button (optional)
+                  // Set it to null to hide the Backspace-Button
+                  setState(() {
+                    if (inputController.text.isNotEmpty) {
+                      // Check if the last character is an emoji or other multi-code-unit character
+                      String currentText = inputController.text;
+
+                      // Try to safely remove the last emoji or character (multi-unit or single unit)
+                      if (currentText.length > 1 &&
+                          currentText.codeUnitAt(currentText.length - 1) >
+                              0xd7ff) {
+                        // It's an emoji or multi-unit character
+                        inputController.text = currentText.substring(
+                            0,
+                            currentText.length -
+                                2); // Remove last emoji (2 Unicode units)
+                      } else {
+                        // Remove a single character (normal character)
+                        inputController.text =
+                            currentText.substring(0, currentText.length - 1);
+                      }
+
+                      // Move the cursor to the end after removing the character
+                      inputController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: inputController.text.length));
+                    }
+                  });
+                },
+                textEditingController:
+                    emojiEditingController, // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
+                config: Config(
+                  height: 256,
+                  checkPlatformCompatibility: true,
+                  emojiViewConfig: EmojiViewConfig(
+                    // Issue: https://github.com/flutter/flutter/issues/28894
+                    emojiSizeMax: 28 *
+                        (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                            ? 1.20
+                            : 1.0),
+                  ),
+                  swapCategoryAndBottomBar: false,
+                  skinToneConfig: const SkinToneConfig(),
+                  categoryViewConfig: const CategoryViewConfig(),
+                  bottomActionBarConfig: BottomActionBarConfig(
+                      showSearchViewButton: false,
+                      backgroundColor: Colors.grey.shade300,
+                      buttonIconColor: Colors.black),
+                ),
+              )
       ],
     );
   }
@@ -113,6 +176,11 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 _pickImage();
               },
               icon: const Icon(Icons.photo)),
+          IconButton(
+              onPressed: () {
+                _pickEmoji();
+              },
+              icon: const Icon(Icons.emoji_emotions)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -156,6 +224,12 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     );
   }
 
+  _pickEmoji() {
+    setState(() {
+      _emojiShowing = !_emojiShowing;
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -165,15 +239,26 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     //await picker.pickImage(source: ImageSource.gallery);
     final XFile? photo = await picker.pickMedia();
     var isVideo = true;
-    var imageTypes = {"tif","tiff","bmp", "jpg", "jpeg", "png", "gif", "webp", "ico", "svg"};
-     var ar = (photo?.name ?? "").split(".");
-     if (ar.length > 1){
-       if (imageTypes.contains(ar.last)){
-         isVideo = false;
-       }
-     }else{
-       return SmartDialog.showToast("不能识别的文件");
-     }
+    var imageTypes = {
+      "tif",
+      "tiff",
+      "bmp",
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "ico",
+      "svg"
+    };
+    var ar = (photo?.name ?? "").split(".");
+    if (ar.length > 1) {
+      if (imageTypes.contains(ar.last)) {
+        isVideo = false;
+      }
+    } else {
+      return SmartDialog.showToast("不能识别的文件");
+    }
 
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
