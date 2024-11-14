@@ -188,7 +188,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: Colors.black),
                 focusNode: focusNode,
                 controller: inputController,
                 maxLines: 3,
@@ -257,7 +257,9 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         isVideo = false;
       }
     } else {
-      return SmartDialog.showToast("不能识别的文件");
+      if (ar[0].isNotEmpty) {
+        return SmartDialog.showToast("不能识别的文件");
+      }
     }
 
     if (photo != null) {
