@@ -13,24 +13,21 @@ import 'Constant.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-
-    // Must add this line.
-    await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = WindowOptions(
-      size: Size(1200, 800),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-
-  }
+  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  //   // Must add this line.
+  //   await windowManager.ensureInitialized();
+  //   WindowOptions windowOptions = WindowOptions(
+  //     size: Size(1200, 800),
+  //     center: true,
+  //     backgroundColor: Colors.transparent,
+  //     skipTaskbar: false,
+  //     titleBarStyle: TitleBarStyle.hidden,
+  //   );
+  //   windowManager.waitUntilReadyToShow(windowOptions, () async {
+  //     await windowManager.show();
+  //     await windowManager.focus();
+  //   });
+  //}
   runApp(const MyApp());
 }
 
