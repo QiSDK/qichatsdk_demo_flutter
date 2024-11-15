@@ -366,16 +366,25 @@ class _ChatPageState extends State<ChatPage>
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-      //_scrollController?.scrollToIndex(_messages.length);
+      // if (_scrollController.hasClients) {
+      //   _scrollController.animateTo(
+      //     _scrollController.position.maxScrollExtent,
+      //     duration: const Duration(milliseconds: 300),
+      //     curve: Curves.easeOut,
+      //
+      //   );
+      // }
+      _scrollController.animateTo(
+        0.0,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+      );
     });
+    //行不同
+    //_scrollController?.scrollToIndex(_messages.length);
   }
+
+
 
   _updateUI(String info) {
     setState(() {});
