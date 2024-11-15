@@ -172,7 +172,7 @@ class _ChatPageState extends State<ChatPage>
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.VideoMessage(
                   author: _me,
-                  uri: url,
+                  uri: baseUrlImage + url,
                   metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                   createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
@@ -189,7 +189,7 @@ class _ChatPageState extends State<ChatPage>
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.ImageMessage(
                   author: _me,
-                  uri: url,
+                  uri: baseUrlImage + url,
                   metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                   createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
@@ -439,25 +439,24 @@ class _ChatPageState extends State<ChatPage>
               status: types.Status.sent,
             ));
       }
-
-      setState(() {
-        _messages.insert(
-            0,
-            types.TextMessage(
-              author: _client,
-              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-              createdAt: DateTime
-                  .now()
-                  .millisecondsSinceEpoch,
-              text: "您好，${workerName}为您服务！",
-              // 根据这个字段来自定义界面
-              id: _generateRandomId(),
-              status: types.Status.sent,
-            ));
-      });
     }
     //处理在无网、或断网情况下未发出去的消息
     _handleUnSent();
+    setState(() {
+      _messages.insert(
+          0,
+          types.TextMessage(
+            author: _client,
+            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+            createdAt: DateTime
+                .now()
+                .millisecondsSinceEpoch,
+            text: "您好，${workerName}为您服务！",
+            // 根据这个字段来自定义界面
+            id: _generateRandomId(),
+            status: types.Status.sent,
+          ));
+    });
   }
 
   @override
@@ -658,7 +657,7 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
-    setState(() {
+   // setState(() {
       if (isMe) {
         _messages.insert(
             0,
@@ -698,7 +697,8 @@ class _ChatPageState extends State<ChatPage>
               ));
         }
       }
-    });
+   // });
+    _updateUI("info");
   }
 
   void startTimer() {

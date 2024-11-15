@@ -28,7 +28,7 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
   init() async {
     Uri? uri;
     try {
-      uri = Uri.parse(baseUrlImage + widget.message.uri);
+      uri = Uri.parse(widget.message.uri);
       _videoPlayerController = VideoPlayerController.networkUrl(uri);
       await _videoPlayerController.initialize();
       setState(() {
