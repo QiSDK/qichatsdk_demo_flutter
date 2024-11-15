@@ -74,6 +74,7 @@ dependencies:
   chewie: ^1.8.5
   emoji_picker_flutter: ^2.2.0
   window_manager: ^0.4.3
+  #auto_scroll: ^0.2.0
 
 dev_dependencies:
   flutter_test:

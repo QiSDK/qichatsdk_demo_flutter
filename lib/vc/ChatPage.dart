@@ -28,6 +28,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -54,6 +56,7 @@ class _ChatPageState extends State<ChatPage>
    var store = ChatStore();
   Timer? _timer;
   int _timerCount = 0;
+  AutoScrollController _scrollController = AutoScrollController();
 
   @override
   void initState() {
@@ -118,6 +121,7 @@ class _ChatPageState extends State<ChatPage>
         messages: _messages,
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
+        scrollController: _scrollController,
         user: _me,
         // customMessageBuilder: (message, {messageWidth = 200}) {
         //   return TipMessage(message: message);
@@ -360,8 +364,22 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+      //_scrollController?.scrollToIndex(_messages.length);
+    });
+  }
+
   _updateUI(String info) {
     setState(() {});
+    _scrollToBottom();
   }
 
   void updateMessageStatus(

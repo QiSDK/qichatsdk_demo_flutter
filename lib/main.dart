@@ -13,21 +13,22 @@ import 'Constant.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-  //   // Must add this line.
-  //   await windowManager.ensureInitialized();
-  //   WindowOptions windowOptions = WindowOptions(
-  //     size: Size(1200, 800),
-  //     center: true,
-  //     backgroundColor: Colors.transparent,
-  //     skipTaskbar: false,
-  //     titleBarStyle: TitleBarStyle.hidden,
-  //   );
-  //   windowManager.waitUntilReadyToShow(windowOptions, () async {
-  //     await windowManager.show();
-  //     await windowManager.focus();
-  //   });
-  //}
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    // Must add this line.
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(900, 675),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
   runApp(const MyApp());
 }
 
@@ -39,9 +40,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chat Demo',
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          iconTheme: IconThemeData(size: 15), // Set global icon size for AppBar
+        ),
       ),
       builder: FlutterSmartDialog.init(builder: (context, child) {
         return GestureDetector(
