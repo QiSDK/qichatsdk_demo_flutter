@@ -26,8 +26,12 @@ String baseUrlImage = "https://sssacc.wwc09.com"; // For constructing image URLs
 
 String xToken = "";
 String domain = "";  // Domain
-String baseUrlApi = "https://$domain";  // For data requests and image uploads
-int workerId = 2;
+//String baseUrlApi = "https://$domain";  // For data requests and image uploads
+
+String baseUrlApi(){
+  return "https://$domain";
+}
+int workerId = -1;
 String userName ='王五';
 int maxSessionMins = 5;
 

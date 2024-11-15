@@ -271,7 +271,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   Future<void> upload(Uint8List imgData, bool isVideo) async {
     // 设置URL
-    final String apiUrl = '$baseUrlApi/v1/assets/upload/';
+    final String apiUrl = '${baseUrlApi()}/v1/assets/upload/';
 
     Dio dio = Dio();
     dio.options.headers = {

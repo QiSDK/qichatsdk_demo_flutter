@@ -27,7 +27,7 @@ class Api {
     Object? data,
     Map<String, dynamic>? queryParameters,
   }) async {
-    final url = '$baseUrlApi$path';
+    final url = '${baseUrlApi()}$path';
 
     try {
       final response = await dio.request(

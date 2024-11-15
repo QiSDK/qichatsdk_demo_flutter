@@ -317,9 +317,10 @@ class _ChatPageState extends State<ChatPage>
     _updateUI("客服更换成功，新worker id:${msg.workerId}");
     //客服更换之后，在这重新调用历史记录的接口，和更换客服头像、名字
     if (workerId > 0 && workerId != msg.workerId) {
+      consultId = msg.consultId;
       workerId = msg.workerId;
       getChatData(msg.workerName);
-
+      store.loadingMsg = msg.workerName;
       _messages.insert(
           0,
           types.TextMessage(
