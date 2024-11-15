@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
@@ -27,7 +28,7 @@ class _VideoMessageWidgetState extends State<VideoMessageWidget> {
   init() async {
     Uri? uri;
     try {
-      uri = Uri.parse(widget.message.uri);
+      uri = Uri.parse(baseUrlImage + widget.message.uri);
       _videoPlayerController = VideoPlayerController.networkUrl(uri);
       await _videoPlayerController.initialize();
       setState(() {

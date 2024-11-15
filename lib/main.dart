@@ -8,6 +8,7 @@ import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'Constant.dart';
 
@@ -29,6 +30,16 @@ Future<void> main() async {
       await windowManager.focus();
     });
   }
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  lines = prefs.getString(PARAM_LINES) ?? lines;
+  cert = prefs.getString('PARAM_CERT') ?? cert;
+  merchantId = (prefs.getInt('PARAM_MERCHANT_ID') ?? merchantId);
+  userId = (prefs.getInt('PARAM_USER_ID') ?? userId);
+  userName = prefs.getString('PARAM_USERNAME') ?? userName;
+  baseUrlImage = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
+  maxSessionMins = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins);
+
   runApp(const MyApp());
 }
 
@@ -93,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
   void initState() {
     WidgetsBinding.instance?.addObserver(this);
     super.initState();
+
     loadData();
   }
 
