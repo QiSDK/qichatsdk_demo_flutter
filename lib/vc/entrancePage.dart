@@ -18,26 +18,15 @@ class EntrancePage extends StatefulWidget {
   State<EntrancePage> createState() => _EntrancePageState();
 }
 
-class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver{
+class _EntrancePageState extends State<EntrancePage> {
   //final AppPurchaseV2 _appPurchase = AppPurchaseV2.instance;
    Entrance? entrance;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    //WidgetsBinding.instance.addObserver(this);
     loadData();
   }
-
-   @override
-   void didChangeAppLifecycleState(AppLifecycleState state) {
-     super.didChangeAppLifecycleState(state);
-     if (state == AppLifecycleState.resumed) {
-       // This is similar to `onResume`
-       print("App has resumed");
-       // Perform the actions you want when the page is resumed
-       loadData();
-     }
-   }
 
   @override
   Widget build(BuildContext context) {
@@ -65,18 +54,10 @@ class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver
                   return GestureDetector(
                       onTap: () {
                         print("Tapped on: ${model.name}");
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
-
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   SnackBar(content: Text("Tapped on: ${model.name}")),
-                        // );
+                        _navigateToChatPage(model);
                       },
 
                   child: _initCell(model),
-
                   );
                 }
             )),
@@ -138,7 +119,17 @@ class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver
     );
   }
 
+   Future<void> _navigateToChatPage(Consults model) async {
+     await Navigator.push(
+       context,
+       MaterialPageRoute( builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
+
+     // Call loadData when returning from Page B
+     loadData();
+   }
+
   loadData() async {
+    print("调用queryEntrance");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
 
@@ -148,7 +139,6 @@ class _EntrancePageState extends State<EntrancePage> with WidgetsBindingObserver
 
    @override
    void dispose() {
-     WidgetsBinding.instance.removeObserver(this);
      super.dispose();
    }
 }

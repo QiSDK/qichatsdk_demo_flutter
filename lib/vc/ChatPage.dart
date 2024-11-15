@@ -107,7 +107,6 @@ class _ChatPageState extends State<ChatPage>
 
     setState(() {
       _messages.insert(0, textMessage);
-      //_messages.insert(0, imgMsg);
     });
   }
 

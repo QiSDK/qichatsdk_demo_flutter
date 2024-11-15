@@ -45,7 +45,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
 
   void setupUI() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    controllers[0].text = prefs.getString('PARAM_LINES') ?? lines;
+    controllers[0].text = prefs.getString(PARAM_LINES) ?? lines;
     controllers[1].text = prefs.getString('PARAM_CERT') ?? cert;
     controllers[2].text = (prefs.getInt('PARAM_MERCHANT_ID') ?? merchantId).toString();
     controllers[3].text = (prefs.getInt('PARAM_USER_ID') ?? userId).toString();

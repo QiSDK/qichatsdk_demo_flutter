@@ -86,36 +86,41 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
-class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver implements LineDetectDelegate {
   String _textContent = "正在线路检测。。。";
 
   @override
   void initState() {
+    WidgetsBinding.instance?.addObserver(this);
     super.initState();
+    loadData();
+  }
 
-    if (domain.isEmpty) {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // This is similar to `onResume`
+      print("App has resumed");
+      // Perform the actions you want when the page is resumed
+      //loadData();
+    }
+  }
+
+  void loadData(){
+    //if (domain.isEmpty) {
       print("开始线路检测");
       var lineDetect = LineDetectLib(
-          "https://xxxcsapi.hfxg.xyz,https://csapi.hfxg.xyz,https://csapi.hfxg.xyz000",
-          tenantId: 230);
+          lines,
+          tenantId: merchantId);
       lineDetect.getLine();
       lineDetect.delegate = this;
-    }
+    //}
   }
 
   void _updateUI(String content) {
     setState(() {
       _textContent = "${content} \n";
-    });
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => BWSettingViewController()));
-      //回复消息
-      //Constant.instance.chatLib.sendMessage("hello chat sdk!", MessageFormat.MSG_TEXT, consultId, replyMsgId: 12344555555555544433);
     });
   }
 
@@ -162,10 +167,7 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
                       SmartDialog.showToast("无可用线路");
                       return;
                     }
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EntrancePage()));
+                    _navigateToPageB();
                   },
                   child: const Text('联系客服', style: TextStyle(fontSize: 15))),
               Padding(
@@ -178,11 +180,31 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
             ]),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _navigateToSettings,
         tooltip: '设置',
         child: const Icon(Icons.settings),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> _navigateToPageB() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EntrancePage()),
+    );
+
+    // Call loadData when returning from Page B
+    loadData();
+  }
+
+  Future<void> _navigateToSettings() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BWSettingViewController()),
+    );
+
+    // Call loadData when returning from Page B
+    loadData();
   }
 
   @override
@@ -201,5 +223,11 @@ class _MyHomePageState extends State<MyHomePage> implements LineDetectDelegate {
     _updateUI("当前线路：${domain}");
     //initSDK();
     //getEntrance();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
   }
 }
