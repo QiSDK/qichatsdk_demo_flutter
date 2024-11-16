@@ -232,7 +232,7 @@ class _ChatPageState extends State<ChatPage>
         token: "",
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: getCustomParam(userName, 1, 0));
+        custom: getCustomParam(userName, 1, 0), maxSessionMinutes: maxSessionMins);
 
     // Now the listener will receive the delegate events
     Constant.instance.chatLib.callWebSocket();
@@ -281,6 +281,7 @@ class _ChatPageState extends State<ChatPage>
         //showTip("无效的Token")
         //有时候服务器反馈的这个消息不准，可忽略它
       } else if (result.code == 1005) {//会话超时，返回到之前页面
+        SmartDialog.showToast("会话超时", displayTime: Duration(seconds: 3));
         Navigator.pop(context);
       } else {
         //showTip("在别处登录了")
