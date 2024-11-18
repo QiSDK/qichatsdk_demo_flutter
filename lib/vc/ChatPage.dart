@@ -129,7 +129,7 @@ class _ChatPageState extends State<ChatPage>
         // customMessageBuilder: (message, {messageWidth = 200}) {
         //   return TipMessage(message: message);
         // },
-        showUserAvatars: false,
+        showUserAvatars: true,
         showUserNames: true,
         theme: const DefaultChatTheme(
             inputBackgroundColor: Colors.lightBlue,
@@ -138,9 +138,15 @@ class _ChatPageState extends State<ChatPage>
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           return TextMessageWidget(
             message: message,
+            autoReply: _autoReplyModel,
             chatId: _me.id,
             listener: this,
             messageWidth: messageWidth ?? 0,
+            onExpandAction: (index, val) {
+              setState(() {
+                _autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val;
+              });
+            },
           );
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
