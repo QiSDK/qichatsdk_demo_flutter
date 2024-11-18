@@ -12,6 +12,8 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
+
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
   int messageWidth;
@@ -142,7 +144,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       children: [
         TextButton(
             onPressed: () {
-              widget.listener.onReply(content,  Int64.parseInt(widget.message.remoteId.toString()));
+              widget.listener.onReply(
+                  content, Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
@@ -283,22 +286,35 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             autoReplyModel?.autoReplyItem?.title ?? '',
             style: const TextStyle(fontSize: 16, color: Colors.black),
           ),
-          ExpansionPanelList(
+          EnhanceExpansionPanelList(
             elevation: 0,
             expansionCallback: (index, expand) {
               setState(() {
-                sectionList[index].isExpanded = expand;
+                sectionList[index].isExpanded = !expand;
               });
             },
             dividerColor: Colors.white.withOpacity(0.3),
             children: List.generate(sectionList.length, (index) {
               Qa qa = sectionList[index];
               List<Qa> relatedList = qa.related ?? [];
-              var canTapOnHeader = relatedList.length <= 0;
-              return ExpansionPanel(
+              var canTapOnHeader = relatedList.isNotEmpty;
+              return EnhanceExpansionPanel(
                   backgroundColor: bgColor,
-                  canTapOnHeader: canTapOnHeader,
+                  canTapOnHeader: true,
                   isExpanded: qa.isExpanded ?? false,
+                  arrowPosition: EnhanceExpansionPanelArrowPosition.tailing,
+                  arrow: canTapOnHeader
+                      ? const Icon(
+                          Icons.keyboard_arrow_right,
+                          color: Colors.blue,
+                        )
+                      : Container(),
+                  arrowExpanded: canTapOnHeader
+                      ? const Icon(
+                          Icons.keyboard_arrow_down_sharp,
+                          color: Colors.blue,
+                        )
+                      : Container(),
                   headerBuilder: (ctx, val) {
                     return Container(
                       padding: const EdgeInsets.all(2.0),
@@ -309,7 +325,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                                   color: Colors.white.withOpacity(0.3)))),
                       child: InkWell(
                         onTap: () {
-                          if (relatedList.length <= 0) {
+                          if (relatedList.isEmpty) {
                             qaClicked(qa);
                           }
                         },
