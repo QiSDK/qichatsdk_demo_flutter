@@ -201,24 +201,23 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     ? Colors.white.withOpacity(0.5)
                     : Colors.grey),
           ),
-          replyText.isEmpty
-              ? const SizedBox()
-              : IntrinsicWidth(
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.5),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(6))),
-                    child: Text(replyText,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.black)),
-                  ),
-                ),
           Text(
             content,
             style: textStyle,
+          ),  replyText.isEmpty
+              ? const SizedBox()
+              : IntrinsicWidth(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius:
+                  const BorderRadius.all(Radius.circular(6))),
+              child: Text(replyText,
+                  style:
+                  const TextStyle(fontSize: 12, color: Colors.black)),
+            ),
           ),
         ],
       ),

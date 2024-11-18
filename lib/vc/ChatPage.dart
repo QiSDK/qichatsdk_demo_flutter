@@ -56,6 +56,8 @@ class _ChatPageState extends State<ChatPage>
    var store = ChatStore();
   Timer? _timer;
   int _timerCount = 0;
+  Worker? _preWorker;
+  Worker? _Worker;
   AutoScrollController _scrollController = AutoScrollController();
 
   @override
@@ -305,6 +307,7 @@ class _ChatPageState extends State<ChatPage>
          workerId = onValue.workerId ?? 0;
          getChatData(onValue.nick ?? "_");
          store.loadingMsg = onValue?.nick ?? "..";
+         _preWorker = Worker(workerId: workerId, nick: onValue?.nick);
        }else{
          store.loadingMsg = "分配客服失败";
          SmartDialog.showToast("分配客服失败");
@@ -320,22 +323,27 @@ class _ChatPageState extends State<ChatPage>
     if (workerId > 0 && workerId != msg.workerId) {
       consultId = msg.consultId;
       workerId = msg.workerId;
+      _preWorker = Worker(workerId: workerId, nick: msg.workerName);
       getChatData(msg.workerName);
       store.loadingMsg = msg.workerName;
-      _messages.insert(
-          0,
-          types.TextMessage(
-            author: _client,
-            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-            createdAt: DateTime
-                .now()
-                .millisecondsSinceEpoch,
-            text: "您好，${msg.workerName}为您服务！",
-            // 根据这个字段来自定义界面
-            id: _generateRandomId(),
-            status: types.Status.sent,
-          ));
-     }
+      //您好，{转出会话客服账号} 已为您转接！{接收会话客服账号} 为您服务！
+      setState(() {
+        _messages.insert(
+            0,
+            types.TextMessage(
+              author: _client,
+              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+              createdAt: DateTime
+                  .now()
+                  .millisecondsSinceEpoch,
+              text: "您好，${_preWorker?.nick ?? "_"} 已为您转接！${msg
+                  .workerName}为您服务",
+              // 根据这个字段来自定义界面
+              id: _generateRandomId(),
+              status: types.Status.sent,
+            ));
+      });
+    }
   }
 
   @override
@@ -424,7 +432,7 @@ class _ChatPageState extends State<ChatPage>
       //自动回复
       AutoReply? model =
       await ArticleRepository.queryAutoReply(consultId, workerId);
-      print(model?.autoReplyItem?.qa);
+      print("显示自动回复");
       print(model?.autoReplyItem?.title);
       if (model != null) {
         _messages.insert(
@@ -441,24 +449,25 @@ class _ChatPageState extends State<ChatPage>
               status: types.Status.sent,
             ));
       }
+      setState(() {
+        _messages.insert(
+            0,
+            types.TextMessage(
+              author: _client,
+              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+              createdAt: DateTime
+                  .now()
+                  .millisecondsSinceEpoch,
+              text: "您好，${workerName}为您服务！",
+              // 根据这个字段来自定义界面
+              id: _generateRandomId(),
+              status: types.Status.sent,
+            ));
+      });
     }
     //处理在无网、或断网情况下未发出去的消息
     _handleUnSent();
-    setState(() {
-      _messages.insert(
-          0,
-          types.TextMessage(
-            author: _client,
-            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-            createdAt: DateTime
-                .now()
-                .millisecondsSinceEpoch,
-            text: "您好，${workerName}为您服务！",
-            // 根据这个字段来自定义界面
-            id: _generateRandomId(),
-            status: types.Status.sent,
-          ));
-    });
+
   }
 
   @override
@@ -595,11 +604,11 @@ class _ChatPageState extends State<ChatPage>
       if (index >= 0) {
         replyModel = _messages[index];
         if (replyModel is types.TextMessage) {
-          replyTxt = (replyModel as types.TextMessage).text;
+          replyTxt = "回复：${(replyModel as types.TextMessage).text}";
         } else if (replyModel is types.ImageMessage) {
-          replyTxt = "[图片]";
+          replyTxt = "回复：[图片]";
         } else if (replyModel is types.VideoMessage) {
-          replyTxt = "[视频]";
+          replyTxt = "回复：[视频]";
         }
         debugPrint("replyModel:${replyModel.toJson()}");
       }
