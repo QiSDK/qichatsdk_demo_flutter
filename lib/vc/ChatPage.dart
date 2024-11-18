@@ -60,6 +60,8 @@ class _ChatPageState extends State<ChatPage>
   Worker? _Worker;
   AutoScrollController _scrollController = AutoScrollController();
 
+  AutoReply? _autoReplyModel;
+
   @override
   void initState() {
     super.initState();
@@ -431,18 +433,17 @@ class _ChatPageState extends State<ChatPage>
       _isFirstLoad = false;
       //自动回复
       AutoReply? model =
-      await ArticleRepository.queryAutoReply(consultId, workerId);
-      print("显示自动回复");
+          await ArticleRepository.queryAutoReply(consultId, workerId);
+      print(model?.autoReplyItem?.qa);
       print(model?.autoReplyItem?.title);
+      _autoReplyModel = model;
       if (model != null) {
         _messages.insert(
             0,
             types.TextMessage(
               metadata: model.toJson(),
               author: _client,
-              createdAt: DateTime
-                  .now()
-                  .millisecondsSinceEpoch,
+              createdAt: DateTime.now().millisecondsSinceEpoch,
               text: 'autoReplay',
               // 根据这个字段来自定义界面
               id: _generateRandomId(),

@@ -12,17 +12,23 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
+
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;
   int messageWidth;
   String chatId;
+  AutoReply? autoReply;
   MessageItemOperateListener listener;
+  Function(int, bool) onExpandAction;
   TextMessageWidget(
       {super.key,
       required this.chatId,
       required this.message,
       required this.messageWidth,
-      required this.listener});
+      required this.listener,
+      this.autoReply,
+      required this.onExpandAction});
 
   @override
   State<TextMessageWidget> createState() => _TextMessageWidgetState();
@@ -44,8 +50,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     super.initState();
 
     if (content == 'autoReplay' && widget.message.metadata != null) {
-      autoReplyModel = AutoReply.fromJson(widget.message.metadata!);
-      sectionList = autoReplyModel?.autoReplyItem?.qa ?? [];
+      if (widget.autoReply != null) {
+        autoReplyModel = widget.autoReply;
+        sectionList = autoReplyModel?.autoReplyItem?.qa ?? [];
+      }
     }
   }
 
@@ -142,7 +150,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       children: [
         TextButton(
             onPressed: () {
-              widget.listener.onReply(content,  Int64.parseInt(widget.message.remoteId.toString()));
+              widget.listener.onReply(
+                  content, Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
@@ -282,22 +291,37 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             autoReplyModel?.autoReplyItem?.title ?? '',
             style: const TextStyle(fontSize: 16, color: Colors.black),
           ),
-          ExpansionPanelList(
+          EnhanceExpansionPanelList(
             elevation: 0,
             expansionCallback: (index, expand) {
               setState(() {
-                sectionList[index].isExpanded = expand;
+                sectionList[index].isExpanded = !expand;
               });
+              // 告诉外面的数据源，哪个展开了
+              widget.onExpandAction(index, !expand);
             },
             dividerColor: Colors.white.withOpacity(0.3),
             children: List.generate(sectionList.length, (index) {
               Qa qa = sectionList[index];
               List<Qa> relatedList = qa.related ?? [];
-              var canTapOnHeader = relatedList.length <= 0;
-              return ExpansionPanel(
+              var canTapOnHeader = relatedList.isNotEmpty;
+              return EnhanceExpansionPanel(
                   backgroundColor: bgColor,
-                  canTapOnHeader: canTapOnHeader,
+                  canTapOnHeader: true,
                   isExpanded: qa.isExpanded ?? false,
+                  arrowPosition: EnhanceExpansionPanelArrowPosition.tailing,
+                  arrow: canTapOnHeader
+                      ? const Icon(
+                          Icons.keyboard_arrow_right,
+                          color: Colors.blue,
+                        )
+                      : Container(),
+                  arrowExpanded: canTapOnHeader
+                      ? const Icon(
+                          Icons.keyboard_arrow_down_sharp,
+                          color: Colors.blue,
+                        )
+                      : Container(),
                   headerBuilder: (ctx, val) {
                     return Container(
                       padding: const EdgeInsets.all(2.0),
@@ -308,7 +332,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                                   color: Colors.white.withOpacity(0.3)))),
                       child: InkWell(
                         onTap: () {
-                          if (relatedList.length <= 0) {
+                          if (relatedList.isEmpty) {
                             qaClicked(qa);
                           }
                         },
