@@ -30,7 +30,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
 
@@ -52,11 +51,13 @@ class _ChatPageState extends State<ChatPage>
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
   List<MsgItem>? replyList;
-   bool _isFirstLoad = true;
-   var store = ChatStore();
+  bool _isFirstLoad = true;
+  var store = ChatStore();
   Timer? _timer;
   int _timerCount = 0;
   AutoScrollController _scrollController = AutoScrollController();
+
+  AutoReply? _autoReplyModel;
 
   @override
   void initState() {
@@ -74,7 +75,8 @@ class _ChatPageState extends State<ChatPage>
           //把未发送的消息保存起来
           _getUnsentMessage();
         }
-      }});
+      }
+    });
   }
 
   String _generateRandomId() {
@@ -82,7 +84,7 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void _handleSendPressed(types.PartialText message) {
-    if (_me.id == "user"){
+    if (_me.id == "user") {
       SmartDialog.showToast("此时不能发消息，请检查网络或稍等片刻");
       return;
     }
@@ -134,9 +136,15 @@ class _ChatPageState extends State<ChatPage>
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           return TextMessageWidget(
             message: message,
+            autoReply: _autoReplyModel,
             chatId: _me.id,
             listener: this,
             messageWidth: messageWidth ?? 0,
+            onExpandAction: (index, val) {
+              setState(() {
+                _autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val;
+              });
+            },
           );
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
@@ -173,7 +181,9 @@ class _ChatPageState extends State<ChatPage>
               var msg = types.VideoMessage(
                   author: _me,
                   uri: baseUrlImage + url,
-                  metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+                  metadata: {
+                    'msgTime': Util.convertDateToString(DateTime.now())
+                  },
                   createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
                   name: 'dd',
@@ -190,7 +200,9 @@ class _ChatPageState extends State<ChatPage>
               var msg = types.ImageMessage(
                   author: _me,
                   uri: baseUrlImage + url,
-                  metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+                  metadata: {
+                    'msgTime': Util.convertDateToString(DateTime.now())
+                  },
                   createdAt: DateTime.now().microsecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
                   name: 'dd',
@@ -232,7 +244,8 @@ class _ChatPageState extends State<ChatPage>
         token: "",
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: getCustomParam(userName, 1, 0), maxSessionMinutes: maxSessionMins);
+        custom: getCustomParam(userName, 1, 0),
+        maxSessionMinutes: maxSessionMins);
 
     // Now the listener will receive the delegate events
     Constant.instance.chatLib.callWebSocket();
@@ -280,7 +293,8 @@ class _ChatPageState extends State<ChatPage>
       if (result.code == 1002) {
         //showTip("无效的Token")
         //有时候服务器反馈的这个消息不准，可忽略它
-      } else if (result.code == 1005) {//会话超时，返回到之前页面
+      } else if (result.code == 1005) {
+        //会话超时，返回到之前页面
         SmartDialog.showToast("会话超时", displayTime: Duration(seconds: 3));
         Navigator.pop(context);
       } else {
@@ -288,7 +302,7 @@ class _ChatPageState extends State<ChatPage>
         //toast("在别处登录了")
         //在此处退出聊天
       }
-    }else{
+    } else {
       _getUnsentMessage();
     }
   }
@@ -300,16 +314,16 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.isConnected = true;
     _updateUI("连接成功！");
     //c.workerId;
-     ArticleRepository.assignWorker(consultId).then((onValue){
-       if (onValue != null) {
-         workerId = onValue.workerId ?? 0;
-         getChatData(onValue.nick ?? "_");
-         store.loadingMsg = onValue?.nick ?? "..";
-       }else{
-         store.loadingMsg = "分配客服失败";
-         SmartDialog.showToast("分配客服失败");
-       }
-     });
+    ArticleRepository.assignWorker(consultId).then((onValue) {
+      if (onValue != null) {
+        workerId = onValue.workerId ?? 0;
+        getChatData(onValue.nick ?? "_");
+        store.loadingMsg = onValue?.nick ?? "..";
+      } else {
+        store.loadingMsg = "分配客服失败";
+        SmartDialog.showToast("分配客服失败");
+      }
+    });
   }
 
   @override
@@ -327,15 +341,13 @@ class _ChatPageState extends State<ChatPage>
           types.TextMessage(
             author: _client,
             metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-            createdAt: DateTime
-                .now()
-                .millisecondsSinceEpoch,
+            createdAt: DateTime.now().millisecondsSinceEpoch,
             text: "您好，${msg.workerName}为您服务！",
             // 根据这个字段来自定义界面
             id: _generateRandomId(),
             status: types.Status.sent,
           ));
-     }
+    }
   }
 
   @override
@@ -387,8 +399,6 @@ class _ChatPageState extends State<ChatPage>
     //_scrollController?.scrollToIndex(_messages.length);
   }
 
-
-
   _updateUI(String info) {
     setState(() {});
     _scrollToBottom();
@@ -423,18 +433,17 @@ class _ChatPageState extends State<ChatPage>
       _isFirstLoad = false;
       //自动回复
       AutoReply? model =
-      await ArticleRepository.queryAutoReply(consultId, workerId);
+          await ArticleRepository.queryAutoReply(consultId, workerId);
       print(model?.autoReplyItem?.qa);
       print(model?.autoReplyItem?.title);
+      _autoReplyModel = model;
       if (model != null) {
         _messages.insert(
             0,
             types.TextMessage(
               metadata: model.toJson(),
               author: _client,
-              createdAt: DateTime
-                  .now()
-                  .millisecondsSinceEpoch,
+              createdAt: DateTime.now().millisecondsSinceEpoch,
               text: 'autoReplay',
               // 根据这个字段来自定义界面
               id: _generateRandomId(),
@@ -450,9 +459,7 @@ class _ChatPageState extends State<ChatPage>
           types.TextMessage(
             author: _client,
             metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-            createdAt: DateTime
-                .now()
-                .millisecondsSinceEpoch,
+            createdAt: DateTime.now().millisecondsSinceEpoch,
             text: "您好，${workerName}为您服务！",
             // 根据这个字段来自定义界面
             id: _generateRandomId(),
@@ -494,29 +501,32 @@ class _ChatPageState extends State<ChatPage>
     ArticleRepository.markRead(consultId);
   }
 
-  _getUnsentMessage(){
-    if (_messages.isEmpty){
+  _getUnsentMessage() {
+    if (_messages.isEmpty) {
       return;
     }
     //把未发送的消息保存起来
     //if (unSentMessage == null || unSentMessage?.length == 0) {
-      unSentMessage[consultId] =
-          _messages.takeWhile((p) => p.status == types.Status.sending).toList();
+    unSentMessage[consultId] =
+        _messages.takeWhile((p) => p.status == types.Status.sending).toList();
     //}
     print("获取到未发送的消息总数${unSentMessage?.length}");
   }
 
-  _handleUnSent(){
+  _handleUnSent() {
     print("处理未发送的消息 ${unSentMessage?.length}");
-    if (Constant.instance.isConnected && unSentMessage[consultId] != null && unSentMessage[consultId]!.length > 0){
+    if (Constant.instance.isConnected &&
+        unSentMessage[consultId] != null &&
+        unSentMessage[consultId]!.length > 0) {
       print("重发消息总数${unSentMessage?.length}");
       _messages.insertAll(0, unSentMessage[consultId]!);
       _updateUI("info");
       for (var msg in unSentMessage[consultId]!!) {
         print("重发消息${msg}");
         if (msg is types.TextMessage) {
-          print("重发消息${ (msg as types.TextMessage).text}");
-         Constant.instance.chatLib.resendMSg(msg.text, consultId, Int64(int.parse(msg.id)));
+          print("重发消息${(msg as types.TextMessage).text}");
+          Constant.instance.chatLib
+              .resendMSg(msg.text, consultId, Int64(int.parse(msg.id)));
         }
       }
       unSentMessage[consultId]!.clear();
@@ -623,9 +633,7 @@ class _ChatPageState extends State<ChatPage>
     return replyTxt;
   }
 
-  void handleUnSent(){
-
-  }
+  void handleUnSent() {}
 
   @override
   void onCopy(int position) {}
@@ -659,47 +667,47 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
-   // setState(() {
-      if (isMe) {
+    // setState(() {
+    if (isMe) {
+      _messages.insert(
+          0,
+          types.TextMessage(
+            author: _me,
+            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+            status: types.Status.sent,
+            createdAt: DateTime.now().millisecondsSinceEpoch,
+            id: _generateRandomId(),
+            text: msg,
+          ));
+    } else {
+      if (msgType == "MSG_IMAGE") {
+        final imgUrl = baseUrlImage + msg;
+        _messages.insert(
+            0,
+            types.ImageMessage(
+              author: _client,
+              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+              status: types.Status.sent,
+              createdAt: DateTime.now().millisecondsSinceEpoch,
+              id: _generateRandomId(),
+              uri: imgUrl,
+              name: '',
+              size: 150,
+            ));
+      } else {
         _messages.insert(
             0,
             types.TextMessage(
-              author: _me,
+              author: _client,
               metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
               status: types.Status.sent,
               createdAt: DateTime.now().millisecondsSinceEpoch,
               id: _generateRandomId(),
               text: msg,
             ));
-      } else {
-        if (msgType == "MSG_IMAGE") {
-          final imgUrl = baseUrlImage + msg;
-          _messages.insert(
-              0,
-              types.ImageMessage(
-                author: _client,
-                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-                status: types.Status.sent,
-                createdAt: DateTime.now().millisecondsSinceEpoch,
-                id: _generateRandomId(),
-                uri: imgUrl,
-                name: '',
-                size: 150,
-              ));
-        } else {
-          _messages.insert(
-              0,
-              types.TextMessage(
-                author: _client,
-                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-                status: types.Status.sent,
-                createdAt: DateTime.now().millisecondsSinceEpoch,
-                id: _generateRandomId(),
-                text: msg,
-              ));
-        }
       }
-   // });
+    }
+    // });
     _updateUI("info");
   }
 
@@ -707,7 +715,7 @@ class _ChatPageState extends State<ChatPage>
     const oneSec = const Duration(seconds: 1);
     _timer = new Timer.periodic(
       oneSec,
-          (Timer timer) {
+      (Timer timer) {
         //每8秒检查一次状态
         if (_timerCount > 0 && _timerCount % 8 == 0) {
           //setState(() {
@@ -715,7 +723,7 @@ class _ChatPageState extends State<ChatPage>
           checkSDKStatus();
           //});
         }
-        _timerCount +=1;
+        _timerCount += 1;
         // else {
         //   setState(() {
         //     _timerCount--;
@@ -725,8 +733,8 @@ class _ChatPageState extends State<ChatPage>
     );
   }
 
-  void checkSDKStatus(){
-    if (Constant.instance.isConnected == false){
+  void checkSDKStatus() {
+    if (Constant.instance.isConnected == false) {
       Constant.instance.chatLib.disconnect();
       initSDK();
     }
