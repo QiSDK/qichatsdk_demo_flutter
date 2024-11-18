@@ -261,7 +261,7 @@ class _ChatPageState extends State<ChatPage>
                 author: types.User(id: msg.sender.toString()),
                 text: msg.content.data,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
-                metadata: {'msgTime': msg.msgTime},
+                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 id: _generateRandomId(),
                 status: types.Status.sent,
                 remoteId: msg.msgId.toString()));
