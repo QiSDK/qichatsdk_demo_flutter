@@ -129,12 +129,13 @@ class _EntrancePageState extends State<EntrancePage> {
    }
 
   loadData() async {
-    print("调用queryEntrance");
+    print("调用queryEntrance ${DateTime.now()}");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
 
     entrance = await ArticleRepository.queryEntrance();
-    setState(() {});
+    if (entrance != null)
+      setState(() {});
   }
 
    @override

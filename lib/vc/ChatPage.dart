@@ -313,7 +313,7 @@ class _ChatPageState extends State<ChatPage>
      ArticleRepository.assignWorker(consultId).then((onValue){
        if (onValue != null) {
          workerId = onValue.workerId ?? 0;
-         getChatData(onValue.nick ?? "_");
+         getChatData(onValue.nick ?? "_", false);
          store.loadingMsg = onValue?.nick ?? "..";
          _preWorker = Worker(workerId: workerId, nick: onValue?.nick);
        }else{
@@ -331,26 +331,8 @@ class _ChatPageState extends State<ChatPage>
     if (workerId > 0 && workerId != msg.workerId) {
       consultId = msg.consultId;
       workerId = msg.workerId;
-      _preWorker = Worker(workerId: workerId, nick: msg.workerName);
-      getChatData(msg.workerName);
+      getChatData(msg.workerName, true);
       store.loadingMsg = msg.workerName;
-      //您好，{转出会话客服账号} 已为您转接！{接收会话客服账号} 为您服务！
-      setState(() {
-        _messages.insert(
-            0,
-            types.TextMessage(
-              author: _client,
-              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-              createdAt: DateTime
-                  .now()
-                  .millisecondsSinceEpoch,
-              text: "您好，${_preWorker?.nick ?? "_"} 已为您转接！${msg
-                  .workerName}为您服务",
-              // 根据这个字段来自定义界面
-              id: _generateRandomId(),
-              status: types.Status.sent,
-            ));
-      });
     }
   }
 
@@ -393,12 +375,16 @@ class _ChatPageState extends State<ChatPage>
       //
       //   );
       // }
-      _scrollController.animateTo(
-        0.0,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 300),
-      );
+
+      if (_scrollController.hasClients && _messages.length < 5) {
+        _scrollController.animateTo(
+          0.0,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 300),
+        );
+      }
     });
+
     //行不同
     //_scrollController?.scrollToIndex(_messages.length);
   }
@@ -424,7 +410,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  Future<void> getChatData(String workerName) async {
+  Future<void> getChatData(String workerName, bool workerChanged) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(PARAM_XTOKEN, xToken);
     _messages.clear();
@@ -456,25 +442,47 @@ class _ChatPageState extends State<ChatPage>
               status: types.Status.sent,
             ));
       }
-      setState(() {
-        _messages.insert(
-            0,
-            types.TextMessage(
-              author: _client,
-              metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-              createdAt: DateTime
-                  .now()
-                  .millisecondsSinceEpoch,
-              text: "您好，${workerName}为您服务！",
-              // 根据这个字段来自定义界面
-              id: _generateRandomId(),
-              status: types.Status.sent,
-            ));
-      });
+      // setState(() {
+      //   _messages.insert(
+      //       0,
+      //       types.TextMessage(
+      //         author: _client,
+      //         metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+      //         createdAt: DateTime
+      //             .now()
+      //             .millisecondsSinceEpoch,
+      //         text: "您好，${workerName}为您服务！",
+      //         // 根据这个字段来自定义界面
+      //         id: _generateRandomId(),
+      //         status: types.Status.sent,
+      //       ));
+      // });
     }
+
+    String hello = "您好，${_preWorker?.nick ?? "_"} 已为您转接！${workerName}为您服务";
+    if (!workerChanged){
+      hello = "您好，${workerName}为您服务！";
+    }else{
+      _preWorker = Worker(workerId: workerId, nick: workerName);
+    }
+    //您好，{转出会话客服账号} 已为您转接！{接收会话客服账号} 为您服务！
+    setState(() {
+      _messages.insert(
+          0,
+          types.TextMessage(
+            author: _client,
+            metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+            createdAt: DateTime
+                .now()
+                .millisecondsSinceEpoch,
+            text: hello,
+            // 根据这个字段来自定义界面
+            id: _generateRandomId(),
+            status: types.Status.sent,
+          ));
+    });
     //处理在无网、或断网情况下未发出去的消息
     _handleUnSent();
-
   }
 
   @override
@@ -554,7 +562,7 @@ class _ChatPageState extends State<ChatPage>
 
     var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     final sender = types.User(id: senderId);
-    types.Message msg;
+    types.Message? msg;
     if (imgUri.isNotEmpty) {
       var imgUrl = imgUri;
       if (!imgUri.contains("http")) {
@@ -585,18 +593,23 @@ class _ChatPageState extends State<ChatPage>
           metadata: {'msgTime': msgTime},
           status: types.Status.sent,
           remoteId: msgId);
-    } else {
-      msg = types.TextMessage(
-          author: sender,
-          text: text,
-          createdAt: milliSeconds,
-          metadata: {'msgTime': msgTime, 'replyText': replyText},
-          id: _generateRandomId(),
-          status: types.Status.sent,
-          remoteId: msgId);
+    } else  if (text.isNotEmpty)
+    {
+        msg = types.TextMessage(
+            author: sender,
+            text: text,
+            createdAt: milliSeconds,
+            metadata: {'msgTime': msgTime, 'replyText': replyText},
+            id: _generateRandomId(),
+            status: types.Status.sent,
+            remoteId: msgId);
+      }else{
+      print("消息内容为空");
     }
 
-    insert ? _messages.insert(0, msg) : _messages.add(msg);
+    if (msg != null) {
+      insert ? _messages.insert(0, msg) : _messages.add(msg);
+    }
   }
 
   String _getReplyText(String replyMsgId, bool append) {
