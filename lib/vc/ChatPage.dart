@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:date_format/date_format.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,13 +46,12 @@ class _ChatPageState extends State<ChatPage>
   final List<types.Message> _messages = [];
   var _me = const types.User(
     id: 'user',
-    imageUrl:'assets/png/me_avatar.png',
-
   );
   final _friend = const types.User(
     firstName: 'client',
     imageUrl:'assets/png/qiliaoicon_withback.png',
     id: 'client',
+    lastName: "客服",
   );
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
@@ -438,7 +438,9 @@ class _ChatPageState extends State<ChatPage>
     _messages.clear();
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
-    _me = types.User(id: h?.request?.chatId ?? "");
+    _me = types.User(id: h?.request?.chatId ?? "0",
+      imageUrl:'assets/png/me_avatar.png',
+      firstName: userName);
 
     replyList = h?.replyList;
     _buildHistory(h?.list);
