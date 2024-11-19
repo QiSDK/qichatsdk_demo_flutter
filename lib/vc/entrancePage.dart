@@ -20,7 +20,6 @@ class EntrancePage extends StatefulWidget {
 
 class _EntrancePageState extends State<EntrancePage> {
   //final AppPurchaseV2 _appPurchase = AppPurchaseV2.instance;
-   Entrance? entrance;
   @override
   void initState() {
     super.initState();

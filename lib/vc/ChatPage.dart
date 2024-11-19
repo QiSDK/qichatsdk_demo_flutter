@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,9 +45,12 @@ class _ChatPageState extends State<ChatPage>
   final List<types.Message> _messages = [];
   var _me = const types.User(
     id: 'user',
+    imageUrl:'assets/png/me_avatar.png',
+
   );
-  final _client = const types.User(
+  final _friend = const types.User(
     firstName: 'client',
+    imageUrl:'assets/png/qiliaoicon_withback.png',
     id: 'client',
   );
   GlobalKey _sendViewKey = GlobalKey();
@@ -218,11 +222,29 @@ class _ChatPageState extends State<ChatPage>
   }
 
   Widget customAvatarBuilder(String userId) {
+    var avatar = baseUrlImage + (entrance?.avatar ?? "");
     return Container(
       padding: const EdgeInsets.only(right: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
-        child: const Icon(Icons.av_timer_sharp),
+        //child: const Icon(Icons.av_timer_sharp),
+        child:  CachedNetworkImage(
+          imageUrl: avatar,
+          width: 30,
+          height: 30,
+          progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+            child: SizedBox(
+              width: 30,
+              height: 30,
+              child: CircularProgressIndicator(
+                value: downloadProgress.progress,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) =>
+              Image.asset(""),
+        ),
       ),
     );
   }
@@ -434,7 +456,7 @@ class _ChatPageState extends State<ChatPage>
             0,
             types.TextMessage(
               metadata: model.toJson(),
-              author: _client,
+              author: _friend,
               createdAt: DateTime.now().millisecondsSinceEpoch,
               text: 'autoReplay',
               // 根据这个字段来自定义界面
@@ -470,7 +492,7 @@ class _ChatPageState extends State<ChatPage>
       _messages.insert(
           0,
           types.TextMessage(
-            author: _client,
+            author: _friend,
             metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
             createdAt: DateTime
                 .now()
@@ -561,7 +583,12 @@ class _ChatPageState extends State<ChatPage>
     }
 
     var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
-    final sender = types.User(id: senderId);
+    var sender = types.User(id: senderId);
+    if (sender.id == _me.id){
+      sender = _me;
+    }else{
+      sender = _friend;
+    }
     types.Message? msg;
     if (imgUri.isNotEmpty) {
       var imgUrl = imgUri;
@@ -640,11 +667,11 @@ class _ChatPageState extends State<ChatPage>
         if (index >= 0) {
           var msg = replyList![index];
           if ((msg.image?.uri ?? "").isNotEmpty) {
-            replyTxt = "[图片]";
+            replyTxt = "回复：[图片]";
           } else if ((msg.video?.uri ?? "").isNotEmpty) {
-            replyTxt = "[视频]";
+            replyTxt = "回复：[视频]";
           } else {
-            replyTxt = msg.content?.data ?? "";
+            replyTxt = "回复：${msg.content?.data ?? ""}";
           }
         }
       }
@@ -706,7 +733,7 @@ class _ChatPageState extends State<ChatPage>
           _messages.insert(
               0,
               types.ImageMessage(
-                author: _client,
+                author: _friend,
                 metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 status: types.Status.sent,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -719,7 +746,7 @@ class _ChatPageState extends State<ChatPage>
           _messages.insert(
               0,
               types.TextMessage(
-                author: _client,
+                author: _friend,
                 metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 status: types.Status.sent,
                 createdAt: DateTime.now().millisecondsSinceEpoch,

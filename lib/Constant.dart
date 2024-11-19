@@ -8,6 +8,8 @@ import 'package:fixnum/src/int64.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
+import 'model/Entrance.dart';
+
 const String PARAM_USER_ID = "USER_ID";
 const String PARAM_CERT = "CERT";
 const String PARAM_MERCHANT_ID = "MERCHANT_ID";
@@ -44,6 +46,7 @@ ReportRequest reportRequest = ReportRequest();
 const String PARAM_XTOKEN = "HTTPTOKEN";
 
 const String serverTimeFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'";
+Entrance? entrance;
 
 // UI constants
 const double iconWidth = 38.0;
