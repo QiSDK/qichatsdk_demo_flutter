@@ -453,7 +453,7 @@ class _ChatPageState extends State<ChatPage>
       print(model?.autoReplyItem?.qa);
       print(model?.autoReplyItem?.title);
       _autoReplyModel = model;
-      if (model != null) {
+      if (model != null && (model.autoReplyItem?.qa?.length ?? 0) > 0) {
         _messages.insert(
             0,
             types.TextMessage(
