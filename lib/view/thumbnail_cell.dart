@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
+import 'package:qichatsdk_demo_flutter/vc/FullVideoPlayer.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
 as cmessage;
 import 'package:fixnum/src/int64.dart';
@@ -118,6 +119,11 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
         onLongPress: () {
           _toolTipController.showTooltip();
         },
+          onTap: ()  {
+             Navigator.push(
+                context,
+                MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
+          },
         child:
             Stack(
                 alignment: Alignment.center,
@@ -141,19 +147,10 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  content, Int64.parseInt(widget.message.remoteId.toString()));
+                  "视频", Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
-        // TextButton(
-        //     onPressed: () {
-        //       FlutterClipboard.copy(content).then((value) {
-        //         _toolTipController.hideTooltip().then((val) {
-        //           SmartDialog.showToast("已复制到剪切板");
-        //         });
-        //       });
-        //     },
-        //     child: buildRowText(Icons.copy, '复制'))
       ],
     );
   }
@@ -177,6 +174,4 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
       ],
     );
   }
-
-
 }
