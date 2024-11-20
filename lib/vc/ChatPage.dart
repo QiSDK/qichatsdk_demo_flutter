@@ -180,7 +180,7 @@ class _ChatPageState extends State<ChatPage>
           },
           onUploadSuccess: (String url, bool isVideo) {
             if (isVideo) {
-              debugPrint('视频URL:$url');
+              debugPrint('视频URL:${baseUrlImage + url}');
               Constant.instance.chatLib.sendMessage(
                   url, cMessage.MessageFormat.MSG_VIDEO, consultId,
                   withAutoReply: withAutoReplyBuilder);
