@@ -100,7 +100,6 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.chatLib.sendMessage(
         message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
         replyMsgId: replyId, withAutoReply: withAutoReplyBuilder);
-    withAutoReplyBuilder = null;
     debugPrint("replyId:$replyId");
 
     // sending是转圈的状态
@@ -369,6 +368,7 @@ class _ChatPageState extends State<ChatPage>
     print("收到回执 payloadId:${payloadId} msgId: ${msg.msgId}");
     updateMessageStatus(
         payloadId.toString(), types.Status.sent, msg.msgId.toString());
+    withAutoReplyBuilder = null;
   }
 
   @override

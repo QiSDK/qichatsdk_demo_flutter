@@ -118,7 +118,17 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
         onLongPress: () {
           _toolTipController.showTooltip();
         },
-        child: _localImage()
+        child:
+            Stack(
+                alignment: Alignment.center,
+               children: [
+                 _localImage(),
+                Positioned(child: Icon(Icons.slow_motion_video_outlined,
+                 size: 50.0,
+                 color: Colors.white.withOpacity(0.8))
+                )
+               ]
+            )
       ),
     );
   }
@@ -135,15 +145,15 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
-        TextButton(
-            onPressed: () {
-              FlutterClipboard.copy(content).then((value) {
-                _toolTipController.hideTooltip().then((val) {
-                  SmartDialog.showToast("已复制到剪切板");
-                });
-              });
-            },
-            child: buildRowText(Icons.copy, '复制'))
+        // TextButton(
+        //     onPressed: () {
+        //       FlutterClipboard.copy(content).then((value) {
+        //         _toolTipController.hideTooltip().then((val) {
+        //           SmartDialog.showToast("已复制到剪切板");
+        //         });
+        //       });
+        //     },
+        //     child: buildRowText(Icons.copy, '复制'))
       ],
     );
   }
