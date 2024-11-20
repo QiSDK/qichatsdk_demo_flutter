@@ -76,7 +76,9 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
   _localImage() {
    // getThumbnail();
     if (thumbnail == null){
-      return Container();
+      return  CircularProgressIndicator(
+        color: Colors.red,
+      );
     }else{
       return Image.memory(
         thumbnail!,
