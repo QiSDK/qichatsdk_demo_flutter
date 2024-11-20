@@ -1,7 +1,13 @@
+
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
 as cmessage;
 import 'package:fixnum/src/int64.dart';
@@ -11,11 +17,12 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'dart:typed_data';
 
 import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class ThumbnailCellWidget extends StatefulWidget {
-  types.TextMessage message;
+  types.Message message;
   int messageWidth;
   String chatId;
   MessageItemOperateListener listener;
@@ -33,62 +40,61 @@ class ThumbnailCellWidget extends StatefulWidget {
 class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
   types.Status? get state => widget.message.status;
 
-  String get content => widget.message.text;
+  String content = "";
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
   final _toolTipController = SuperTooltipController();
+  Uint8List? thumbnail;
 
   @override
-  void initState() {
+   void initState() {
     super.initState();
+    getThumbnail();
+  }
 
+  Future<void> getThumbnail() async {
+    if (widget.message is types.VideoMessage){
+      var uri = (widget.message as types.VideoMessage).uri;
+      // var ex = path.split('.').last;
+      // content = path.replaceFirst(ex, ".jpg");
+      // print("图片路径:${content}");
+
+      var t = await Util().generateThumbnail(uri);
+      var f = File(t);
+      thumbnail = await f.readAsBytes();
+      setState(()  {
+        //
+        //print("获得thumbnail${thumbnail})");
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return getWidget(context);
-  }
-
-  getWidget(context) {
-    if (state != null && state == types.Status.error) {
-      return buildFail(context);
-    }
-    // if (state != null && state == types.Status.sending) {
-    //   return buildLoading();
-    // }
-    // if (widget.message.metadata != null && widget.message.metadata!['isSystemMessage'] == true) {
-    //  return buildTipMessage(widget.message);
-    // }
     return buildGptMessage(context);
   }
 
-  buildFail(context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: () {},
-            child: const Row(
-              children: [
-                Icon(
-                  Icons.error,
-                  color: Colors.redAccent,
-                ),
-                SizedBox(
-                  width: 4,
-                ),
-                Text(
-                  '消息失败了哦~',
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                )
-              ],
-            ),
-          )
-        ],
-      ),
+  _localImage() {
+   // getThumbnail();
+    if (thumbnail == null){
+      return Container();
+    }else{
+      return Image.memory(
+        thumbnail!,
+        fit: BoxFit.cover,
+        height: 300,
+      );
+    }
+  }
+
+  _remoteImag(){
+    return CachedNetworkImage(
+      key: Key(widget.message.remoteId.toString()),
+      width: 200,
+      height: 150,
+      imageUrl: content,
     );
   }
+
 
   buildLoading() {
     return Container(
@@ -110,12 +116,7 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
         onLongPress: () {
           _toolTipController.showTooltip();
         },
-        child: CachedNetworkImage(
-        key: Key(widget.message.remoteId.toString()),
-        width: 200,
-        height: 150,
-        imageUrl: widget.message.text,
-      )
+        child: _localImage()
       ),
     );
   }
@@ -164,4 +165,6 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
       ],
     );
   }
+
+
 }

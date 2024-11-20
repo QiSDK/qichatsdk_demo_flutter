@@ -32,6 +32,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import '../view/thumbnail_cell.dart';
+
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -154,8 +156,11 @@ class _ChatPageState extends State<ChatPage>
           );
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
-          return VideoMessageWidget(
+          return ThumbnailCellWidget(
             message: message,
+            chatId: _me.id,
+            listener: this,
+            messageWidth: messageWidth ?? 0,
           );
         },
         avatarBuilder: (types.User user) {

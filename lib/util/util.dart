@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class Util {
   static Future<String?> xFileToBase64(XFile xFile) async {
@@ -59,6 +62,43 @@ class Util {
     } catch (e) {
       print('Error parsing string to DateTime: $e');
       return null; // 如果转换失败，返回 null
+    }
+  }
+
+  Future<String> generateThumbnail(String videoPath) async {
+    try {
+      // Get the temporary directory to store the thumbnail
+      final Directory tempDir = await getTemporaryDirectory();
+      var fileName = videoPath.split("/").last;
+      var ex = fileName.split(".").last;
+      fileName = fileName.replaceFirst(ex, "jpg");
+      final String thumbnailPath = '${tempDir.path}/${fileName}';
+
+      if (File(thumbnailPath).existsSync()){
+        print("缩略图地址已存在:" + thumbnailPath);
+        return thumbnailPath;
+      }
+
+      // FFmpeg command to extract a frame from the video
+      final String command = '-i "$videoPath" -ss 00:00:01 -vframes 1 "$thumbnailPath"';
+
+      // Run the FFmpeg command
+      await FFmpegKit.execute(command);
+
+      // Check if the thumbnail was generated
+      if (File(thumbnailPath).existsSync()) {
+        //setState(() {
+          //_thumbnailPath = thumbnailPath;
+          print("缩略图地址:" + thumbnailPath);
+        //});
+        return thumbnailPath;
+      } else {
+        print("Thumbnail generation failed.");
+        return "";
+      }
+    } catch (e) {
+      print("Error generating thumbnail: $e");
+      return "";
     }
   }
 }

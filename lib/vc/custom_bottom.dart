@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:dio/dio.dart';
 import 'package:fixnum/src/int64.dart';
@@ -238,6 +241,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   _pickImage() async {
     //await picker.pickImage(source: ImageSource.gallery);
     final XFile? photo = await picker.pickMedia();
+    print(photo?.path ?? "本地图片");
+
     var isVideo = true;
     var imageTypes = {
       "tif",
@@ -260,16 +265,33 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       if (ar[0].isNotEmpty) {
         return SmartDialog.showToast("不能识别的文件");
       }
+
     }
 
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      upload(val, isVideo);
+
+      // File thumbNail = File(photo?.path ?? "")
+      //   ..createSync(recursive: true)
+      //   ..writeAsBytesSync(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      Uint8List? thumbnail;
+      /*final thumbnailFile = await VideoThumbnail.thumbnailFile(
+        video: photo?.path ?? "",
+        thumbnailPath: (await getTemporaryDirectory()).path,
+        imageFormat: ImageFormat.JPEG,
+        quality: 70,
+      );
+      var thumbnailBytes = await thumbnailFile?.readAsBytes();
+      if (thumbnailBytes != null)
+      thumbnail = Uint8List.fromList(thumbnailBytes);
+      print("缩略图文件  " + thumbnailFile.path );
+      */
+      upload(val, thumbnail, isVideo);
     }
   }
 
-  Future<void> upload(Uint8List imgData, bool isVideo) async {
+  Future<void> upload(Uint8List imgData, Uint8List? thumbnailData, bool isVideo) async {
     // 设置URL
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload/';
 
@@ -281,11 +303,16 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     };
 
     final String fileName = isVideo ? 'file.mp4' : 'file.png';
+    final String fileNameThumbnail = isVideo ? 'fileThumbnail.mp4' : 'fileThumbnail.png';
     final String mimeType = isVideo ? 'video/mp4' : 'image/png';
 
     // 创建表单数据
     FormData formData = FormData.fromMap({
       'type': 4,
+      'thumbnail': thumbnailData == null ? null : MultipartFile.fromBytes(
+        thumbnailData,
+        filename: fileNameThumbnail,
+      ),
       'myFile': MultipartFile.fromBytes(
         imgData,
         filename: fileName,
