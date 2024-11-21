@@ -21,6 +21,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
 
+import '../vc/FullImageView.dart';
 import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class ImageThumbnailCellWidget extends StatefulWidget {
@@ -104,7 +105,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
           onTap: ()  {
              Navigator.push(
                 context,
-                MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
+                MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
           },
         child: _remoteImag(),
       ),

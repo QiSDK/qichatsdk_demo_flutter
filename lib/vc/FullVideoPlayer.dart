@@ -60,7 +60,7 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
         body: _initBody());
   }
 
-  Container _initBody(){
+   _initBody(){
     return urlError
         ? Container(
       child: Text('视频加载失败~'),
@@ -78,5 +78,12 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
         child: CircularProgressIndicator(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
   }
 }
