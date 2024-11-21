@@ -16,6 +16,7 @@ import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -32,7 +33,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import '../view/thumbnail_cell.dart';
+import '../view/video_thumbnail_cell.dart';
 
 
 class ChatPage extends StatefulWidget {
@@ -155,7 +156,15 @@ class _ChatPageState extends State<ChatPage>
           );
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
-          return ThumbnailCellWidget(
+          return VideoThumbnailCellWidget(
+            message: message,
+            chatId: _me.id,
+            listener: this,
+            messageWidth: messageWidth ?? 0,
+          );
+        },
+        imageMessageBuilder: (message, {int? messageWidth}) {
+          return ImageThumbnailCellWidget(
             message: message,
             chatId: _me.id,
             listener: this,
@@ -416,11 +425,11 @@ class _ChatPageState extends State<ChatPage>
     //_scrollController?.scrollToIndex(_messages.length);
   }
 
-
-
   _updateUI(String info) {
-    setState(() {});
-    _scrollToBottom();
+    if (mounted) {
+      setState(() {});
+      _scrollToBottom();
+    }
   }
 
   void updateMessageStatus(
@@ -471,21 +480,6 @@ class _ChatPageState extends State<ChatPage>
               status: types.Status.sent,
             ));
       }
-      // setState(() {
-      //   _messages.insert(
-      //       0,
-      //       types.TextMessage(
-      //         author: _client,
-      //         metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-      //         createdAt: DateTime
-      //             .now()
-      //             .millisecondsSinceEpoch,
-      //         text: "您好，${workerName}为您服务！",
-      //         // 根据这个字段来自定义界面
-      //         id: _generateRandomId(),
-      //         status: types.Status.sent,
-      //       ));
-      // });
     }
 
     String hello = "您好，${_preWorker?.nick ?? "_"} 已为您转接！${workerName}为您服务";
@@ -722,7 +716,6 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
-   // setState(() {
       if (isMe) {
         _messages.insert(
             0,
@@ -762,7 +755,6 @@ class _ChatPageState extends State<ChatPage>
               ));
         }
       }
-   // });
     _updateUI("info");
   }
 

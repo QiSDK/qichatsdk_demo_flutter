@@ -22,12 +22,12 @@ import 'dart:typed_data';
 
 import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
 
-class ThumbnailCellWidget extends StatefulWidget {
+class VideoThumbnailCellWidget extends StatefulWidget {
   types.Message message;
   int messageWidth;
   String chatId;
   MessageItemOperateListener listener;
-  ThumbnailCellWidget(
+  VideoThumbnailCellWidget(
       {super.key,
         required this.chatId,
         required this.message,
@@ -35,10 +35,10 @@ class ThumbnailCellWidget extends StatefulWidget {
         required this.listener});
 
   @override
-  State<ThumbnailCellWidget> createState() => _ThumbnailCellWidget();
+  State<VideoThumbnailCellWidget> createState() => _VideoThumbnailCellWidget();
 }
 
-class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
+class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   types.Status? get state => widget.message.status;
 
   String content = "";
@@ -58,14 +58,13 @@ class _ThumbnailCellWidget extends State<ThumbnailCellWidget> {
       // var ex = path.split('.').last;
       // content = path.replaceFirst(ex, ".jpg");
       // print("图片路径:${content}");
-
       var t = await Util().generateThumbnail(uri);
       var f = File(t);
       thumbnail = await f.readAsBytes();
-      setState(()  {
-        //
-        //print("获得thumbnail${thumbnail})");
-      });
+      if (mounted) {
+        setState(() {
+        });
+      }
     }
   }
 

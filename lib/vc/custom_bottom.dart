@@ -10,6 +10,7 @@ import 'package:fixnum/src/int64.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 typedef SubmittedAction = void Function(String val);
 
