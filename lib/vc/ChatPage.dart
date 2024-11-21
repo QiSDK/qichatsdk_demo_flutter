@@ -524,6 +524,9 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     for (var msg in msgItems) {
+      if (msg.msgOp == "MSG_OP_DELETE"){
+        continue;
+      }
       MyMsg model = MyMsg();
       model.imgUri = msg.image?.uri ?? '';
       model.videoUri = msg.video?.uri ?? '';
