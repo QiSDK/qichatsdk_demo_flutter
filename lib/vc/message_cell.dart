@@ -117,6 +117,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   buildGptMessage(BuildContext context) {
+    // && (widget.autoReply?.autoReplyItem?.qa?.length ?? 0) > 0
     if (content == 'autoReplay' && widget.message.metadata != null) {
       return initAutoReplay();
     }

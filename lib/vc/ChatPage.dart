@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:date_format/date_format.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -31,6 +33,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import '../view/video_thumbnail_cell.dart';
+
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -45,13 +49,12 @@ class _ChatPageState extends State<ChatPage>
   final List<types.Message> _messages = [];
   var _me = const types.User(
     id: 'user',
-    imageUrl:'assets/png/me_avatar.png',
-
   );
   final _friend = const types.User(
     firstName: 'client',
     imageUrl:'assets/png/qiliaoicon_withback.png',
     id: 'client',
+    lastName: "客服",
   );
   GlobalKey _sendViewKey = GlobalKey();
   var consultId = Int64(1);
@@ -98,7 +101,6 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.chatLib.sendMessage(
         message.text, cMessage.MessageFormat.MSG_TEXT, consultId,
         replyMsgId: replyId, withAutoReply: withAutoReplyBuilder);
-    withAutoReplyBuilder = null;
     debugPrint("replyId:$replyId");
 
     // sending是转圈的状态
@@ -154,8 +156,19 @@ class _ChatPageState extends State<ChatPage>
           );
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
-          return VideoMessageWidget(
+          return VideoThumbnailCellWidget(
             message: message,
+            chatId: _me.id,
+            listener: this,
+            messageWidth: messageWidth ?? 0,
+          );
+        },
+        imageMessageBuilder: (message, {int? messageWidth}) {
+          return ImageThumbnailCellWidget(
+            message: message,
+            chatId: _me.id,
+            listener: this,
+            messageWidth: messageWidth ?? 0,
           );
         },
         avatarBuilder: (types.User user) {
@@ -180,7 +193,7 @@ class _ChatPageState extends State<ChatPage>
           },
           onUploadSuccess: (String url, bool isVideo) {
             if (isVideo) {
-              debugPrint('视频URL:$url');
+              debugPrint('视频URL:${baseUrlImage + url}');
               Constant.instance.chatLib.sendMessage(
                   url, cMessage.MessageFormat.MSG_VIDEO, consultId,
                   withAutoReply: withAutoReplyBuilder);
@@ -364,6 +377,7 @@ class _ChatPageState extends State<ChatPage>
     print("收到回执 payloadId:${payloadId} msgId: ${msg.msgId}");
     updateMessageStatus(
         payloadId.toString(), types.Status.sent, msg.msgId.toString());
+    withAutoReplyBuilder = null;
   }
 
   @override
@@ -411,11 +425,11 @@ class _ChatPageState extends State<ChatPage>
     //_scrollController?.scrollToIndex(_messages.length);
   }
 
-
-
   _updateUI(String info) {
-    setState(() {});
-    _scrollToBottom();
+    if (mounted) {
+      setState(() {});
+      _scrollToBottom();
+    }
   }
 
   void updateMessageStatus(
@@ -438,7 +452,9 @@ class _ChatPageState extends State<ChatPage>
     _messages.clear();
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
-    _me = types.User(id: h?.request?.chatId ?? "");
+    _me = types.User(id: h?.request?.chatId ?? "0",
+      imageUrl:'assets/png/me_avatar.png',
+      firstName: userName);
 
     replyList = h?.replyList;
     _buildHistory(h?.list);
@@ -451,7 +467,7 @@ class _ChatPageState extends State<ChatPage>
       print(model?.autoReplyItem?.qa);
       print(model?.autoReplyItem?.title);
       _autoReplyModel = model;
-      if (model != null) {
+      if (model != null && (model.autoReplyItem?.qa?.length ?? 0) > 0) {
         _messages.insert(
             0,
             types.TextMessage(
@@ -464,21 +480,6 @@ class _ChatPageState extends State<ChatPage>
               status: types.Status.sent,
             ));
       }
-      // setState(() {
-      //   _messages.insert(
-      //       0,
-      //       types.TextMessage(
-      //         author: _client,
-      //         metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-      //         createdAt: DateTime
-      //             .now()
-      //             .millisecondsSinceEpoch,
-      //         text: "您好，${workerName}为您服务！",
-      //         // 根据这个字段来自定义界面
-      //         id: _generateRandomId(),
-      //         status: types.Status.sent,
-      //       ));
-      // });
     }
 
     String hello = "您好，${_preWorker?.nick ?? "_"} 已为您转接！${workerName}为您服务";
@@ -715,7 +716,6 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void onSendLocalMsg(String msg, bool isMe, [String msgType = "MSG_TEXT"]) {
-   // setState(() {
       if (isMe) {
         _messages.insert(
             0,
@@ -755,7 +755,6 @@ class _ChatPageState extends State<ChatPage>
               ));
         }
       }
-   // });
     _updateUI("info");
   }
 
