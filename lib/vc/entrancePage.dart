@@ -133,7 +133,7 @@ class _EntrancePageState extends State<EntrancePage> {
     xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
 
     entrance = await ArticleRepository.queryEntrance();
-    if (entrance != null)
+    if (entrance != null && mounted)
       setState(() {});
   }
 

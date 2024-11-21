@@ -12,6 +12,8 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
+import '../base/custom_interceptors.dart';
+
 typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
@@ -297,6 +299,12 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload/';
 
     Dio dio = Dio();
+    // 设置 Dio 的一些默认配置（如果需要）
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(minutes: 15); // 接收超时
+    dio.options.sendTimeout = const Duration(minutes: 15); // 接收超时
+    dio.interceptors.add(CustomInterceptors());
+
     dio.options.headers = {
       'Content-Type': 'multipart/form-data',
       'Accept': 'multipart/form-data',
@@ -321,14 +329,16 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     });
 
     debugPrint('xToken=$xToken');
-
     try {
       SmartDialog.showLoading(msg: "上传中");
       final Response response = await dio.post(apiUrl, data: formData,
-          onSendProgress: (int sent, int total) {
+          onSendProgress: (int sent, int total){
         debugPrint(
-            'Upload Progress: ${(sent / total * 100).toStringAsFixed(0)}%');
-      });
+            'Upload Progress: ${(sent / total * 100).toStringAsFixed(0)}% ${DateTime.now()}');
+      }, onReceiveProgress: (int rece, int total) {
+            debugPrint(
+                'Receive Progress: ${(rece / total * 100).toStringAsFixed(0)}% ${DateTime.now()}');
+          });
 
       if (response.statusCode == 200) {
         final String filePath = response.data.toString();
@@ -336,14 +346,14 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         if (filePath.isNotEmpty) {
           widget.onUploadSuccess(filePath, isVideo);
         }
-        SmartDialog.dismiss();
-        debugPrint('上传成功: $filePath');
+        print('上传成功: $filePath ${DateTime.now()}');
       } else {
-        debugPrint('上传失败：${response.statusMessage}');
-        SmartDialog.dismiss();
+        print('上传失败：${response.statusMessage}');
       }
     } catch (e) {
-      debugPrint('上传失败：$e');
+      print('上传失败：$e ${DateTime.now()}');
+    }finally{
+      print('上传 finally ${DateTime.now()}');
       SmartDialog.dismiss();
     }
   }

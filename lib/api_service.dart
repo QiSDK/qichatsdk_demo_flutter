@@ -16,8 +16,8 @@ class Api {
   Api() : dio = Dio() {
     // 设置 Dio 的一些默认配置（如果需要）
     dio.options.connectTimeout = const Duration(seconds: 30);
-    dio.options.receiveTimeout = const Duration(minutes: 15); // 接收超时
-    dio.options.sendTimeout = const Duration(minutes: 15); // 接收超时
+    dio.options.receiveTimeout = const Duration(minutes: 1); // 接收超时
+    dio.options.sendTimeout = const Duration(minutes: 1); // 接收超时
     dio.interceptors.add(CustomInterceptors());
   }
 
