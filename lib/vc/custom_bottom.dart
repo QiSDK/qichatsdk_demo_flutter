@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +10,10 @@ import 'package:fixnum/src/int64.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
-
 import '../base/custom_interceptors.dart';
+import '../model/Result.dart' as re;
 
 typedef SubmittedAction = void Function(String val);
 
@@ -296,7 +297,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   Future<void> upload(Uint8List imgData, Uint8List? thumbnailData, bool isVideo) async {
     // 设置URL
-    final String apiUrl = '${baseUrlApi()}/v1/assets/upload/';
+    final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v3';
 
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
@@ -317,7 +318,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
     // 创建表单数据
     FormData formData = FormData.fromMap({
-      'type': 4,
+      'type': '4',
       'thumbnail': thumbnailData == null ? null : MultipartFile.fromBytes(
         thumbnailData,
         filename: fileNameThumbnail,
@@ -341,7 +342,14 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           });
 
       if (response.statusCode == 200) {
-        final String filePath = response.data.toString();
+        final responseData = response.data is String
+            ? jsonDecode(response.data)
+            : response.data;
+        var result = re.Result<re.FilePath>.fromJson(
+          responseData,
+              (json) => re.FilePath.fromJson(json as Map<String, dynamic>),
+        );
+        final String filePath = result.data?.filePath ?? "";
         debugPrint(filePath);
         if (filePath.isNotEmpty) {
           widget.onUploadSuccess(filePath, isVideo);

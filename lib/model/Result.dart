@@ -22,3 +22,20 @@ class Result<T> {
     return json;
   }
 }
+
+
+class FilePath {
+  String? filePath;
+
+  FilePath({this.filePath});
+
+  FilePath.fromJson(Map<String, dynamic> json) {
+    filePath = json['filepath'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['filepath'] = this.filePath;
+    return data;
+  }
+}
