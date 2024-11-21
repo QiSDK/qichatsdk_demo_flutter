@@ -77,6 +77,7 @@ dependencies:
   get_thumbnail_video: ^0.6.1
   ffmpeg_kit_flutter_full_gpl: ^4.5.1
   webview_flutter: ^4.8.0
+  webview_flutter_wkwebview: ^3.14.0
   #auto_scroll: ^0.2.0
 
 dev_dependencies:
