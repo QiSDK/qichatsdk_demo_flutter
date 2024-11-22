@@ -333,9 +333,9 @@ class _ChatPageState extends State<ChatPage>
         SmartDialog.showToast("会话超时", displayTime: Duration(seconds: 3));
         Navigator.pop(context);
       } else {
-        //showTip("在别处登录了")
-        //toast("在别处登录了")
         //在此处退出聊天
+        SmartDialog.showToast("已在别处登录了", displayTime: Duration(seconds: 3));
+        Navigator.pop(context);
       }
     } else {
       _getUnsentMessage();

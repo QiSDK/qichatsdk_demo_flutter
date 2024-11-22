@@ -114,28 +114,41 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
     return SuperTooltip(
       content: buildToolAction(),
       controller: _toolTipController,
-      child: GestureDetector(
-        onLongPress: () {
-          _toolTipController.showTooltip();
-        },
-          onTap: ()  {
-             Navigator.push(
-                context,
-                MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
-          },
-        child:
-            Stack(
-                alignment: Alignment.center,
-               children: [
-                 _localImage(),
-                Positioned(child: Icon(Icons.slow_motion_video_outlined,
-                 size: 50.0,
-                 color: Colors.white.withOpacity(0.8))
-                )
-               ]
-            )
-      ),
-    );
+        child: Container(
+            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            color: Colors.blueAccent, child:  Column(
+
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "   " +  msgTime,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white.withOpacity(0.5)
+                        : Colors.grey),
+              ), GestureDetector(
+                  onLongPress: () {
+                    _toolTipController.showTooltip();
+                  },
+                  onTap: ()  {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
+                  },
+                  child:
+                  Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        _localImage(),
+                        Positioned(child: Icon(Icons.slow_motion_video_outlined,
+                            size: 50.0,
+                            color: Colors.white.withOpacity(0.8))
+                        )
+                      ]
+                  )
+              ),
+            ])));
   }
 
   buildToolAction() {

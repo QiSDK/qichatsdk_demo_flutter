@@ -98,7 +98,22 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
     return SuperTooltip(
       content: buildToolAction(),
       controller: _toolTipController,
-      child: GestureDetector(
+      child:
+      Container(
+        padding:  EdgeInsets.fromLTRB(0, 5, 0, 0),
+          color: Colors.blueAccent,
+     child:  Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        Text(
+          "   " + msgTime,
+        style: TextStyle(
+            fontSize: 12,
+
+            color: widget.message.author.id == widget.chatId
+                ? Colors.white.withOpacity(0.5)
+                : Colors.grey),
+      ),GestureDetector(
         onLongPress: () {
           _toolTipController.showTooltip();
         },
@@ -109,7 +124,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
           },
         child: _remoteImag(),
       ),
-    );
+    ])));
   }
 
   buildToolAction() {
