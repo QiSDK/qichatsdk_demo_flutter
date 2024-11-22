@@ -50,7 +50,7 @@ class _ChatPageState extends State<ChatPage>
   var _me = const types.User(
     id: 'user',
   );
-  final _friend = const types.User(
+  var _friend =  types.User(
     firstName: 'client',
     imageUrl:'assets/png/qiliaoicon_withback.png',
     id: 'client',
@@ -63,8 +63,7 @@ class _ChatPageState extends State<ChatPage>
    var store = ChatStore();
   Timer? _timer;
   int _timerCount = 0;
-  Worker? _preWorker;
-  Worker? _Worker;
+  Worker? _worker;
   AutoScrollController _scrollController = AutoScrollController();
 
   AutoReply? _autoReplyModel;
@@ -192,8 +191,8 @@ class _ChatPageState extends State<ChatPage>
             _handleSendPressed(partialText);
           },
           onUploadSuccess: (String url, bool isVideo) {
+            debugPrint('上传成功 URL:${baseUrlImage + url}');
             if (isVideo) {
-              debugPrint('视频URL:${baseUrlImage + url}');
               Constant.instance.chatLib.sendMessage(
                   url, cMessage.MessageFormat.MSG_VIDEO, consultId,
                   withAutoReply: withAutoReplyBuilder);
@@ -235,14 +234,14 @@ class _ChatPageState extends State<ChatPage>
   }
 
   Widget customAvatarBuilder(String userId) {
-    var avatar = baseUrlImage + (entrance?.avatar ?? "");
+    //var avatar = baseUrlImage + (store.workerAvatar ?? "");
     return Container(
       padding: const EdgeInsets.only(right: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
         //child: const Icon(Icons.av_timer_sharp),
         child:  CachedNetworkImage(
-          imageUrl: avatar,
+          imageUrl: baseUrlImage + (store.workerAvatar ?? ""),
           width: 30,
           height: 30,
           progressIndicatorBuilder: (context, url, downloadProgress) => Center(
@@ -347,10 +346,12 @@ class _ChatPageState extends State<ChatPage>
     //c.workerId;
      ArticleRepository.assignWorker(consultId).then((onValue){
        if (onValue != null) {
-         workerId = onValue.workerId ?? 0;
-         getChatData(onValue.nick ?? "_", false);
+         _worker = Worker(workerId: onValue.workerId, nick: onValue?.nick, avatar: onValue?.avatar);
+         store.workerAvatar = _worker?.avatar ?? "";
+
+         //_preWorker = _worker;//Worker(workerId: workerId, nick: onValue?.nick);
+         getChatData(_worker!, false);
          store.loadingMsg = onValue?.nick ?? "..";
-         _preWorker = Worker(workerId: workerId, nick: onValue?.nick);
        }else{
          store.loadingMsg = "分配客服失败";
          SmartDialog.showToast("分配客服失败");
@@ -363,10 +364,9 @@ class _ChatPageState extends State<ChatPage>
     print("Worker Changed for Consult ID: ${msg.consultId}");
     _updateUI("客服更换成功，新worker id:${msg.workerId}");
     //客服更换之后，在这重新调用历史记录的接口，和更换客服头像、名字
-    if (workerId > 0 && workerId != msg.workerId) {
+    if ((_worker?.workerId ?? 0) > 0 && (_worker?.workerId ?? 0) != msg.workerId) {
       consultId = msg.consultId;
-      workerId = msg.workerId;
-      getChatData(msg.workerName, true);
+      getChatData(Worker(workerId: msg.workerId, nick: msg.workerName, avatar: msg.workerAvatar), true);
       store.loadingMsg = msg.workerName;
     }
   }
@@ -446,7 +446,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  Future<void> getChatData(String workerName, bool workerChanged) async {
+  Future<void> getChatData(Worker myWorker, bool workerChanged) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(PARAM_XTOKEN, xToken);
     _messages.clear();
@@ -463,7 +463,7 @@ class _ChatPageState extends State<ChatPage>
       _isFirstLoad = false;
       //自动回复
       AutoReply? model =
-          await ArticleRepository.queryAutoReply(consultId, workerId);
+          await ArticleRepository.queryAutoReply(consultId, myWorker.workerId ?? 0);
       print(model?.autoReplyItem?.qa);
       print(model?.autoReplyItem?.title);
       _autoReplyModel = model;
@@ -482,11 +482,11 @@ class _ChatPageState extends State<ChatPage>
       }
     }
 
-    String hello = "您好，${_preWorker?.nick ?? "_"} 已为您转接！${workerName}为您服务";
+    String hello = "您好，${_worker?.nick ?? "_"} 已为您转接！${myWorker.nick}为您服务";
     if (!workerChanged){
-      hello = "您好，${workerName}为您服务！";
+      hello = "您好，${myWorker.nick}为您服务！";
     }else{
-      _preWorker = Worker(workerId: workerId, nick: workerName);
+      _worker = myWorker;
     }
     //您好，{转出会话客服账号} 已为您转接！{接收会话客服账号} 为您服务！
     setState(() {
@@ -503,6 +503,7 @@ class _ChatPageState extends State<ChatPage>
             id: _generateRandomId(),
             status: types.Status.sent,
           ));
+      store.workerAvatar = myWorker.avatar ?? "";
     });
     //处理在无网、或断网情况下未发出去的消息
     _handleUnSent();
@@ -591,6 +592,12 @@ class _ChatPageState extends State<ChatPage>
     if (sender.id == _me.id){
       sender = _me;
     }else{
+      _friend = types.User(
+        firstName: 'client',
+        imageUrl:baseUrlImage + store.workerAvatar,
+        id: 'client',
+        lastName: "客服",
+      );
       sender = _friend;
     }
     types.Message? msg;

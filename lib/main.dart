@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:qichatsdk_demo_flutter/vc/entrancePage.dart';
@@ -99,12 +100,11 @@ class MyHomePage extends StatefulWidget {
 }
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver implements LineDetectDelegate {
   String _textContent = "正在线路检测。。。";
-
+  String _verionNo = "";
   @override
   void initState() {
     WidgetsBinding.instance?.addObserver(this);
     super.initState();
-
     loadData();
   }
 
@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
     }
   }
 
-  void loadData(){
+  Future<void> loadData() async {
     //if (domain.isEmpty) {
       print("开始线路检测");
       var lineDetect = LineDetectLib(
@@ -128,6 +128,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
       lineDetect.getLine();
       lineDetect.delegate = this;
     //}
+
+      _verionNo = await Util().getAppVersion();
   }
 
   void _updateUI(String content) {
@@ -158,19 +160,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            //
-            // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-            // action in the IDE, or press "p" in the console), to see the
-            // wireframe for each widget.
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ElevatedButton(
@@ -186,6 +175,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   '$_textContent',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),  Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  '版本号：$_verionNo',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ),

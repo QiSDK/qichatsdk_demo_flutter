@@ -33,7 +33,7 @@ String domain = "";  // Domain
 String baseUrlApi(){
   return "https://$domain";
 }
-int workerId = -1;
+//int workerId = -1;
 String userName ='王五';
 int maxSessionMins = 5;
 

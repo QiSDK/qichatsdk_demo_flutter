@@ -312,8 +312,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       'X-Token': xToken,
     };
 
-    final String fileName = isVideo ? 'file.mp4' : 'file.png';
-    final String fileNameThumbnail = isVideo ? 'fileThumbnail.mp4' : 'fileThumbnail.png';
+    final String fileName = isVideo ? '${DateTime.now().millisecond}file.mp4' : '${DateTime.now().millisecond}file.png';
+    final String fileNameThumbnail = isVideo ? '${DateTime.now().millisecond}fileThumbnail.mp4' : '${DateTime.now().millisecond}fileThumbnail.png';
     final String mimeType = isVideo ? 'video/mp4' : 'image/png';
 
     // 创建表单数据
@@ -332,6 +332,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     debugPrint('xToken=$xToken');
     try {
       SmartDialog.showLoading(msg: "上传中");
+      Constant.instance.chatLib.idleTimes = 0;
       final Response response = await dio.post(apiUrl, data: formData,
           onSendProgress: (int sent, int total){
         debugPrint(
@@ -340,7 +341,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
             debugPrint(
                 'Receive Progress: ${(rece / total * 100).toStringAsFixed(0)}% ${DateTime.now()}');
           });
-
+      Constant.instance.chatLib.idleTimes = 0;
       if (response.statusCode == 200) {
         final responseData = response.data is String
             ? jsonDecode(response.data)
