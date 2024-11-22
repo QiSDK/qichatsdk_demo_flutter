@@ -4,6 +4,7 @@ import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
@@ -100,5 +101,12 @@ class Util {
       print("Error generating thumbnail: $e");
       return "";
     }
+  }
+
+  Future<String> getAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+      var _versionName = packageInfo.version; // Version name (e.g., 1.0.0)
+      var _versionCode = packageInfo.buildNumber; // Version code (e.g., 1)
+      return '$_versionName ($_versionCode)';
   }
 }

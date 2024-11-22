@@ -48,7 +48,7 @@ class CustomInterceptors extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-   // print(
+    //print(
      //   'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
 
     if (kDebugMode) {
