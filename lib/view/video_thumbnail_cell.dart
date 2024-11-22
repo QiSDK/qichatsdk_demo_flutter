@@ -116,7 +116,9 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
       controller: _toolTipController,
         child: Container(
             padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-            color: Colors.blueAccent, child:  Column(
+            color: widget.message.author.id == widget.chatId
+            ? Colors.blueAccent
+            : Colors.blue.shade100, child:  Column(
 
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

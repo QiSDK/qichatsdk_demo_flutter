@@ -101,8 +101,10 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
       child:
       Container(
         padding:  EdgeInsets.fromLTRB(0, 5, 0, 0),
-          color: Colors.blueAccent,
-     child:  Column(
+          color: widget.message.author.id == widget.chatId
+              ? Colors.blue
+              : Colors.blue.shade100,
+          child:  Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
         Text(

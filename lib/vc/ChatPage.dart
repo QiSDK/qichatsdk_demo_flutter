@@ -401,8 +401,6 @@ class _ChatPageState extends State<ChatPage>
       _messages.removeAt(index);
 
       MyMsg model = MyMsg();
-      model.imgUri = msg.image.uri;
-      model.videoUri = msg.video.uri;
       model.text = '对方撤回了1条消息';
       model.senderId = msg.sender.toString();
       model.msgId = msg.msgId.toString();
