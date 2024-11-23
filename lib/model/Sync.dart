@@ -105,9 +105,7 @@ class MsgItem {
   Content? content;
   Media? image;
   Media? video;
-  // "image": {
-  // "uri": "/session/20240927/230/666688/ASSET_KIND_SESSION/2bf88b8337752f72e72aefff4ce99082.jpg"
-  // }
+  WorkerChanged? workerChanged;
 
   MsgItem(
       {this.chatId,
@@ -125,7 +123,8 @@ class MsgItem {
         this.payloadId,
         this.content,
         this.image,
-        this.video
+        this.video,
+        this.workerChanged
       });
 
   MsgItem.fromJson(Map<String, dynamic> json) {
@@ -153,6 +152,9 @@ class MsgItem {
     json['video'] != null ? new Media.fromJson(json['video']) : null;
     content =
     json['content'] != null ? new Content.fromJson(json['content']) : null;
+
+    workerChanged =
+    json['workerChanged'] != null ? new WorkerChanged.fromJson(json['workerChanged']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -181,6 +183,9 @@ class MsgItem {
     }
     if (this.video != null) {
       data['video'] = this.video!.toJson();
+    }
+    if (this.workerChanged != null) {
+      data['workerChanged'] = this.workerChanged!.toJson();
     }
     return data;
   }
@@ -266,6 +271,47 @@ class Media {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['uri'] = this.uri;
+    return data;
+  }
+}
+
+class WorkerChanged {
+  String? workerClientId;
+  int? workerId;
+  String? name;
+  String? avatar;
+  String? greeting;
+  String? state;
+  String? consultId;
+
+  WorkerChanged(
+      {this.workerClientId,
+        this.workerId,
+        this.name,
+        this.avatar,
+        this.greeting,
+        this.state,
+        this.consultId});
+
+  WorkerChanged.fromJson(Map<String, dynamic> json) {
+    workerClientId = json['workerClientId'];
+    workerId = json['workerId'];
+    name = json['name'];
+    avatar = json['avatar'];
+    greeting = json['greeting'];
+    state = json['State'];
+    consultId = json['consultId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['workerClientId'] = this.workerClientId;
+    data['workerId'] = this.workerId;
+    data['name'] = this.name;
+    data['avatar'] = this.avatar;
+    data['greeting'] = this.greeting;
+    data['State'] = this.state;
+    data['consultId'] = this.consultId;
     return data;
   }
 }

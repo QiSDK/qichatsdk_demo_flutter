@@ -405,7 +405,7 @@ class _ChatPageState extends State<ChatPage>
       model.senderId = msg.sender.toString();
       model.msgId = msg.msgId.toString();
       model.msgTime = msg.msgTime.toDateTime();
-      composeLocalMsg(model, insert: true);
+      composeLocalMsg(model, insert: true, isTipText: true);
       _updateUI("删除成功 msgId:${msg.msgId}");
       print("删除成功: ${msg.msgId} ");
     } else {
@@ -470,7 +470,7 @@ class _ChatPageState extends State<ChatPage>
         firstName: userName);
 
     replyList = h?.replyList;
-    _buildHistory(h?.list);
+    _buildHistory(h);
 
     if (_isFirstLoad) {
       _isFirstLoad = false;
@@ -495,12 +495,12 @@ class _ChatPageState extends State<ChatPage>
       }
     }
 
-    String hello = "您好，${_worker?.nick ?? "_"} 已为您转接！${myWorker.nick}为您服务";
-    if (!workerChanged) {
-      hello = "您好，${myWorker.nick}为您服务！";
-    } else {
+    //String hello = "您好，${_worker?.nick ?? "_"} 已为您转接！${myWorker.nick}为您服务";
+    if (workerChanged) {
       _worker = myWorker;
     }
+
+    var hello = "您好，${myWorker.nick}为您服务！";
     //您好，{转出会话客服账号} 已为您转接！{接收会话客服账号} 为您服务！
     setState(() {
       _messages.insert(
@@ -531,10 +531,11 @@ class _ChatPageState extends State<ChatPage>
     super.dispose();
   }
 
-  _buildHistory(List<MsgItem>? msgItems) {
-    if (msgItems == null) {
+  _buildHistory(Sync? h) {
+    if (h == null || (h?.list?.length ?? 0) == 0) {
       return;
     }
+    List<MsgItem> msgItems = h.list!;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {
         continue;
@@ -547,7 +548,19 @@ class _ChatPageState extends State<ChatPage>
       model.msgId = msg.msgId;
       model.msgTime = Util.parseStringToDateTime(msg.msgTime);
       model.replyMsgId = msg.replyMsgId;
-      composeLocalMsg(model);
+      if (msg.workerChanged != null){
+        model.text = msg.workerChanged?.greeting ?? "";
+        composeLocalMsg(model, isTipText: true);
+      }else {
+        composeLocalMsg(model);
+      }
+
+      /*
+       else if (history.workerChanged != null){
+            cMContent.data = history.workerChanged.greeting
+            chatModel.cellType = CellType.TYPE_Tip
+        }
+       */
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
     if (mounted) {
@@ -588,7 +601,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  void composeLocalMsg(MyMsg msgModel, {bool insert = false}) {
+  void composeLocalMsg(MyMsg msgModel, {bool insert = false, bool isTipText = false}) {
     String imgUri = msgModel.imgUri ?? '';
     String videoUri = msgModel.videoUri ?? '';
     String text = msgModel.text ?? '';
@@ -650,7 +663,7 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           text: text,
           createdAt: milliSeconds,
-          metadata: {'msgTime': msgTime, 'replyText': replyText},
+          metadata: {'msgTime': msgTime, 'replyText': replyText, 'tipText': isTipText},
           id: _generateRandomId(),
           status: types.Status.sent,
           remoteId: msgId);

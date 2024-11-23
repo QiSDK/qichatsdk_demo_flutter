@@ -121,7 +121,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (content == 'autoReplay' && widget.message.metadata != null) {
       return initAutoReplay();
     }
-    if (content.contains('对方撤回')) {
+    if (widget.message.metadata != null && widget.message.metadata!['tipText'] == true) {
       return initWithdraws();
     }
     // if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
@@ -258,21 +258,23 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   initWithdraws() {
     return SizedBox(
-        width: 200, // Set the desired width
-        height: 45,
+      height: 65,
+        width: MediaQuery.of(context).size.width * 0.9, // Set the desired width
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              msgTime,
+
+              "\n" + msgTime,
               style: TextStyle(
+
                   fontSize: 12,
                   color: widget.message.author.id == widget.chatId
                       ? Colors.white.withOpacity(0.5)
                       : Colors.grey),
             ),
             Text(
-              content,
+               content,
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             )
           ],
