@@ -28,5 +28,10 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+
+	<key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+    <key>NSFileUsageDescription</key>
+    <string>We need access to save downloaded files.</string>
 </dict>
 </plist>

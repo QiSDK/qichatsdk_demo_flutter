@@ -14,6 +14,7 @@ as cmessage;
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 import '../Constant.dart';
+import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
@@ -23,7 +24,7 @@ import 'dart:typed_data';
 import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class VideoThumbnailCellWidget extends StatefulWidget {
-  types.Message message;
+  types.VideoMessage message;
   int messageWidth;
   String chatId;
   MessageItemOperateListener listener;
@@ -118,7 +119,19 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
             padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
             color: widget.message.author.id == widget.chatId
             ? Colors.blueAccent
-            : Colors.blue.shade100, child:  Column(
+            : Colors.blue.shade100, child:   Row( children: [
+            IconButton(onPressed: () async {
+        SmartDialog.showLoading(msg:"正在下载");
+        var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
+        SmartDialog.dismiss();
+        if (downloaded){
+        SmartDialog.showToast("下载成功");
+        }else{
+        SmartDialog.showToast("下载失败");
+        }
+
+        }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
+        Column(
 
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -150,7 +163,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                       ]
                   )
               ),
-            ])));
+            ])])));
   }
 
   buildToolAction() {

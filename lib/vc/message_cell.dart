@@ -258,24 +258,26 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
 
   initWithdraws() {
     return SizedBox(
-      height: 65,
         width: MediaQuery.of(context).size.width * 0.9, // Set the desired width
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-
-              "\n" + msgTime,
-              style: TextStyle(
-
-                  fontSize: 12,
-                  color: widget.message.author.id == widget.chatId
-                      ? Colors.white.withOpacity(0.5)
-                      : Colors.grey),
-            ),
-            Text(
-               content,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
+                child:   Text(
+                  msgTime,
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: widget.message.author.id == widget.chatId
+                          ? Colors.white.withOpacity(0.5)
+                          : Colors.grey),
+                )),
+            Padding(
+                padding: const EdgeInsets.all(5.0),
+                child:   Text(
+                  content,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                )
             )
           ],
         ));

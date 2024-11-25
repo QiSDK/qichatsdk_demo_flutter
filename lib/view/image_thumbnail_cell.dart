@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:path_provider/path_provider.dart';
+import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
@@ -104,29 +105,44 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
           color: widget.message.author.id == widget.chatId
               ? Colors.blue
               : Colors.blue.shade100,
-          child:  Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        Text(
-          "   " + msgTime,
-        style: TextStyle(
-            fontSize: 12,
+          child:
+              Row( children: [
+                IconButton(onPressed: () async {
+                  SmartDialog.showLoading(msg:"正在下载");
+                var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
+                  SmartDialog.dismiss();
+                if (downloaded){
+                  SmartDialog.showToast("下载成功");
+                }else{
+                  SmartDialog.showToast("下载失败");
+                }
 
-            color: widget.message.author.id == widget.chatId
-                ? Colors.white.withOpacity(0.5)
-                : Colors.grey),
-      ),GestureDetector(
-        onLongPress: () {
-          _toolTipController.showTooltip();
-        },
-          onTap: ()  {
-             Navigator.push(
-                context,
-                MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
-          },
-        child: _remoteImag(),
-      ),
-    ])));
+                }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
+                Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "   " + msgTime,
+                        style: TextStyle(
+                            fontSize: 12,
+
+                            color: widget.message.author.id == widget.chatId
+                                ? Colors.white.withOpacity(0.5)
+                                : Colors.grey),
+                      ),GestureDetector(
+                        onLongPress: () {
+                          _toolTipController.showTooltip();
+                        },
+                        onTap: ()  {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
+                        },
+                        child: _remoteImag(),
+                      ),
+                    ])
+              ],)
+        ));
   }
 
   buildToolAction() {

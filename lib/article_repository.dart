@@ -1,7 +1,8 @@
 import 'dart:developer';
-import 'dart:ffi';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
@@ -9,7 +10,9 @@ import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'api_service.dart';
 import 'model/Entrance.dart';
 import 'model/Result.dart';
+import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:fixnum/src/int64.dart' as fixNum;
+import 'package:file_picker/file_picker.dart';
 
 class ArticleRepository {
   static const String publishPath = '/api/PublishWork';
@@ -178,6 +181,42 @@ class ArticleRepository {
       //rethrow;
     }
   }
+
+
+  Future<bool> downloadVideo(String url) async {
+    try {
+      // Initialize Dio
+      Dio dio = Dio();
+      var fileName = url.split("/").last;
+      // Get the app's document directory to save the file
+      //Directory downloadDirectory = await getTemporaryDirectory();
+      //String savePath = '${downloadDirectory.path}/$fileName';
+      //String savePath = '/Users/xuefeng/Downloads/$fileName';
+
+      // Let the user choose the save location
+      String? savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save your file',
+        fileName: fileName,
+      );
+      // Start downloading
+      await dio.download(
+        url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            // Print download progress
+            print('Download Progress: ${(received / total * 100).toStringAsFixed(0)}%');
+          }
+        },
+      );
+      return true;
+      print('File saved to $savePath');
+    } catch (e) {
+      return false;
+      print('Error downloading file: $e');
+    }
+  }
+
 
   static Future<dynamic> uploadAudio(
       int workId, MultipartFile file, String lang) async {

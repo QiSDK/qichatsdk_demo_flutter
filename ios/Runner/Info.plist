@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UISupportsDocumentBrowser</key>
+    <true/>
+    <key>NSFileUsageDescription</key>
+    <string>We need access to save downloaded files.</string>
 </dict>
 </plist>

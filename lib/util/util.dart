@@ -109,4 +109,6 @@ class Util {
       var _versionCode = packageInfo.buildNumber; // Version code (e.g., 1)
       return '$_versionName ($_versionCode)';
   }
+
+
 }
