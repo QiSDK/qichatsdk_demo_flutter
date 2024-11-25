@@ -321,9 +321,8 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void systemMsg(Result result) {
-    print("System Message: ${result.message}");
+    print("System Message: ${result.message} Code:${result.code}");
     Constant.instance.isConnected = false;
-    print("已经断开");
     if (result.code == 1002 || result.code == 1010 || result.code == 1005) {
       if (result.code == 1002) {
         //showTip("无效的Token")
