@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
@@ -55,16 +56,19 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
 
   Future<void> getThumbnail() async {
     if (widget.message is types.VideoMessage){
-      var uri = (widget.message as types.VideoMessage).uri;
-      // var ex = path.split('.').last;
-      // content = path.replaceFirst(ex, ".jpg");
-      // print("图片路径:${content}");
-      var t = await Util().generateThumbnail(uri);
-      var f = File(t);
-      thumbnail = await f.readAsBytes();
-      if (mounted) {
-        setState(() {
-        });
+
+      if (Platform.isWindows){
+        final data = await rootBundle
+            .load('assets/png/defaultthumbnail.jpg'); // replace with your image path
+        thumbnail = data.buffer.asUint8List();
+      }else {
+        var uri = (widget.message as types.VideoMessage).uri;
+        var t = await Util().generateThumbnail(uri);
+        var f = File(t);
+        thumbnail = await f.readAsBytes();
+        if (mounted) {
+          setState(() {});
+        }
       }
     }
   }
@@ -83,7 +87,8 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
     }else{
       return Image.memory(
         thumbnail!,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
+        width: 300,
         height: 300,
       );
     }
@@ -156,10 +161,9 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                       alignment: Alignment.center,
                       children: [
                         _localImage(),
-                        Positioned(child: Icon(Icons.slow_motion_video_outlined,
+                        Icon(Icons.slow_motion_video_outlined,
                             size: 50.0,
                             color: Colors.white.withOpacity(0.8))
-                        )
                       ]
                   )
               ),

@@ -58,30 +58,15 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
     return buildGptMessage(context);
   }
 
-  _localImage() {
-   // getThumbnail();
-    if (thumbnail == null){
-      return  CircularProgressIndicator(
-        color: Colors.red,
-      );
-    }else{
-      return Image.memory(
-        thumbnail!,
-        fit: BoxFit.cover,
-        height: 300,
-      );
-    }
-  }
-
   _remoteImag(){
     return CachedNetworkImage(
       key: Key(widget.message.remoteId.toString()),
+      fit: BoxFit.contain,
+      width: 300,
       height: 300,
-      fit: BoxFit.cover,
       imageUrl: widget.message.uri,
     );
   }
-
 
   buildLoading() {
     return Container(

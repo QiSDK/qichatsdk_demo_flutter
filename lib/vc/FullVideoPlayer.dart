@@ -1,9 +1,12 @@
 
+import 'dart:io';
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:video_player/video_player.dart';
+//import 'package:video_player_win/video_player_win.dart' as winVideoPlayer;
 
 class Fullvideoplayer extends StatefulWidget {
   final types.VideoMessage message;
@@ -29,17 +32,19 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
     Uri? uri;
     try {
       uri = Uri.parse(widget.message.uri);
-      //uri = Uri.parse("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
-      _videoPlayerController = VideoPlayerController.networkUrl(uri);
-      await _videoPlayerController.initialize();
-      setState(() {
-        _chewieController = ChewieController(
-          videoPlayerController: _videoPlayerController,
-          aspectRatio: _videoPlayerController.value.aspectRatio,
-          autoPlay: true,
-          looping: true,
-        );
-      });
+      print("视频地址:${widget.message.uri}");
+
+        //uri = Uri.parse("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+        _videoPlayerController = VideoPlayerController.networkUrl(uri);
+        await _videoPlayerController.initialize();
+        setState(() {
+          _chewieController = ChewieController(
+            videoPlayerController: _videoPlayerController,
+            aspectRatio: _videoPlayerController.value.aspectRatio,
+            autoPlay: true,
+            looping: true,
+          );
+        });
     } catch (e) {
       print(e);
       setState(() {
@@ -83,7 +88,7 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
+    _videoPlayerController?.dispose();
     _chewieController?.dispose();
     super.dispose();
   }
