@@ -29,6 +29,7 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
     Uri? uri;
     try {
       uri = Uri.parse(widget.message.uri);
+      //uri = Uri.parse("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
       _videoPlayerController = VideoPlayerController.networkUrl(uri);
       await _videoPlayerController.initialize();
       setState(() {
