@@ -292,18 +292,34 @@ class _ChatPageState extends State<ChatPage>
       var index =
           _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
       if (index >= 0) {
+        var replayMsg = _messages[0].repliedMessage;
         _messages.removeAt(index);
         _messages.insert(
             index,
             types.TextMessage(
                 author: types.User(id: msg.sender.toString()),
                 text: msg.content.data,
+                repliedMessage: replayMsg,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
                 id: _generateRandomId(),
                 status: types.Status.sent,
                 remoteId: msg.msgId.toString()));
       }
+      //应该是不需要
+     // index =
+     //      _messages.indexWhere((p) => (p.repliedMessage?.remoteId ?? '#')  == msg.msgId.toString());
+     //  if (index >= 0){
+     //    var replyMsg =  types.TextMessage(
+     //        author: types.User(id: msg.sender.toString()),
+     //        text: msg.content.data,
+     //        createdAt: DateTime.now().millisecondsSinceEpoch,
+     //        metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+     //        id: _generateRandomId(),
+     //        status: types.Status.sent,
+     //        remoteId: msg.msgId.toString());
+     //    _messages[index] = _messages[index].copyWith(repliedMessage: replyMsg);
+     //  }
     } else {
       MyMsg model = MyMsg();
       model.imgUri = msg.image.uri;

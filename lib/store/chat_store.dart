@@ -8,6 +8,6 @@ abstract class _ChatStore with Store {
   @observable
   var loadingMsg = "正在连接中。。。";
 
-  @observable
+  //@observable
   var workerAvatar = "";
 }

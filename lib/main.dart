@@ -22,6 +22,7 @@ Future<void> main() async {
     WindowOptions windowOptions = WindowOptions(
       size: Size(900, 675),
       center: true,
+      fullScreen: false,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
