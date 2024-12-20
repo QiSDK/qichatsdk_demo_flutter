@@ -63,6 +63,7 @@ class _ChatPageState extends State<ChatPage>
   Timer? _timer;
   int _timerCount = 0;
   Worker? _worker;
+
   AutoScrollController _scrollController = AutoScrollController();
 
   AutoReply? _autoReplyModel;
@@ -245,7 +246,8 @@ class _ChatPageState extends State<ChatPage>
         borderRadius: BorderRadius.circular(15),
         //child: const Icon(Icons.av_timer_sharp),
         child: CachedNetworkImage(
-          imageUrl: baseUrlImage + (store.workerAvatar ?? ""),
+          //imageUrl: baseUrlImage + (store.workerAvatar ?? ""),
+          imageUrl: baseUrlImage + (_worker?.avatar ?? ""),
           width: 30,
           height: 30,
           progressIndicatorBuilder: (context, url, downloadProgress) => Center(
@@ -292,34 +294,33 @@ class _ChatPageState extends State<ChatPage>
       var index =
           _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
       if (index >= 0) {
-        var replayMsg = _messages[0].repliedMessage;
+        var metaData = _messages[index].metadata;
         _messages.removeAt(index);
         _messages.insert(
             index,
             types.TextMessage(
                 author: types.User(id: msg.sender.toString()),
                 text: msg.content.data,
-                repliedMessage: replayMsg,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
-                metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+                metadata: metaData,
                 id: _generateRandomId(),
                 status: types.Status.sent,
                 remoteId: msg.msgId.toString()));
       }
       //应该是不需要
-     // index =
-     //      _messages.indexWhere((p) => (p.repliedMessage?.remoteId ?? '#')  == msg.msgId.toString());
-     //  if (index >= 0){
-     //    var replyMsg =  types.TextMessage(
-     //        author: types.User(id: msg.sender.toString()),
-     //        text: msg.content.data,
-     //        createdAt: DateTime.now().millisecondsSinceEpoch,
-     //        metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-     //        id: _generateRandomId(),
-     //        status: types.Status.sent,
-     //        remoteId: msg.msgId.toString());
-     //    _messages[index] = _messages[index].copyWith(repliedMessage: replyMsg);
-     //  }
+     //index =
+     //     _messages.indexWhere((p) => (p.repliedMessage?.remoteId ?? '#')  == msg.msgId.toString());
+      // if (index >= 0){
+      //   var replyMsg =  types.TextMessage(
+      //       author: types.User(id: msg.sender.toString()),
+      //       text: msg.content.data,
+      //       createdAt: DateTime.now().millisecondsSinceEpoch,
+      //       metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
+      //       id: _generateRandomId(),
+      //       status: types.Status.sent,
+      //       remoteId: msg.msgId.toString());
+      //   _messages[index] = _messages[index].copyWith(repliedMessage: replyMsg);
+      // }
     } else {
       MyMsg model = MyMsg();
       model.imgUri = msg.image.uri;
@@ -483,7 +484,6 @@ class _ChatPageState extends State<ChatPage>
         id: h?.request?.chatId ?? "0",
         imageUrl: 'assets/png/me_avatar.png',
         firstName: userName);
-
     replyList = h?.replyList;
     _buildHistory(h);
 
@@ -578,9 +578,9 @@ class _ChatPageState extends State<ChatPage>
        */
       // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
-    if (mounted) {
-      setState(() {});
-    }
+    // if (mounted) {
+    //   setState(() {});
+    // }
     ArticleRepository.markRead(consultId);
   }
 
@@ -636,7 +636,8 @@ class _ChatPageState extends State<ChatPage>
     } else {
       _friend = types.User(
         firstName: 'client',
-        imageUrl: baseUrlImage + store.workerAvatar,
+        //imageUrl: baseUrlImage + store.workerAvatar,
+        imageUrl: baseUrlImage + (_worker?.avatar ?? ""),
         id: 'client',
         lastName: "客服",
       );
