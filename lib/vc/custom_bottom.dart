@@ -11,6 +11,8 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
+import 'package:qichatsdk_demo_flutter/util/UploadUtil.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import '../base/custom_interceptors.dart';
 import '../model/Result.dart' as re;
@@ -32,7 +34,7 @@ class ChatCustomBottom extends StatefulWidget {
 }
 
 class ChatCustomBottomState extends State<ChatCustomBottom>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin implements UploadListener{
   late FocusNode focusNode = FocusNode();
   late TextEditingController inputController = TextEditingController();
   var lastWords = '';
@@ -291,10 +293,12 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       thumbnail = Uint8List.fromList(thumbnailBytes);
       print("缩略图文件  " + thumbnailFile.path );
       */
-      upload(val, thumbnail, isVideo);
+      //upload(val, thumbnail, isVideo);
+      UploadUtil().upload(val, isVideo, this);
     }
   }
 
+  //v3, 已作废
   Future<void> upload(Uint8List imgData, Uint8List? thumbnailData, bool isVideo) async {
     // 设置URL
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v3';
@@ -365,5 +369,21 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       print('上传 finally ${DateTime.now()}');
       SmartDialog.dismiss();
     }
+  }
+
+  @override
+  void uploadFailed(String msg) {
+    SmartDialog.showToast(msg);
+  }
+
+  @override
+  void uploadProgress(int progress) {
+    SmartDialog.showLoading(msg:"正在上传 ${progress}%");
+  }
+
+  @override
+  void uploadSuccess(Urls path, bool isVideo) {
+      widget.onUploadSuccess(path.uri ?? "", isVideo);
+      SmartDialog.dismiss();
   }
 }
