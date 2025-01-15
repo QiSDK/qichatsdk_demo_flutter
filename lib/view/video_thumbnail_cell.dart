@@ -104,17 +104,17 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   }
 
 
-  buildLoading() {
-    return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: const SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
-        ));
-  }
+  // buildLoading() {
+  //   return Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //       child: const SizedBox(
+  //         width: 22,
+  //         height: 22,
+  //         child: CircularProgressIndicator(
+  //           color: Colors.white,
+  //         ),
+  //       ));
+  // }
 
   buildGptMessage(BuildContext context) {
     return SuperTooltip(
@@ -127,7 +127,12 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
             : Colors.blue.shade100, child:   Row( children: [
             IconButton(onPressed: () async {
         SmartDialog.showLoading(msg:"正在下载");
-        var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
+        /*
+         "uri": "/session/tenant_230/20250102/Videos/3137333537393937343830373166696c65d41d8cd98f00b204e9800998ecf8427e/index.mp4",
+                    "hlsUri": "/session/tenant_230/20250102/Videos/3137333537393937343830373166696c65d41d8cd98f00b204e9800998ecf8427e/master.m3u8",
+         */
+
+        var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
         SmartDialog.dismiss();
         if (downloaded){
         SmartDialog.showToast("下载成功");
