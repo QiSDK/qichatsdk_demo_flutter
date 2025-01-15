@@ -16,6 +16,7 @@ class FullImageView extends StatefulWidget {
 
 class _FullImageViewState extends State<FullImageView> {
   late final WebViewController _controller;
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +25,7 @@ class _FullImageViewState extends State<FullImageView> {
     init();
   }
 
-  init()  {
+  init() {
 
   }
 
@@ -41,12 +42,17 @@ class _FullImageViewState extends State<FullImageView> {
         body: _remoteImag());
   }
 
-  _remoteImag(){
-    return CachedNetworkImage(
-      key: Key(widget.message.remoteId.toString()),
-      width: MediaQuery.sizeOf(context).width,
-      fit: BoxFit.cover,
-      imageUrl: widget.message.uri,
+  _remoteImag() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+        child: CachedNetworkImage(
+          key: Key(widget.message.remoteId.toString()),
+          width: MediaQuery
+              .sizeOf(context)
+              .width,
+          fit: BoxFit.cover,
+          imageUrl: widget.message.uri,
+        ),
     );
   }
 }
