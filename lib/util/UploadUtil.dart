@@ -104,8 +104,10 @@ class UploadUtil {
         subscribeToSee(apiUrl + "?uploadId=${ result.data ?? ""}");
       } else {
         print('上传失败：${response.statusMessage}');
+        listener?.uploadFailed('上传失败：${response.statusCode} - ${response.statusMessage}');
       }
     } catch (e) {
+      listener?.uploadFailed('上传失败：${e.toString()}');
       print('上传失败：$e ${DateTime.now()}');
     } finally {
       print('上传 finally ${DateTime.now()}');
@@ -184,8 +186,8 @@ class UploadUtil {
         //   SmartDialog.dismiss();
         // }
       }
+    }else{
+      listener?.uploadFailed('上传失败：${response.statusCode} - ${response.statusMessage}');
     }
-    //  private fun subscribeToSSE(url: String, ext: String) {
-
   }
 }

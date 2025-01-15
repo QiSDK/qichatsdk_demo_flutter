@@ -198,6 +198,7 @@ class _ChatPageState extends State<ChatPage>
             }
             debugPrint('上传成功 URL:${baseUrlImage + (urls.hlsUri ?? "")}');
             if (isVideo) {
+              print("发送视频消息");
               Constant.instance.chatLib.sendVideoMessage(
                   urls.uri ?? "", urls.thumbnailUri ?? "", urls.hlsUri ?? "", consultId,
                   withAutoReply: withAutoReplyBuilder);
