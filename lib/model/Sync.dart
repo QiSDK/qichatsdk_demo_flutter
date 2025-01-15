@@ -1,6 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
 
 class Sync {
   Request? request;
@@ -104,7 +105,7 @@ class MsgItem {
   String? payloadId;
   Content? content;
   Media? image;
-  Media? video;
+  Urls? video;
   WorkerChanged? workerChanged;
 
   MsgItem(
@@ -149,7 +150,7 @@ class MsgItem {
     image =
     json['image'] != null ? new Media.fromJson(json['image']) : null;
     video =
-    json['video'] != null ? new Media.fromJson(json['video']) : null;
+    json['video'] != null ? new Urls.fromJson(json['video']) : null;
     content =
     json['content'] != null ? new Content.fromJson(json['content']) : null;
 

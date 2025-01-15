@@ -12,7 +12,7 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
+import 'enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class TextMessageWidget extends StatefulWidget {
   types.TextMessage message;

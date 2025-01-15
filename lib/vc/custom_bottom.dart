@@ -21,7 +21,7 @@ typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
-  Function(String, bool) onUploadSuccess;
+  Function(Urls, bool) onUploadSuccess;
 
   ChatCustomBottom({
     super.key,
@@ -357,7 +357,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         final String filePath = result.data?.filePath ?? "";
         debugPrint(filePath);
         if (filePath.isNotEmpty) {
-          widget.onUploadSuccess(filePath, isVideo);
+          //widget.onUploadSuccess(filePath, isVideo);
         }
         print('上传成功: $filePath ${DateTime.now()}');
       } else {
@@ -382,8 +382,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   @override
-  void uploadSuccess(Urls path, bool isVideo) {
-      widget.onUploadSuccess(path.uri ?? "", isVideo);
+  void uploadSuccess(Urls urls, bool isVideo) {
+      widget.onUploadSuccess(urls, isVideo);
       SmartDialog.dismiss();
   }
 }

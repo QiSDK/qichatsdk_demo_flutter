@@ -70,9 +70,14 @@ class Util {
     try {
       // Get the temporary directory to store the thumbnail
       final Directory tempDir = await getTemporaryDirectory();
+      var fileAr = videoPath.split("/");
       var fileName = videoPath.split("/").last;
-      var ex = fileName.split(".").last;
-      fileName = fileName.replaceFirst(ex, "jpg");
+      if (fileAr.length > 3){
+        fileName = fileAr[fileAr.length - 2];
+      }
+
+      //var ex = videoPath.split(".").last;
+      fileName = fileName + ".jpg";
       final String thumbnailPath = '${tempDir.path}/${fileName}';
 
       if (File(thumbnailPath).existsSync()){

@@ -11,11 +11,11 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
-import 'package:qichatsdk_demo_flutter/vc/message_cell.dart';
-import 'package:qichatsdk_demo_flutter/vc/video_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
@@ -191,15 +191,19 @@ class _ChatPageState extends State<ChatPage>
             final partialText = types.PartialText(text: trimmedText);
             _handleSendPressed(partialText);
           },
-          onUploadSuccess: (String url, bool isVideo) {
-            debugPrint('上传成功 URL:${baseUrlImage + url}');
+          onUploadSuccess: (Urls urls, bool isVideo) {
+            if ((urls.uri ?? "").isEmpty){
+              SmartDialog.showToast("上传错误，返回路径为空！");
+              return;
+            }
+            debugPrint('上传成功 URL:${baseUrlImage + (urls.hlsUri ?? "")}');
             if (isVideo) {
-              Constant.instance.chatLib.sendMessage(
-                  url, cMessage.MessageFormat.MSG_VIDEO, consultId,
+              Constant.instance.chatLib.sendVideoMessage(
+                  urls.uri ?? "", urls.thumbnailUri ?? "", urls.hlsUri ?? "", consultId,
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.VideoMessage(
                   author: _me,
-                  uri: baseUrlImage + url,
+                  uri: baseUrlImage + (urls.hlsUri ?? ""),
                   metadata: {
                     'msgTime': Util.convertDateToString(DateTime.now())
                   },
@@ -214,11 +218,11 @@ class _ChatPageState extends State<ChatPage>
               });
             } else {
               Constant.instance.chatLib.sendMessage(
-                  url, cMessage.MessageFormat.MSG_IMG, consultId,
+                  urls.uri ?? "", cMessage.MessageFormat.MSG_IMG, consultId,
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.ImageMessage(
                   author: _me,
-                  uri: baseUrlImage + url,
+                  uri: baseUrlImage + (urls.uri ?? ""),
                   metadata: {
                     'msgTime': Util.convertDateToString(DateTime.now())
                   },
@@ -324,7 +328,11 @@ class _ChatPageState extends State<ChatPage>
     } else {
       MyMsg model = MyMsg();
       model.imgUri = msg.image.uri;
-      model.videoUri = msg.video.uri;
+      if (msg.video.hlsUri.isNotEmpty){
+        model.videoUri = msg.video.hlsUri;
+      }else{
+        model.videoUri = msg.video.uri;
+      }
       model.text = msg.content.data;
       model.senderId = msg.sender.toString();
       model.msgId = msg.msgId.toString();
@@ -557,7 +565,8 @@ class _ChatPageState extends State<ChatPage>
       }
       MyMsg model = MyMsg();
       model.imgUri = msg.image?.uri ?? '';
-      model.videoUri = msg.video?.uri ?? '';
+
+      model.videoUri = (msg.video?.hlsUri ?? '').isEmpty ? (msg.video?.uri ?? '') : (msg.video?.hlsUri ?? '');
       model.text = msg.content?.data ?? '';
       model.senderId = msg.sender;
       model.msgId = msg.msgId;
