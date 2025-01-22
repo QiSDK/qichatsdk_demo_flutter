@@ -286,7 +286,7 @@ class _ChatPageState extends State<ChatPage>
         token: "",
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
-        custom: getCustomParam(userName, 1, 0),
+        custom: getCustomParam(userName, 1),
         maxSessionMinutes: maxSessionMins);
 
     // Now the listener will receive the delegate events
