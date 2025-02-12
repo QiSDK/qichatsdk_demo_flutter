@@ -13,7 +13,7 @@ import '../model/UploadPercent.dart';
 
 abstract class UploadListener {
   void uploadSuccess(Urls path, bool isVideo);
-  void uploadProgress(int progress);
+  void updateProgress(int progress);
   void uploadFailed(String msg);
 }
 
@@ -33,6 +33,8 @@ class UploadUtil {
     dio.options.receiveTimeout = const Duration(minutes: 15); // 接收超时
     dio.options.sendTimeout = const Duration(minutes: 15); // 接收超时
     dio.interceptors.add(CustomInterceptors());
+    uploadProgress = 1;
+    listener?.updateProgress(uploadProgress);
 
     dio.options.headers = {
       'Content-Type': 'multipart/form-data',
@@ -89,11 +91,12 @@ class UploadUtil {
         }
         print('上传成功: $filePath ${DateTime.now()}');
       } else if (response.statusCode == 202) {
-        // var b = gson.fromJson(bodyStr, ReturnData<String>()::class.java)
-        // subscribeToSSE(
-        //     Constants.baseUrlApi() + "/v1/assets/upload-v4?uploadId=" + b.data,
-        //     file.extension
-        // )
+        if (uploadProgress < 70){
+          uploadProgress = 70;
+        }else{
+          uploadProgress += 10;
+        }
+        listener?.updateProgress(uploadProgress);
         final responseData = response.data is String
             ? jsonDecode(response.data)
             : response.data;
@@ -101,6 +104,7 @@ class UploadUtil {
           responseData as Map<String, dynamic>, // Cast to Map<String, dynamic>
               (json) => json as String, //
         );
+        print('获得上传地址=${ result.data ?? ""}');
         subscribeToSee(apiUrl + "?uploadId=${ result.data ?? ""}");
       } else {
         print('上传失败：${response.statusMessage}');
@@ -121,9 +125,9 @@ class UploadUtil {
 
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
-    dio.options.connectTimeout = const Duration(minutes: 10);
-    dio.options.receiveTimeout = const Duration(minutes: 15); // 接收超时
-    dio.options.sendTimeout = const Duration(minutes: 15); // 接收超时
+    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.receiveTimeout = const Duration(minutes: 10); // 接收超时
+    dio.options.sendTimeout = const Duration(minutes: 5); // 接收超时
     dio.interceptors.add(CustomInterceptors());
 
     dio.options.headers = {
@@ -133,7 +137,7 @@ class UploadUtil {
 
     debugPrint('xToken=$xToken');
     // try {
-    SmartDialog.showLoading(msg: "上传中");
+    //SmartDialog.showLoading(msg: "上传中");
     Constant.instance.chatLib.idleTimes = 0;
     final Response response = await dio.get(url,
         onReceiveProgress: (int rece, int total) {
@@ -143,6 +147,7 @@ class UploadUtil {
         });
     Constant.instance.chatLib.idleTimes = 0;
     if (response.statusCode == 200) {
+      listener?.updateProgress(99);
       print("上传成功：${response.statusCode}");
       final body = response.data;
 
@@ -167,13 +172,12 @@ class UploadUtil {
             final result = UploadPercent.fromJson(jsonDecode(data));
 
             if (result.percentage == 100 && result.data != null) {
-              listener?.uploadProgress(result.percentage ?? 0);
               listener?.uploadSuccess(result.data!, true);
               print("上传成功 ${result.data?.uri}");
               print("${DateFormat('yyyy-MM-dd HH:mm:ss').format(
                   DateTime.now())} 上传进度 ${result.percentage}");
             } else {
-              listener?.uploadProgress(result.percentage ?? 0);
+              listener?.updateProgress(result.percentage ?? 0);
               print("${DateFormat('yyyy-MM-dd HH:mm:ss').format(
                   DateTime.now())} 上传进度 ${result.percentage}");
             }

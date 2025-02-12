@@ -4,7 +4,7 @@ import 'dart:io';
 class Custom {
   String username;
   int platform;
-  String userlevel;
+  int userlevel;
 
   Custom({required this.username, required this.platform, required this.userlevel});
 
@@ -22,7 +22,7 @@ String getCustomParam(String userName, int userLevel) {
   Custom custom = Custom(
     username: userName,
     platform: getPlatformCode(),
-    userlevel: userLevel.toString(),
+    userlevel: userLevel,
   );
 
   String jsonString = jsonEncode(custom.toJson());

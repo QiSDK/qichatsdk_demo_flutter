@@ -823,6 +823,11 @@ class _ChatPageState extends State<ChatPage>
     _timer = new Timer.periodic(
       oneSec,
       (Timer timer) {
+        //上传视频的时候，在这里更新上传进度，对接开发人员可以有自己的办法，和聊天sdk无关。
+        if (uploadProgress > 0 && (uploadProgress < 67 || uploadProgress >= 70) && uploadProgress < 96){
+          uploadProgress += 1;
+          this.updateProgress(uploadProgress);
+        }
         //每8秒检查一次状态
         if (_timerCount > 0 && _timerCount % 8 == 0) {
           //setState(() {
@@ -845,5 +850,9 @@ class _ChatPageState extends State<ChatPage>
       Constant.instance.chatLib.disconnect();
       initSDK();
     }
+  }
+
+  void updateProgress(int progress) {
+    SmartDialog.showLoading(msg:"正在上传 ${progress}%");
   }
 }
