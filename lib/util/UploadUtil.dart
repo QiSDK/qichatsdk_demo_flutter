@@ -115,7 +115,6 @@ class UploadUtil {
       print('上传失败：$e ${DateTime.now()}');
     } finally {
       print('上传 finally ${DateTime.now()}');
-      SmartDialog.dismiss();
     }
   }
 
@@ -183,12 +182,6 @@ class UploadUtil {
             }
           }
         }
-        // } catch (e) {
-        //   print('上传失败：$e ${DateTime.now()}');
-        // } finally {
-        //   print('上传 finally ${DateTime.now()}');
-        //   SmartDialog.dismiss();
-        // }
       }
     }else{
       listener?.uploadFailed('上传失败：${response.statusCode} - ${response.statusMessage}');

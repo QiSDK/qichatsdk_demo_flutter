@@ -22,11 +22,10 @@ typedef SubmittedAction = void Function(String val);
 class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
   Function(Urls, bool) onUploadSuccess;
-
   ChatCustomBottom({
     super.key,
     required this.onSubmitted,
-    required this.onUploadSuccess,
+    required this.onUploadSuccess
   });
 
   @override
