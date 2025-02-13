@@ -263,7 +263,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     };
     var ar = (photo?.name ?? "").split(".");
     if (ar.length > 1) {
-      if (imageTypes.contains(ar.last)) {
+      if (imageTypes.contains(ar.last.toLowerCase())) {
         isVideo = false;
       }
     } else {

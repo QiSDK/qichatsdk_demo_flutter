@@ -10,19 +10,13 @@ import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullVideoPlayer.dart';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
-as cmessage;
 import 'package:fixnum/src/int64.dart';
-import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
-import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
-
-import '../view/enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class VideoThumbnailCellWidget extends StatefulWidget {
   types.VideoMessage message;
@@ -79,7 +73,6 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   }
 
   _localImage() {
-   // getThumbnail();
     if (thumbnail == null){
       return  CircularProgressIndicator(
         color: Colors.red,
@@ -103,19 +96,6 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
     );
   }
 
-
-  // buildLoading() {
-  //   return Container(
-  //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //       child: const SizedBox(
-  //         width: 22,
-  //         height: 22,
-  //         child: CircularProgressIndicator(
-  //           color: Colors.white,
-  //         ),
-  //       ));
-  // }
-
   buildGptMessage(BuildContext context) {
     return SuperTooltip(
       content: buildToolAction(),
@@ -127,10 +107,6 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
             : Colors.blue.shade100, child:   Row( children: [
             IconButton(onPressed: () async {
         SmartDialog.showLoading(msg:"正在下载");
-        /*
-         "uri": "/session/tenant_230/20250102/Videos/3137333537393937343830373166696c65d41d8cd98f00b204e9800998ecf8427e/index.mp4",
-                    "hlsUri": "/session/tenant_230/20250102/Videos/3137333537393937343830373166696c65d41d8cd98f00b204e9800998ecf8427e/master.m3u8",
-         */
 
         var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
         SmartDialog.dismiss();
@@ -142,7 +118,6 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
 
         }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
         Column(
-
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
