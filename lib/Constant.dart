@@ -136,7 +136,7 @@ class Constant {
     return date.toLocal();
   }
 
-
-
-
+  var imageTypes = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "jfif", "heic"]; // 图片
+  var videoTypes = ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"]; // 视频
+  var fileTypes = ["docx", "doc", "pdf", "xls", "xlsx", "csv"]; // 文件
 }

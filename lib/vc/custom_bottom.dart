@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -275,7 +276,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      UploadUtil().upload(val, isVideo, this);
+      UploadUtil().upload(val, isVideo, this,  photo.path, imageBytes.length);
     }
   }
 

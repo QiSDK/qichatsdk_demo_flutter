@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +22,34 @@ class UploadUtil {
 
   UploadListener? listener;
 
+  //, filePath: String?, fileSize: Int32 = 0
   Future<void> upload(Uint8List imgData,
-      bool isVideo, UploadListener? mylistener) async {
+      bool isVideo, UploadListener? mylistener, String? filePath, int length) async {
     this.listener = mylistener;
     // 设置URL
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v4';
+
+    var ext = "";
+    if (filePath != null) {
+      ext = filePath?.split(".").last ?? "#";
+
+      if (!Constant.instance.imageTypes.contains(ext) &&
+          !Constant.instance.fileTypes.contains(ext) &&
+          !Constant.instance.videoTypes.contains(ext)) {
+        listener?.uploadFailed("不支持的文件格式");
+        return;
+      }
+    }
+
+
+    // let ext = filePath?.split(separator: ".").last?.lowercased() ?? "$"
+    //
+    // //目前只有pdf, word, excel等文件，filePath才不为空
+    // if (filePath != nil && !fileTypes.contains(ext)){
+    //   self.listener?.uploadFailed(msg: "不支持的文件格式")
+    //   return
+    // }
+
 
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
@@ -42,11 +66,15 @@ class UploadUtil {
       'X-Token': xToken,
     };
 
-    final String fileName = isVideo ? '${DateTime
+    // final String fileName = isVideo ? '${DateTime
+    //     .now()
+    //     .millisecond}file.mp4' : '${DateTime
+    //     .now()
+    //     .millisecond}file.jpg';
+
+    final String fileName = '${DateTime
         .now()
-        .millisecond}file.mp4' : '${DateTime
-        .now()
-        .millisecond}file.jpg';
+        .millisecond}.${ext}';
 
     //final String mimeType = isVideo ? 'video/mp4' : 'image/png';
 
@@ -87,6 +115,8 @@ class UploadUtil {
         if (filePath.isNotEmpty) {
           var urls = Urls();
           urls.uri = filePath;
+          urls.size = length;
+          urls.fileName = fileName;
           listener?.uploadSuccess(urls, false);
         }
         print('上传成功: $filePath ${DateTime.now()}');
@@ -113,6 +143,7 @@ class UploadUtil {
     } catch (e) {
       listener?.uploadFailed('上传失败：${e.toString()}');
       print('上传失败：$e ${DateTime.now()}');
+      SmartDialog.dismiss();
     } finally {
       print('上传 finally ${DateTime.now()}');
     }

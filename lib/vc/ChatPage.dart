@@ -192,15 +192,16 @@ class _ChatPageState extends State<ChatPage>
             _handleSendPressed(partialText);
           },
           onUploadSuccess: (Urls urls, bool isVideo) {
-            if ((urls.uri ?? "").isEmpty){
+            if ((urls.uri ?? "").isEmpty) {
               SmartDialog.showToast("上传错误，返回路径为空！");
               return;
             }
-            debugPrint('上传成功 URL:${baseUrlImage + (urls.hlsUri ?? "")}');
+            debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
             if (isVideo) {
               print("发送视频消息");
               Constant.instance.chatLib.sendVideoMessage(
-                  urls.uri ?? "", urls.thumbnailUri ?? "", urls.hlsUri ?? "", consultId,
+                  urls.uri ?? "", urls.thumbnailUri ?? "", urls.hlsUri ?? "",
+                  consultId,
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.VideoMessage(
                   author: _me,
@@ -208,7 +209,9 @@ class _ChatPageState extends State<ChatPage>
                   metadata: {
                     'msgTime': Util.convertDateToString(DateTime.now())
                   },
-                  createdAt: DateTime.now().millisecondsSinceEpoch,
+                  createdAt: DateTime
+                      .now()
+                      .millisecondsSinceEpoch,
                   id: "${Constant.instance.chatLib.payloadId}",
                   name: 'dd',
                   size: 200,
@@ -218,26 +221,54 @@ class _ChatPageState extends State<ChatPage>
                 _messages.insert(0, msg);
               });
             } else {
-              Constant.instance.chatLib.sendMessage(
-                  urls.uri ?? "", cMessage.MessageFormat.MSG_IMG, consultId,
-                  withAutoReply: withAutoReplyBuilder);
-              var msg = types.ImageMessage(
-                  author: _me,
-                  uri: baseUrlImage + (urls.uri ?? ""),
-                  metadata: {
-                    'msgTime': Util.convertDateToString(DateTime.now())
-                  },
-                  createdAt: DateTime.now().millisecondsSinceEpoch,
-                  id: "${Constant.instance.chatLib.payloadId}",
-                  name: 'dd',
-                  size: 200,
-                  status: types.Status.sent,
-                  remoteId: '0');
-              setState(() {
-                _messages.insert(0, msg);
-              });
+              var ext = (urls.uri ?? "")
+                  .split(".")
+                  .lastOrNull ?? "#";
+              if (Constant.instance.fileTypes.contains(ext)) {
+                Constant.instance.chatLib.sendMessage(
+                    urls.uri ?? "", cMessage.MessageFormat.MSG_FILE, consultId,
+                    withAutoReply: withAutoReplyBuilder, fileSize: urls.size ?? 0, fileName: urls.fileName ?? '');
+                var msg = types.FileMessage(
+                    author: _me,
+                    uri: baseUrlImage + (urls.uri ?? ""),
+                    metadata: {
+                      'msgTime': Util.convertDateToString(DateTime.now())
+                    },
+                    createdAt: DateTime
+                        .now()
+                        .millisecondsSinceEpoch,
+                    id: "${Constant.instance.chatLib.payloadId}",
+                    name: urls.fileName ?? '',
+                    size: urls.size ?? 0,
+                    status: types.Status.sent,
+                    remoteId: '0');
+                setState(() {
+                  _messages.insert(0, msg);
+                });
+              } else {
+                Constant.instance.chatLib.sendMessage(
+                    urls.uri ?? "", cMessage.MessageFormat.MSG_IMG, consultId,
+                    withAutoReply: withAutoReplyBuilder);
+                var msg = types.ImageMessage(
+                    author: _me,
+                    uri: baseUrlImage + (urls.uri ?? ""),
+                    metadata: {
+                      'msgTime': Util.convertDateToString(DateTime.now())
+                    },
+                    createdAt: DateTime
+                        .now()
+                        .millisecondsSinceEpoch,
+                    id: "${Constant.instance.chatLib.payloadId}",
+                    name: 'dd',
+                    size: 200,
+                    status: types.Status.sent,
+                    remoteId: '0');
+                setState(() {
+                  _messages.insert(0, msg);
+                });
+              }
             }
-          },
+          }
         ),
       ),
     );
@@ -327,19 +358,23 @@ class _ChatPageState extends State<ChatPage>
       //   _messages[index] = _messages[index].copyWith(repliedMessage: replyMsg);
       // }
     } else {
-      MyMsg model = MyMsg();
-      model.imgUri = msg.image.uri;
+
+
+      MsgItem item = MsgItem();
+      item.content?.data = '对方撤回了1条消息';
+      item.sender = msg.sender.toString();
+      item.msgId = msg.msgId.toString();
+      item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
+      item.image?.uri = msg.image.uri;
       if (msg.video.hlsUri.isNotEmpty){
-        model.videoUri = msg.video.hlsUri;
+        item.image?.uri = msg.video.hlsUri;
       }else{
-        model.videoUri = msg.video.uri;
+        item.image?.uri = msg.video.uri;
       }
-      model.text = msg.content.data;
-      model.senderId = msg.sender.toString();
-      model.msgId = msg.msgId.toString();
-      model.msgTime = msg.msgTime.toDateTime();
-      model.replyMsgId = msg.replyMsgId.toString();
-      composeLocalMsg(model, insert: true);
+      item.replyMsgId = msg.replyMsgId.toString();
+      item.content?.data = msg.content.data;
+
+      composeLocalMsg(item, insert: true);
       print("Received Message: ${msg}");
     }
     _updateUI("info");
@@ -425,12 +460,19 @@ class _ChatPageState extends State<ChatPage>
     if (index >= 0) {
       _messages.removeAt(index);
 
-      MyMsg model = MyMsg();
-      model.text = '对方撤回了1条消息';
-      model.senderId = msg.sender.toString();
-      model.msgId = msg.msgId.toString();
-      model.msgTime = msg.msgTime.toDateTime();
-      composeLocalMsg(model, insert: true, isTipText: true);
+      // MyMsg model = MyMsg();
+      // model.text = '对方撤回了1条消息';
+      // model.senderId = msg.sender.toString();
+      // model.msgId = msg.msgId.toString();
+      // model.msgTime = msg.msgTime.toDateTime();
+
+      MsgItem item = MsgItem();
+      item.content?.data = '对方撤回了1条消息';
+      item.sender = msg.sender.toString();
+      item.msgId = msg.msgId.toString();
+      item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
+
+      composeLocalMsg(item, insert: true, isTipText: true);
       _updateUI("删除成功 msgId:${msg.msgId}");
       print("删除成功: ${msg.msgId} ");
     } else {
@@ -564,20 +606,20 @@ class _ChatPageState extends State<ChatPage>
       if (msg.msgOp == "MSG_OP_DELETE") {
         continue;
       }
-      MyMsg model = MyMsg();
-      model.imgUri = msg.image?.uri ?? '';
-
-      model.videoUri = (msg.video?.hlsUri ?? '').isEmpty ? (msg.video?.uri ?? '') : (msg.video?.hlsUri ?? '');
-      model.text = msg.content?.data ?? '';
-      model.senderId = msg.sender;
-      model.msgId = msg.msgId;
-      model.msgTime = Util.parseStringToDateTime(msg.msgTime);
-      model.replyMsgId = msg.replyMsgId;
+      // MyMsg model = MyMsg();
+      // model.imgUri = msg.image?.uri ?? '';
+      //
+      // model.videoUri = (msg.video?.hlsUri ?? '').isEmpty ? (msg.video?.uri ?? '') : (msg.video?.hlsUri ?? '');
+      // model.text = msg.content?.data ?? '';
+      // model.senderId = msg.sender;
+      // model.msgId = msg.msgId;
+      // model.msgTime = Util.parseStringToDateTime(msg.msgTime);
+      // model.replyMsgId = msg.replyMsgId;
       if (msg.workerChanged != null){
-        model.text = msg.workerChanged?.greeting ?? "";
-        composeLocalMsg(model, isTipText: true);
+        msg.content?.data = msg.workerChanged?.greeting ?? "";
+        composeLocalMsg(msg, isTipText: true);
       }else {
-        composeLocalMsg(model);
+        composeLocalMsg(msg);
       }
 
       /*
@@ -626,17 +668,18 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  void composeLocalMsg(MyMsg msgModel, {bool insert = false, bool isTipText = false}) {
-    String imgUri = msgModel.imgUri ?? '';
-    String videoUri = msgModel.videoUri ?? '';
-    String text = msgModel.text ?? '';
-    String senderId = msgModel.senderId ?? '';
+  void composeLocalMsg(MsgItem msgModel, {bool insert = false, bool isTipText = false}) {
+    String imgUri = msgModel.image?.uri ?? '';
+    String videoUri = msgModel.video?.uri ?? '';
+    String fileUri = msgModel.file?.uri ?? '';
+    String text = msgModel.content?.data ?? '';
+    String senderId = msgModel.sender ?? '';
     String msgId = msgModel.msgId ?? '';
     String? msgTime;
     int? milliSeconds;
     if (msgModel.msgTime != null) {
-      msgTime = Util.convertDateToString(msgModel.msgTime);
-      milliSeconds = msgModel.msgTime!.millisecondsSinceEpoch;
+      //msgTime = Util.convertDateToString(msgModel.msgTime);
+      milliSeconds = Util.parseStringToDateTime(msgModel.msgTime!)?.millisecondsSinceEpoch;
     }
 
     var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
@@ -654,7 +697,21 @@ class _ChatPageState extends State<ChatPage>
       sender = _friend;
     }
     types.Message? msg;
-    if (imgUri.isNotEmpty) {
+    if (fileUri.isNotEmpty) {
+      if (!fileUri.contains("http")) {
+        fileUri = baseUrlImage + imgUri;
+      }
+      msg = types.FileMessage(
+          author: sender,
+          createdAt: milliSeconds,
+          uri: fileUri,
+          id: _generateRandomId(),
+          name: msgModel.file?.fileName ?? 'no file name',
+          size: msgModel.file?.size ?? 0,
+          metadata: {'msgTime': msgTime},
+          status: types.Status.sent,
+          remoteId: msgId);
+    } else if (imgUri.isNotEmpty) {
       var imgUrl = imgUri;
       if (!imgUri.contains("http")) {
         imgUrl = baseUrlImage + imgUri;

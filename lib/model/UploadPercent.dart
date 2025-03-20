@@ -23,13 +23,21 @@ class Urls {
   String? uri;
   String? hlsUri;
   String? thumbnailUri;
+  String? fileName;
+  int? size;
+  /*
+      var fileName: String = ""
+    var fileSize: Int = 0
+   */
 
-  Urls({this.uri, this.hlsUri, this.thumbnailUri});
+  Urls({this.uri, this.hlsUri, this.thumbnailUri, this.fileName, this.size});
 
   Urls.fromJson(Map<String, dynamic> json) {
     uri = json['uri'];
     hlsUri = json['hlsUri'];
     thumbnailUri = json['thumbnailUri'];
+    fileName = json['fileName'];
+    size = json['size'];
   }
 
   Map<String, dynamic> toJson() {
@@ -37,6 +45,8 @@ class Urls {
     data['uri'] = this.uri;
     data['hlsUri'] = this.hlsUri;
     data['thumbnailUri'] = this.thumbnailUri;
+    data['fileName'] = this.fileName;
+    data['size'] = this.size;
     return data;
   }
 }

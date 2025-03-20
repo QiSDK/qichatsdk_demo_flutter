@@ -106,6 +106,7 @@ class MsgItem {
   Content? content;
   Media? image;
   Urls? video;
+  Urls? file;
   WorkerChanged? workerChanged;
 
   MsgItem(
@@ -125,6 +126,7 @@ class MsgItem {
         this.content,
         this.image,
         this.video,
+        this.file,
         this.workerChanged
       });
 
@@ -151,9 +153,10 @@ class MsgItem {
     json['image'] != null ? new Media.fromJson(json['image']) : null;
     video =
     json['video'] != null ? new Urls.fromJson(json['video']) : null;
+    file =
+    json['file'] != null ? new Urls.fromJson(json['file']) : null;
     content =
     json['content'] != null ? new Content.fromJson(json['content']) : null;
-
     workerChanged =
     json['workerChanged'] != null ? new WorkerChanged.fromJson(json['workerChanged']) : null;
   }
@@ -185,6 +188,10 @@ class MsgItem {
     if (this.video != null) {
       data['video'] = this.video!.toJson();
     }
+    if (this.file != null) {
+      data['file'] = this.file!.toJson();
+    }
+
     if (this.workerChanged != null) {
       data['workerChanged'] = this.workerChanged!.toJson();
     }
