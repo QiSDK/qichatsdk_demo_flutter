@@ -66,17 +66,8 @@ class UploadUtil {
       'X-Token': xToken,
     };
 
-    // final String fileName = isVideo ? '${DateTime
-    //     .now()
-    //     .millisecond}file.mp4' : '${DateTime
-    //     .now()
-    //     .millisecond}file.jpg';
-
     final String fileName = '${DateTime
-        .now()
-        .millisecond}.${ext}';
-
-    //final String mimeType = isVideo ? 'video/mp4' : 'image/png';
+        .now().millisecondsSinceEpoch}.${ext}';
 
     // 创建表单数据
     FormData formData = FormData.fromMap({

@@ -15,6 +15,7 @@ import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
+import 'package:qichatsdk_demo_flutter/view/File_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'dart:math';
@@ -165,6 +166,14 @@ class _ChatPageState extends State<ChatPage>
         },
         imageMessageBuilder: (message, {int? messageWidth}) {
           return ImageThumbnailCellWidget(
+            message: message,
+            chatId: _me.id,
+            listener: this,
+            messageWidth: messageWidth ?? 0,
+          );
+        },
+        fileMessageBuilder: (message, {int? messageWidth}) {
+          return FileCellWidget(
             message: message,
             chatId: _me.id,
             listener: this,
@@ -699,7 +708,7 @@ class _ChatPageState extends State<ChatPage>
     types.Message? msg;
     if (fileUri.isNotEmpty) {
       if (!fileUri.contains("http")) {
-        fileUri = baseUrlImage + imgUri;
+        fileUri = baseUrlImage + fileUri;
       }
       msg = types.FileMessage(
           author: sender,

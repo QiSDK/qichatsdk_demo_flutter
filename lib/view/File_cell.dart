@@ -9,12 +9,12 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
 import '../vc/FullImageView.dart';
 
-class ImageThumbnailCellWidget extends StatefulWidget {
-  types.ImageMessage message;
+class FileCellWidget extends StatefulWidget {
+  types.FileMessage message;
   int messageWidth;
   String chatId;
   MessageItemOperateListener listener;
-  ImageThumbnailCellWidget(
+  FileCellWidget(
       {super.key,
         required this.chatId,
         required this.message,
@@ -22,10 +22,10 @@ class ImageThumbnailCellWidget extends StatefulWidget {
         required this.listener});
 
   @override
-  State<ImageThumbnailCellWidget> createState() => _ImageThumbnailCellWidget();
+  State<FileCellWidget> createState() => _FileCellWidget();
 }
 
-class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
+class _FileCellWidget extends State<FileCellWidget> {
   types.Status? get state => widget.message.status;
 
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
@@ -42,13 +42,23 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
     return buildGptMessage(context);
   }
 
-  _remoteImag(){
-    return CachedNetworkImage(
-      key: Key(widget.message.remoteId.toString()),
+  // _remoteImag(){
+  //   return CachedNetworkImage(
+  //     key: Key(widget.message.remoteId.toString()),
+  //     fit: BoxFit.contain,
+  //     width: 300,
+  //     height: 300,
+  //     imageUrl: widget.message.uri,
+  //   );
+  // }
+
+  _localImag(){
+    return Image.asset(
+      displayFileThumbnail(widget.message.uri),
       fit: BoxFit.contain,
       width: 300,
       height: 300,
-      imageUrl: widget.message.uri,
+      
     );
   }
 
@@ -103,11 +113,11 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                           _toolTipController.showTooltip();
                         },
                         onTap: ()  {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
                         },
-                        child: _remoteImag(),
+                        child: _localImag(),
                       ),
                     ])
               ],)
@@ -148,5 +158,22 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
         ),
       ],
     );
+  }
+
+  String displayFileThumbnail(String path) {
+    // Extract the file extension
+    String ext = path.split('.').last.toLowerCase();
+    // Default icon for unknown file types
+    var fileIcon = 'assets/png/unknown_default.png';
+    // Determine the icon based on the file extension
+    if (ext == 'pdf') {
+      fileIcon = 'assets/png/pdf_default.png';
+    } else if (ext == 'xls' || ext == 'xlsx' || ext == 'csv') {
+      fileIcon = 'assets/png/excel_default.png';
+    } else if (ext == 'doc' || ext == 'docx') {
+      fileIcon = 'assets/png/word_default.png';
+    }
+    
+    return fileIcon;
   }
 }
