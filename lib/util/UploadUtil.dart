@@ -33,9 +33,9 @@ class UploadUtil {
     if (filePath != null) {
       ext = filePath?.split(".").last ?? "#";
 
-      if (!Constant.instance.imageTypes.contains(ext) &&
-          !Constant.instance.fileTypes.contains(ext) &&
-          !Constant.instance.videoTypes.contains(ext)) {
+      if (!imageTypes.contains(ext) &&
+          !fileTypes.contains(ext) &&
+          !videoTypes.contains(ext)) {
         listener?.uploadFailed("不支持的文件格式");
         return;
       }

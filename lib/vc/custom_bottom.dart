@@ -250,18 +250,18 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     print(photo?.path ?? "本地图片");
 
     var isVideo = true;
-    var imageTypes = {
-      "tif",
-      "tiff",
-      "bmp",
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "webp",
-      "ico",
-      "svg"
-    };
+    // var imageTypes = {
+    //   "tif",
+    //   "tiff",
+    //   "bmp",
+    //   "jpg",
+    //   "jpeg",
+    //   "png",
+    //   "gif",
+    //   "webp",
+    //   "ico",
+    //   "svg"
+    // };
     var ar = (photo?.name ?? "").split(".");
     if (ar.length > 1) {
       if (imageTypes.contains(ar.last.toLowerCase())) {

@@ -233,7 +233,7 @@ class _ChatPageState extends State<ChatPage>
               var ext = (urls.uri ?? "")
                   .split(".")
                   .lastOrNull ?? "#";
-              if (Constant.instance.fileTypes.contains(ext)) {
+              if (fileTypes.contains(ext)) {
                 Constant.instance.chatLib.sendMessage(
                     urls.uri ?? "", cMessage.MessageFormat.MSG_FILE, consultId,
                     withAutoReply: withAutoReplyBuilder, fileSize: urls.size ?? 0, fileName: urls.fileName ?? '');

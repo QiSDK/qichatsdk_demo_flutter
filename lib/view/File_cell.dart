@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fixnum/src/int64.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
-import '../vc/FullImageView.dart';
+import 'package:macos_webview_kit/macos_webview_kit.dart';
 
 class FileCellWidget extends StatefulWidget {
   types.FileMessage message;
@@ -27,7 +27,7 @@ class FileCellWidget extends StatefulWidget {
 
 class _FileCellWidget extends State<FileCellWidget> {
   types.Status? get state => widget.message.status;
-
+  final _macosWebviewKitPlugin = MacosWebviewKit();
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
   final _toolTipController = SuperTooltipController();
   Uint8List? thumbnail;
@@ -112,10 +112,16 @@ class _FileCellWidget extends State<FileCellWidget> {
                         onLongPress: () {
                           _toolTipController.showTooltip();
                         },
-                        onTap: ()  {
+                        onTap: ()  async {
+
+                          var googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
+                          _launchInWebView(Uri.parse(googleDocsUrl));
+
+
+                          //_launchUrl(widget.message.uri);
                           // Navigator.push(
                           //     context,
-                          //     MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
+                          //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
                         },
                         child: _localImag(),
                       ),
@@ -175,5 +181,32 @@ class _FileCellWidget extends State<FileCellWidget> {
     }
     
     return fileIcon;
+  }
+
+  Future<void> _launchUrl(Uri _url) async {
+    if (!await launchUrl(_url)) {
+      throw Exception('Could not launch $_url');
+    }
+  }
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Future<void> _launchInBrowserView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  Future<void> _launchInWebView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }

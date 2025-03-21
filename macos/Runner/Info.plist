@@ -33,5 +33,11 @@
     <true/>
     <key>NSFileUsageDescription</key>
     <string>We need access to save downloaded files.</string>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>sms</string>
+      <string>tel</string>
+    </array>
 </dict>
 </plist>
