@@ -51,7 +51,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   Future<void> getThumbnail() async {
     if (widget.message is types.VideoMessage){
 
-      if (Platform.isWindows){
+      if (Platform.isWindows || Platform.isMacOS){
         final data = await rootBundle
             .load('assets/png/defaultthumbnail.jpg'); // replace with your image path
         thumbnail = data.buffer.asUint8List();

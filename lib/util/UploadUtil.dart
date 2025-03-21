@@ -31,7 +31,7 @@ class UploadUtil {
 
     var ext = "";
     if (filePath != null) {
-      ext = filePath?.split(".").last ?? "#";
+      ext = (filePath?.split(".").last ?? "#").toLowerCase();
 
       if (!imageTypes.contains(ext) &&
           !fileTypes.contains(ext) &&
@@ -146,7 +146,7 @@ class UploadUtil {
 
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
-    dio.options.connectTimeout = const Duration(seconds: 30);
+    dio.options.connectTimeout = const Duration(seconds: 5);
     dio.options.receiveTimeout = const Duration(minutes: 10); // 接收超时
     dio.options.sendTimeout = const Duration(minutes: 5); // 接收超时
     dio.interceptors.add(CustomInterceptors());

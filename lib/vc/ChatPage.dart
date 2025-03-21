@@ -208,13 +208,14 @@ class _ChatPageState extends State<ChatPage>
             debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
             if (isVideo) {
               print("发送视频消息");
+              var videoUrl = (urls.hlsUri ?? "") == "" ?  urls.uri : urls.hlsUri;
               Constant.instance.chatLib.sendVideoMessage(
                   urls.uri ?? "", urls.thumbnailUri ?? "", urls.hlsUri ?? "",
                   consultId,
                   withAutoReply: withAutoReplyBuilder);
               var msg = types.VideoMessage(
                   author: _me,
-                  uri: baseUrlImage + (urls.hlsUri ?? ""),
+                  uri: baseUrlImage + (videoUrl ?? ""),
                   metadata: {
                     'msgTime': Util.convertDateToString(DateTime.now())
                   },
