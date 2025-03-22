@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
@@ -16,10 +18,10 @@ class FileCellWidget extends StatefulWidget {
   MessageItemOperateListener listener;
   FileCellWidget(
       {super.key,
-        required this.chatId,
-        required this.message,
-        required this.messageWidth,
-        required this.listener});
+      required this.chatId,
+      required this.message,
+      required this.messageWidth,
+      required this.listener});
 
   @override
   State<FileCellWidget> createState() => _FileCellWidget();
@@ -33,7 +35,7 @@ class _FileCellWidget extends State<FileCellWidget> {
   Uint8List? thumbnail;
 
   @override
-   void initState() {
+  void initState() {
     super.initState();
   }
 
@@ -52,13 +54,12 @@ class _FileCellWidget extends State<FileCellWidget> {
   //   );
   // }
 
-  _localImag(){
+  _localImag() {
     return Image.asset(
       displayFileThumbnail(widget.message.uri),
       fit: BoxFit.contain,
       width: 300,
       height: 300,
-      
     );
   }
 
@@ -76,58 +77,103 @@ class _FileCellWidget extends State<FileCellWidget> {
 
   buildGptMessage(BuildContext context) {
     return SuperTooltip(
-      content: buildToolAction(),
-      controller: _toolTipController,
-      child:
-      Container(
-        padding:  EdgeInsets.fromLTRB(0, 5, 0, 0),
+        content: buildToolAction(),
+        controller: _toolTipController,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
           color: widget.message.author.id == widget.chatId
               ? Colors.blue
               : Colors.blue.shade100,
-          child:
-              Row( children: [
-                IconButton(onPressed: () async {
-                  SmartDialog.showLoading(msg:"正在下载");
-                var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
-                  SmartDialog.dismiss();
-                if (downloaded){
-                  SmartDialog.showToast("下载成功");
-                }else{
-                  SmartDialog.showToast("下载失败");
-                }
+          child: _buildFileCell(),
+          // Row(
+          //   children: [
+          //     IconButton(
+          //         onPressed: () async {
+          //           SmartDialog.showLoading(msg: "正在下载");
+          //           var downloaded = await ArticleRepository()
+          //               .downloadVideo(widget.message.uri);
+          //           SmartDialog.dismiss();
+          //           if (downloaded) {
+          //             SmartDialog.showToast("下载成功");
+          //           } else {
+          //             SmartDialog.showToast("下载失败");
+          //           }
+          //         },
+          //         icon: const Icon(Icons.save_alt_sharp,
+          //             color: Colors.black, size: 30)),
+          //     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          //       Text(
+          //         "   " + msgTime,
+          //         style: TextStyle(
+          //             fontSize: 12,
+          //             color: widget.message.author.id == widget.chatId
+          //                 ? Colors.white.withOpacity(0.5)
+          //                 : Colors.grey),
+          //       ),
+          //       GestureDetector(
+          //         onLongPress: () {
+          //           _toolTipController.showTooltip();
+          //         },
+          //         onTap: () async {
+          //           var googleDocsUrl =
+          //               "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
+          //           _launchInWebView(Uri.parse(googleDocsUrl));
 
-                }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
-                Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "   " + msgTime,
-                        style: TextStyle(
-                            fontSize: 12,
-
-                            color: widget.message.author.id == widget.chatId
-                                ? Colors.white.withOpacity(0.5)
-                                : Colors.grey),
-                      ),GestureDetector(
-                        onLongPress: () {
-                          _toolTipController.showTooltip();
-                        },
-                        onTap: ()  async {
-
-                          var googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
-                          _launchInWebView(Uri.parse(googleDocsUrl));
-
-
-                          //_launchUrl(widget.message.uri);
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
-                        },
-                        child: _localImag(),
-                      ),
-                    ])
-              ],)
+          //           //_launchUrl(widget.message.uri);
+          //           // Navigator.push(
+          //           //     context,
+          //           //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
+          //         },
+          //         child: _localImag(),
+          //       ),
+          //     ])
+          //   ],
+          // )
         ));
+  }
+
+  _buildFileCell() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Image.asset(
+            displayFileThumbnail(widget.message.uri),
+            width: 40,
+            height: 40,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.message.name),
+              // 转kb或者M
+              Text(_formatFileSize(widget.message.size.toInt())),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes <= 0) return "0 B";
+
+    final units = ["B", "KB", "MB", "GB", "TB"];
+    int digitGroups = (log(bytes) / log(1024)).floor();
+
+    // 限制在可用单位范围内
+    digitGroups =
+        digitGroups > units.length - 1 ? units.length - 1 : digitGroups;
+
+    // 保留两位小数并移除末尾的0
+    String size = (bytes / pow(1024, digitGroups)).toStringAsFixed(2);
+    if (size.endsWith('.00')) {
+      size = size.substring(0, size.length - 3);
+    } else if (size.endsWith('0')) {
+      size = size.substring(0, size.length - 1);
+    }
+
+    return "$size ${units[digitGroups]}";
   }
 
   buildToolAction() {
@@ -179,7 +225,7 @@ class _FileCellWidget extends State<FileCellWidget> {
     } else if (ext == 'doc' || ext == 'docx') {
       fileIcon = 'assets/png/word_default.png';
     }
-    
+
     return fileIcon;
   }
 
