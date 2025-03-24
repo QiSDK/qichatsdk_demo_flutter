@@ -134,16 +134,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     //     imageUrl: widget.message.text,
     //   );
     // }
-    return SuperTooltip(
-      content: buildToolAction(),
-      controller: _toolTipController,
-      child: GestureDetector(
-        onLongPress: () {
-          _toolTipController.showTooltip();
-        },
-        child: buildNormalMessage(),
-      ),
-    );
+    return buildNormalMessage();
+
   }
 
   buildToolAction() {
@@ -197,7 +189,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         color: widget.message.author.id == widget.chatId
             ? Colors.white
             : Colors.black);
-    return Container(
+    return   Container(
       color: widget.message.author.id == widget.chatId
           ? Colors.blue
           : Colors.blue.shade100,
@@ -206,20 +198,25 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         crossAxisAlignment: CrossAxisAlignment.start, //
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(
+      SuperTooltip(
+        content: buildToolAction(),
+        controller: _toolTipController,child: Text(
             msgTime,
             style: TextStyle(
                 fontSize: 12,
                 color: widget.message.author.id == widget.chatId
                     ? Colors.white.withOpacity(0.5)
                     : Colors.grey),
-          ),
-          Container(
+          )),
+    GestureDetector(
+    onLongPress: () {
+    _toolTipController.showTooltip();
+    }, child:Container(
               margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
               child:Text(
                 content,
                 style: textStyle,
-              )),  widget.message.repliedMessage == null
+              ))),  widget.message.repliedMessage == null
               ? const SizedBox()
               : _buildFileCell()
         ],
@@ -383,7 +380,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       fileSize = (widget.message.repliedMessage as types.FileMessage).size;
       fileName = fileName.split('/').last;
     }else if (widget.message.repliedMessage?.type == MessageType.image){
-      fileName = (widget.message.repliedMessage as types.FileMessage).uri;
+      fileName = (widget.message.repliedMessage as types.ImageMessage).uri;
+      fileName = fileName.split('/').last;
+    }else if (widget.message.repliedMessage?.type == MessageType.video){
+      fileName = (widget.message.repliedMessage as types.VideoMessage).uri;
       fileName = fileName.split('/').last;
     }
     return Padding(

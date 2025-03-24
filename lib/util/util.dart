@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 
+import 'package:qichatsdk_demo_flutter/Constant.dart';
+
 class Util {
   static Future<String?> xFileToBase64(XFile xFile) async {
     try {
@@ -125,6 +127,10 @@ class Util {
     // Determine the icon based on the file extension
     if (ext == 'pdf') {
       fileIcon = 'assets/png/pdf_default.png';
+    } else if (imageTypes.contains(ext)) {
+      fileIcon = 'assets/png/image_default.png';
+    } else if (imageTypes.contains(ext)) {
+      fileIcon = 'assets/png/video_default.png';
     } else if (ext == 'xls' || ext == 'xlsx' || ext == 'csv') {
       fileIcon = 'assets/png/excel_default.png';
     } else if (ext == 'doc' || ext == 'docx') {
