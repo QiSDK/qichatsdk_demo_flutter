@@ -76,60 +76,66 @@ class _FileCellWidget extends State<FileCellWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    return SuperTooltip(
-        content: buildToolAction(),
-        controller: _toolTipController,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+    return
+      Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           color: widget.message.author.id == widget.chatId
               ? Colors.blue
               : Colors.blue.shade100,
-          child: _buildFileCell(),
-          // Row(
-          //   children: [
-          //     IconButton(
-          //         onPressed: () async {
-          //           SmartDialog.showLoading(msg: "正在下载");
-          //           var downloaded = await ArticleRepository()
-          //               .downloadVideo(widget.message.uri);
-          //           SmartDialog.dismiss();
-          //           if (downloaded) {
-          //             SmartDialog.showToast("下载成功");
-          //           } else {
-          //             SmartDialog.showToast("下载失败");
-          //           }
-          //         },
-          //         icon: const Icon(Icons.save_alt_sharp,
-          //             color: Colors.black, size: 30)),
-          //     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          //       Text(
-          //         "   " + msgTime,
-          //         style: TextStyle(
-          //             fontSize: 12,
-          //             color: widget.message.author.id == widget.chatId
-          //                 ? Colors.white.withOpacity(0.5)
-          //                 : Colors.grey),
-          //       ),
-          //       GestureDetector(
-          //         onLongPress: () {
-          //           _toolTipController.showTooltip();
-          //         },
-          //         onTap: () async {
-          //           var googleDocsUrl =
-          //               "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
-          //           _launchInWebView(Uri.parse(googleDocsUrl));
+          //child: _buildFileCell(),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, //
+            mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+        Text(
+          textAlign: TextAlign.start, // Aligns text to the right
+          "   " + msgTime,
+          style: TextStyle(
+              fontSize: 12,
+              color: widget.message.author.id == widget.chatId
+                  ? Colors.white.withOpacity(0.5)
+                  : Colors.grey),
+        ),
+        SuperTooltip(
+            content: buildToolAction(),
+            controller: _toolTipController,
+            child:  Row(
+                  children: [
+                    IconButton(
+                        onPressed: () async {
+                          SmartDialog.showLoading(msg: "正在下载");
+                          var downloaded = await ArticleRepository()
+                              .downloadVideo(widget.message.uri);
+                          SmartDialog.dismiss();
+                          if (downloaded) {
+                            SmartDialog.showToast("下载成功");
+                          } else {
+                            SmartDialog.showToast("下载失败");
+                          }
+                        },
+                        icon: const Icon(Icons.save_alt_sharp,
+                            color: Colors.black, size: 30)),
 
-          //           //_launchUrl(widget.message.uri);
-          //           // Navigator.push(
-          //           //     context,
-          //           //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
-          //         },
-          //         child: _localImag(),
-          //       ),
-          //     ])
-          //   ],
-          // )
-        ));
+                    GestureDetector(
+                      onLongPress: () {
+                        _toolTipController.showTooltip();
+                      },
+                      onTap: () async {
+                        var googleDocsUrl =
+                            "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
+                        _launchInWebView(Uri.parse(googleDocsUrl));
+
+                        //_launchUrl(widget.message.uri);
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
+                      },
+                      child: _buildFileCell(),
+                    ),
+
+                  ],
+                )
+            ),]));
   }
 
   _buildFileCell() {

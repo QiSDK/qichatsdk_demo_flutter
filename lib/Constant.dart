@@ -28,7 +28,7 @@ String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
 String cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ";
 int merchantId = 230;
 int userId = 666667; // Example: 1125324
-String baseUrlImage = "https://sssacc.wwc09.com"; // For constructing image URLs
+String baseUrlImage = "https://imagesacc.hfxg.xyz"; // For constructing image URLs
 
 String xToken = "";
 String domain = "";  // Domain

@@ -681,7 +681,7 @@ class _ChatPageState extends State<ChatPage>
     String? msgTime;
     int? milliSeconds;
     if (msgModel.msgTime != null) {
-      //msgTime = Util.convertDateToString(msgModel.msgTime);
+      msgTime = Util.convertTime(msgModel.msgTime!);
       milliSeconds =
           Util.parseStringToDateTime(msgModel.msgTime!)?.millisecondsSinceEpoch;
     }

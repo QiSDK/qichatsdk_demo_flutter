@@ -50,7 +50,7 @@ class Util {
 
     print("Original DateTime (UTC): $dateTime");
     print("Converted to GMT-8: $gmt8DateTime");
-    return DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(gmt8DateTime);
+    return DateFormat("yyyy-MM-dd HH:mm:ss").format(gmt8DateTime);
   }
 
   static DateTime? parseStringToDateTime(String? str) {

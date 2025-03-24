@@ -101,7 +101,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
       content: buildToolAction(),
       controller: _toolTipController,
         child: Container(
-            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             color: widget.message.author.id == widget.chatId
             ? Colors.blueAccent
             : Colors.blue.shade100, child:   Row( children: [
@@ -117,11 +117,13 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
         }
 
         }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
-        Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
+              crossAxisAlignment: CrossAxisAlignment.end, //
+              mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 "   " +  msgTime,
+                textAlign: TextAlign.right, // Aligns text to the right
                 style: TextStyle(
                     fontSize: 12,
                     color: widget.message.author.id == widget.chatId

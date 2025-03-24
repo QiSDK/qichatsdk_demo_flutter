@@ -70,7 +70,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
       controller: _toolTipController,
       child:
       Container(
-        padding:  EdgeInsets.fromLTRB(0, 5, 0, 0),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           color: widget.message.author.id == widget.chatId
               ? Colors.blue
               : Colors.blue.shade100,
@@ -89,8 +89,10 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                 }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
                 Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
+                        textAlign: TextAlign.left, // Aligns text to the right
                         "   " + msgTime,
                         style: TextStyle(
                             fontSize: 12,

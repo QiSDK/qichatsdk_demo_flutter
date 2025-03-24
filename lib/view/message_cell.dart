@@ -201,7 +201,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           : Colors.blue.shade100,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start, //
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             msgTime,
