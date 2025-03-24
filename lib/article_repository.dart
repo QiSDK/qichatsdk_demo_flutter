@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
@@ -99,9 +100,14 @@ class ArticleRepository {
   static Future<Sync?> queryHistory(fixNum.Int64 consultId) async {
     Resource res = Resource();
     res.path = syncMessagePath;
+
+    var l = 50;
+    if (kDebugMode){
+      l = 5;
+    }
     var map = {
       'chatId': 0,
-      "count": 50,
+      "count": l,
       "consultId": consultId.toInt(),
       "userId": userId
     };

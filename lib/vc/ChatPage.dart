@@ -109,13 +109,9 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        metadata: {
-          'msgTime': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-          'replyText': _getReplyText(replyId.toString(), true)
-        },
+        repliedMessage: _getReplyMessage(replyId.toString(), true),
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
-
     setState(() {
       _messages.insert(0, textMessage);
     });
@@ -670,7 +666,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  void composeLocalMsg(MsgItem msgModel,
+  types.Message? composeLocalMsg(MsgItem msgModel,
       {bool insert = false, bool isTipText = false}) {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
@@ -686,7 +682,11 @@ class _ChatPageState extends State<ChatPage>
           Util.parseStringToDateTime(msgModel.msgTime!)?.millisecondsSinceEpoch;
     }
 
-    var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
+   // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
+    types.Message? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
+    if ((msgModel.replyMsgId ?? "").length > 5){
+      replyMsg = _getReplyMessage(msgModel.replyMsgId ?? "", insert);
+    }
     var sender = types.User(id: senderId);
     if (sender.id == _me.id) {
       sender = _me;
@@ -709,6 +709,7 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           createdAt: milliSeconds,
           uri: fileUri,
+          repliedMessage: replyMsg,
           id: _generateRandomId(),
           name: msgModel.file?.fileName ?? 'no file name',
           size: msgModel.file?.size ?? 0,
@@ -724,6 +725,7 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           createdAt: milliSeconds,
           uri: imgUrl,
+          repliedMessage: replyMsg,
           id: _generateRandomId(),
           name: 'dd',
           size: 150,
@@ -738,6 +740,7 @@ class _ChatPageState extends State<ChatPage>
       msg = types.VideoMessage(
           author: sender,
           uri: url,
+          repliedMessage: replyMsg,
           createdAt: milliSeconds,
           id: _generateRandomId(),
           name: 'dd',
@@ -749,10 +752,10 @@ class _ChatPageState extends State<ChatPage>
       msg = types.TextMessage(
           author: sender,
           text: text,
+          repliedMessage: replyMsg,
           createdAt: milliSeconds,
           metadata: {
             'msgTime': msgTime,
-            'replyText': replyText,
             'tipText': isTipText
           },
           id: _generateRandomId(),
@@ -765,9 +768,32 @@ class _ChatPageState extends State<ChatPage>
     if (msg != null) {
       insert ? _messages.insert(0, msg) : _messages.add(msg);
     }
+    return msg;
   }
 
-  String _getReplyText(String replyMsgId, bool append) {
+  types.Message? _getReplyMessage(String replyMsgId, bool append) {
+    if (replyMsgId.isEmpty) {
+      return null;
+    }
+    types.Message? replyModel;
+    var index = -1;
+    if (append) {
+      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
+      if (index >= 0) {
+        replyModel = _messages[index];
+      }
+    } else {
+      //历史记录
+      if (replyList != null) {
+        index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
+        var msg = replyList![index];
+        replyModel = composeLocalMsg(msg);
+      }
+    }
+    return replyModel;
+  }
+
+  /*String _getReplyText(String replyMsgId, bool append) {
     if (replyMsgId.isEmpty) {
       return "";
     }
@@ -805,7 +831,7 @@ class _ChatPageState extends State<ChatPage>
       }
     }
     return replyTxt;
-  }
+  }*/
 
   void handleUnSent() {}
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -12,6 +13,7 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+import '../util/util.dart';
 import 'enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class TextMessageWidget extends StatefulWidget {
@@ -212,24 +214,14 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     ? Colors.white.withOpacity(0.5)
                     : Colors.grey),
           ),
-          Text(
-            content,
-            style: textStyle,
-          ),  replyText.isEmpty
+          Container(
+              margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+              child:Text(
+                content,
+                style: textStyle,
+              )),  widget.message.repliedMessage == null
               ? const SizedBox()
-              : IntrinsicWidth(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
-                  borderRadius:
-                  const BorderRadius.all(Radius.circular(6))),
-              child: Text(replyText,
-                  style:
-                  const TextStyle(fontSize: 12, color: Colors.black)),
-            ),
-          ),
+              : _buildFileCell()
         ],
       ),
     );
@@ -377,6 +369,39 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     ),
                   ));
             }),
+          )
+        ],
+      ),
+    );
+  }
+
+  _buildFileCell() {
+    var fileName = "";
+    var fileSize;
+    if (widget.message.repliedMessage?.type == MessageType.file){
+      fileName = (widget.message.repliedMessage as types.FileMessage).uri;
+      fileSize = (widget.message.repliedMessage as types.FileMessage).size;
+      fileName = fileName.split('/').last;
+    }else if (widget.message.repliedMessage?.type == MessageType.image){
+      fileName = (widget.message.repliedMessage as types.FileMessage).uri;
+      fileName = fileName.split('/').last;
+    }
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Image.asset(
+            Util().displayFileThumbnail(fileName),
+            width: 40,
+            height: 40,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(fileName),
+              // 转kb或者M
+              if (fileSize != null) Text(Util().formatFileSize(fileSize)),
+            ],
           )
         ],
       ),

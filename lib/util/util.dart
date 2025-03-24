@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'dart:math';
 
 class Util {
   static Future<String?> xFileToBase64(XFile xFile) async {
@@ -116,4 +117,41 @@ class Util {
   }
 
 
+  String displayFileThumbnail(String path) {
+    // Extract the file extension
+    String ext = path.split('.').last.toLowerCase();
+    // Default icon for unknown file types
+    var fileIcon = 'assets/png/unknown_default.png';
+    // Determine the icon based on the file extension
+    if (ext == 'pdf') {
+      fileIcon = 'assets/png/pdf_default.png';
+    } else if (ext == 'xls' || ext == 'xlsx' || ext == 'csv') {
+      fileIcon = 'assets/png/excel_default.png';
+    } else if (ext == 'doc' || ext == 'docx') {
+      fileIcon = 'assets/png/word_default.png';
+    }
+
+    return fileIcon;
+  }
+
+  String formatFileSize(int bytes) {
+    if (bytes <= 0) return "0 B";
+
+    final units = ["B", "KB", "MB", "GB", "TB"];
+    int digitGroups = (log(bytes) / log(1024)).floor();
+
+    // 限制在可用单位范围内
+    digitGroups =
+    digitGroups > units.length - 1 ? units.length - 1 : digitGroups;
+
+    // 保留两位小数并移除末尾的0
+    String size = (bytes / pow(1024, digitGroups)).toStringAsFixed(2);
+    if (size.endsWith('.00')) {
+      size = size.substring(0, size.length - 3);
+    } else if (size.endsWith('0')) {
+      size = size.substring(0, size.length - 1);
+    }
+
+    return "$size ${units[digitGroups]}";
+  }
 }

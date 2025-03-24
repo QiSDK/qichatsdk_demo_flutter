@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -10,6 +9,8 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
 import 'package:macos_webview_kit/macos_webview_kit.dart';
+
+import '../util/util.dart';
 
 class FileCellWidget extends StatefulWidget {
   types.FileMessage message;
@@ -42,25 +43,6 @@ class _FileCellWidget extends State<FileCellWidget> {
   @override
   Widget build(BuildContext context) {
     return buildGptMessage(context);
-  }
-
-  // _remoteImag(){
-  //   return CachedNetworkImage(
-  //     key: Key(widget.message.remoteId.toString()),
-  //     fit: BoxFit.contain,
-  //     width: 300,
-  //     height: 300,
-  //     imageUrl: widget.message.uri,
-  //   );
-  // }
-
-  _localImag() {
-    return Image.asset(
-      displayFileThumbnail(widget.message.uri),
-      fit: BoxFit.contain,
-      width: 300,
-      height: 300,
-    );
   }
 
   buildLoading() {
@@ -144,7 +126,7 @@ class _FileCellWidget extends State<FileCellWidget> {
       child: Row(
         children: [
           Image.asset(
-            displayFileThumbnail(widget.message.uri),
+            Util().displayFileThumbnail(widget.message.uri),
             width: 40,
             height: 40,
           ),
@@ -153,7 +135,7 @@ class _FileCellWidget extends State<FileCellWidget> {
             children: [
               Text(widget.message.name),
               // 转kb或者M
-              Text(_formatFileSize(widget.message.size.toInt())),
+              Text(Util().formatFileSize(widget.message.size.toInt())),
             ],
           )
         ],
@@ -161,26 +143,6 @@ class _FileCellWidget extends State<FileCellWidget> {
     );
   }
 
-  String _formatFileSize(int bytes) {
-    if (bytes <= 0) return "0 B";
-
-    final units = ["B", "KB", "MB", "GB", "TB"];
-    int digitGroups = (log(bytes) / log(1024)).floor();
-
-    // 限制在可用单位范围内
-    digitGroups =
-        digitGroups > units.length - 1 ? units.length - 1 : digitGroups;
-
-    // 保留两位小数并移除末尾的0
-    String size = (bytes / pow(1024, digitGroups)).toStringAsFixed(2);
-    if (size.endsWith('.00')) {
-      size = size.substring(0, size.length - 3);
-    } else if (size.endsWith('0')) {
-      size = size.substring(0, size.length - 1);
-    }
-
-    return "$size ${units[digitGroups]}";
-  }
 
   buildToolAction() {
     return Column(
@@ -216,23 +178,6 @@ class _FileCellWidget extends State<FileCellWidget> {
         ),
       ],
     );
-  }
-
-  String displayFileThumbnail(String path) {
-    // Extract the file extension
-    String ext = path.split('.').last.toLowerCase();
-    // Default icon for unknown file types
-    var fileIcon = 'assets/png/unknown_default.png';
-    // Determine the icon based on the file extension
-    if (ext == 'pdf') {
-      fileIcon = 'assets/png/pdf_default.png';
-    } else if (ext == 'xls' || ext == 'xlsx' || ext == 'csv') {
-      fileIcon = 'assets/png/excel_default.png';
-    } else if (ext == 'doc' || ext == 'docx') {
-      fileIcon = 'assets/png/word_default.png';
-    }
-
-    return fileIcon;
   }
 
   Future<void> _launchUrl(Uri _url) async {
