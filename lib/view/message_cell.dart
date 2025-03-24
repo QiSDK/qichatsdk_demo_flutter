@@ -7,6 +7,7 @@ import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;
 import 'package:fixnum/src/int64.dart';
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../Constant.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
@@ -42,7 +43,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   String get content => widget.message.text;
   //String get msgTime => widget.message.metadata?['msgTime'] ?? '';
   String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
-  String get replyText => widget.message.metadata?['replyText'] ?? '';
+  //String get replyText => widget.message.metadata?['replyText'] ?? '';
 
   List<Qa> sectionList = [];
   AutoReply? autoReplyModel;
@@ -376,35 +377,52 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   _buildFileCell() {
     var fileName = "";
     var fileSize;
-    if (widget.message.repliedMessage?.type == MessageType.file){
-      fileName = (widget.message.repliedMessage as types.FileMessage).uri;
+    var url = "";
+    if (widget.message.repliedMessage?.type == MessageType.file) {
+      url = (widget.message.repliedMessage as types.FileMessage).uri;
       fileSize = (widget.message.repliedMessage as types.FileMessage).size;
-      fileName = fileName.split('/').last;
-    }else if (widget.message.repliedMessage?.type == MessageType.image){
-      fileName = (widget.message.repliedMessage as types.ImageMessage).uri;
-      fileName = fileName.split('/').last;
-    }else if (widget.message.repliedMessage?.type == MessageType.video){
-      fileName = (widget.message.repliedMessage as types.VideoMessage).uri;
-      fileName = fileName.split('/').last;
+      fileName = url
+          .split('/')
+          .last;
+    } else if (widget.message.repliedMessage?.type == MessageType.image) {
+      url = (widget.message.repliedMessage as types.ImageMessage).uri;
+      fileName = url
+          .split('/')
+          .last;
+    } else if (widget.message.repliedMessage?.type == MessageType.video) {
+      url = (widget.message.repliedMessage as types.ImageMessage).uri;
+      fileName = url
+          .split('/')
+          .last;
     }
     return Padding(
       padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Image.asset(
-            Util().displayFileThumbnail(fileName),
-            width: 40,
-            height: 40,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(fileName),
-              // 转kb或者M
-              if (fileSize != null) Text(Util().formatFileSize(fileSize)),
-            ],
-          )
-        ],
+      child: GestureDetector(
+        onLongPress: () {
+          _toolTipController.showTooltip();
+        },
+        onTap: () async {
+          var googleDocsUrl =
+              "https://docs.google.com/gview?embedded=true&url=${url}";
+          _launchInWebView(Uri.parse(googleDocsUrl));
+        },
+        child: Row(
+          children: [
+            Image.asset(
+              Util().displayFileThumbnail(fileName),
+              width: 40,
+              height: 40,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(fileName),
+                // 转kb或者M
+                if (fileSize != null) Text(Util().formatFileSize(fileSize)),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -461,5 +479,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       }
     }
     //}
+  }
+
+  Future<void> _launchInWebView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
