@@ -40,7 +40,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   types.Status? get state => widget.message.status;
 
   String get content => widget.message.text;
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  //String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   String get replyText => widget.message.metadata?['replyText'] ?? '';
 
   List<Qa> sectionList = [];
@@ -208,10 +209,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     ? Colors.white.withOpacity(0.5)
                     : Colors.grey),
           )),
-    GestureDetector(
-    onLongPress: () {
-    _toolTipController.showTooltip();
-    }, child:Container(
+          GestureDetector(
+              onLongPress: () {
+                _toolTipController.showTooltip();
+              }, child:Container(
               margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
               child:Text(
                 content,

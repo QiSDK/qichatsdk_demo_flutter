@@ -69,6 +69,12 @@ class Util {
     }
   }
 
+  String formatTimestamp(int millisecondsSinceEpoch) {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+    final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    return formattedDate;
+  }
+
   Future<String> generateThumbnail(String videoPath) async {
     try {
       // Get the temporary directory to store the thumbnail
