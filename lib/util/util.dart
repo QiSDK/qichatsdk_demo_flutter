@@ -135,7 +135,7 @@ class Util {
       fileIcon = 'assets/png/pdf_default.png';
     } else if (imageTypes.contains(ext)) {
       fileIcon = 'assets/png/image_default.png';
-    } else if (imageTypes.contains(ext)) {
+    } else if (videoTypes.contains(ext)) {
       fileIcon = 'assets/png/video_default.png';
     } else if (ext == 'xls' || ext == 'xlsx' || ext == 'csv') {
       fileIcon = 'assets/png/excel_default.png';

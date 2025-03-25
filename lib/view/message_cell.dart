@@ -15,6 +15,8 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../util/util.dart';
+import '../vc/FullImageView.dart';
+import '../vc/FullVideoPlayer.dart';
 import 'enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class TextMessageWidget extends StatefulWidget {
@@ -390,7 +392,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           .split('/')
           .last;
     } else if (widget.message.repliedMessage?.type == MessageType.video) {
-      url = (widget.message.repliedMessage as types.ImageMessage).uri;
+      url = (widget.message.repliedMessage as types.VideoMessage).uri;
       fileName = url
           .split('/')
           .last;
@@ -402,9 +404,21 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           _toolTipController.showTooltip();
         },
         onTap: () async {
-          var googleDocsUrl =
-              "https://docs.google.com/gview?embedded=true&url=${url}";
-          _launchInWebView(Uri.parse(googleDocsUrl));
+
+          var ext = fileName.split(".").last.toLowerCase();
+          if (imageTypes.contains(ext)){
+            Navigator.push(
+                context,
+                MaterialPageRoute( builder: (context) => FullImageView(message: widget.message.repliedMessage as types.ImageMessage)));
+          }else if(videoTypes.contains(ext)){
+            Navigator.push(
+                context,
+                MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message.repliedMessage as types.VideoMessage)));
+          }else {
+            var googleDocsUrl =
+                "https://docs.google.com/gview?embedded=true&url=${url}";
+            _launchInWebView(Uri.parse(googleDocsUrl));
+          }
         },
         child: Row(
           children: [

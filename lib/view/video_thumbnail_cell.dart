@@ -39,60 +39,61 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
 
   String content = "";
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get thumbnailUri => widget.message.metadata?['thumbnailUri'] ?? '';
   final _toolTipController = SuperTooltipController();
-  Uint8List? thumbnail;
+  //Uint8List? thumbnail;
 
   @override
    void initState() {
     super.initState();
-    getThumbnail();
+    //getThumbnail();
   }
 
-  Future<void> getThumbnail() async {
-    if (widget.message is types.VideoMessage){
-
-      if (Platform.isWindows || Platform.isMacOS){
-        final data = await rootBundle
-            .load('assets/png/defaultthumbnail.jpg'); // replace with your image path
-        thumbnail = data.buffer.asUint8List();
-      }else {
-        var uri = (widget.message as types.VideoMessage).uri;
-        var t = await Util().generateThumbnail(uri);
-        var f = File(t);
-        thumbnail = await f.readAsBytes();
-        if (mounted) {
-          setState(() {});
-        }
-      }
-    }
-  }
+  // Future<void> getThumbnail() async {
+  //   if (widget.message is types.VideoMessage){
+  //
+  //     if (Platform.isWindows || Platform.isMacOS){
+  //       final data = await rootBundle
+  //           .load('assets/png/defaultthumbnail.jpg'); // replace with your image path
+  //       thumbnail = data.buffer.asUint8List();
+  //     }else {
+  //       var uri = (widget.message as types.VideoMessage).uri;
+  //       var t = await Util().generateThumbnail(uri);
+  //       var f = File(t);
+  //       thumbnail = await f.readAsBytes();
+  //       if (mounted) {
+  //         setState(() {});
+  //       }
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return buildGptMessage(context);
   }
 
-  _localImage() {
-    if (thumbnail == null){
-      return  CircularProgressIndicator(
-        color: Colors.red,
-      );
-    }else{
-      return Image.memory(
-        thumbnail!,
-        fit: BoxFit.contain,
-        width: 300,
-        height: 300,
-      );
-    }
-  }
+  // _localImage() {
+  //   if (thumbnail == null){
+  //     return  CircularProgressIndicator(
+  //       color: Colors.red,
+  //     );
+  //   }else{
+  //     return Image.memory(
+  //       thumbnail!,
+  //       fit: BoxFit.contain,
+  //       width: 300,
+  //       height: 300,
+  //     );
+  //   }
+  // }
 
   _remoteImag(){
     return CachedNetworkImage(
       key: Key(widget.message.remoteId.toString()),
       width: 200,
       height: 150,
-      imageUrl: content,
+      imageUrl: thumbnailUri,
     );
   }
 
@@ -142,7 +143,8 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                   Stack(
                       alignment: Alignment.center,
                       children: [
-                        _localImage(),
+                        //_localImage(),
+                        _remoteImag(),
                         Icon(Icons.slow_motion_video_outlined,
                             size: 50.0,
                             color: Colors.white.withOpacity(0.8))

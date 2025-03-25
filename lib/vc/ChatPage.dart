@@ -11,6 +11,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
+import 'package:qichatsdk_demo_flutter/model/Sync.dart' as sy;
 import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
@@ -24,6 +25,7 @@ import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
 import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import '../Constant.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
@@ -359,17 +361,26 @@ class _ChatPageState extends State<ChatPage>
       // }
     } else {
       MsgItem item = MsgItem();
-      item.content?.data = '对方撤回了1条消息';
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
       item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
+      item.image = Media();
       item.image?.uri = msg.image.uri;
+
+      item.file = Urls();
+      item.file?.uri = msg.file.uri;
+      item.file?.size = msg.file.size;
+      item.file?.fileName = msg.file.fileName;
+
+      item.video = Urls();
       if (msg.video.hlsUri.isNotEmpty) {
-        item.image?.uri = msg.video.hlsUri;
+        item.video?.uri = msg.video.hlsUri;
       } else {
-        item.image?.uri = msg.video.uri;
+        item.video?.uri = msg.video.uri;
       }
       item.replyMsgId = msg.replyMsgId.toString();
+
+      item.content = sy.Content();
       item.content?.data = msg.content.data;
 
       composeLocalMsg(item, insert: true);
@@ -667,9 +678,10 @@ class _ChatPageState extends State<ChatPage>
   }
 
   types.Message? composeLocalMsg(MsgItem msgModel,
-      {bool insert = false, bool isTipText = false}) {
+      {bool insert = false, bool isTipText = false, bool onlyCompose = false}) {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
+    String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
     String fileUri = msgModel.file?.uri ?? '';
     String text = msgModel.content?.data ?? '';
     String senderId = msgModel.sender ?? '';
@@ -680,6 +692,10 @@ class _ChatPageState extends State<ChatPage>
       msgTime = Util.convertTime(msgModel.msgTime!);
       milliSeconds =
           Util.parseStringToDateTime(msgModel.msgTime!)?.millisecondsSinceEpoch;
+    }
+
+    if (!thumbnailUri.contains("http")){
+      thumbnailUri = baseUrlImage + thumbnailUri;
     }
 
    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
@@ -745,7 +761,7 @@ class _ChatPageState extends State<ChatPage>
           id: _generateRandomId(),
           name: 'dd',
           size: 150,
-          metadata: {'msgTime': msgTime},
+          metadata: {'msgTime': msgTime, 'thumbnailUri': thumbnailUri},
           status: types.Status.sent,
           remoteId: msgId);
     } else if (text.isNotEmpty) {
@@ -765,7 +781,7 @@ class _ChatPageState extends State<ChatPage>
       print("消息内容为空");
     }
 
-    if (msg != null) {
+    if (msg != null && !onlyCompose) {
       insert ? _messages.insert(0, msg) : _messages.add(msg);
     }
     return msg;
@@ -787,7 +803,7 @@ class _ChatPageState extends State<ChatPage>
       if (replyList != null) {
         index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
         var msg = replyList![index];
-        replyModel = composeLocalMsg(msg);
+        replyModel = composeLocalMsg(msg, onlyCompose: true);
       }
     }
     return replyModel;
