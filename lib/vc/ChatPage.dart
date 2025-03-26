@@ -206,8 +206,7 @@ class _ChatPageState extends State<ChatPage>
               debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
               if (isVideo) {
                 print("发送视频消息");
-                var videoUrl =
-                    (urls.hlsUri ?? "") == "" ? urls.uri : urls.hlsUri;
+                var videoUrl = urls.hlsUri == null ? urls.uri : urls.hlsUri;
                 Constant.instance.chatLib.sendVideoMessage(urls.uri ?? "",
                     urls.thumbnailUri ?? "", urls.hlsUri ?? "", consultId,
                     withAutoReply: withAutoReplyBuilder);
@@ -215,7 +214,8 @@ class _ChatPageState extends State<ChatPage>
                     author: _me,
                     uri: baseUrlImage + (videoUrl ?? ""),
                     metadata: {
-                      'msgTime': Util.convertDateToString(DateTime.now())
+                      'msgTime': Util.convertDateToString(DateTime.now()),
+                      'thumbnailUri': baseUrlImage + (urls.thumbnailUri ?? "")
                     },
                     createdAt: DateTime.now().millisecondsSinceEpoch,
                     id: "${Constant.instance.chatLib.payloadId}",
@@ -810,46 +810,6 @@ class _ChatPageState extends State<ChatPage>
     }
     return replyModel;
   }
-
-  /*String _getReplyText(String replyMsgId, bool append) {
-    if (replyMsgId.isEmpty) {
-      return "";
-    }
-    String replyTxt = "";
-    types.Message? replyModel;
-    var index = -1;
-    if (append) {
-      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
-      if (index >= 0) {
-        replyModel = _messages[index];
-        if (replyModel is types.TextMessage) {
-          replyTxt = "回复：${(replyModel as types.TextMessage).text}";
-        } else if (replyModel is types.ImageMessage) {
-          replyTxt = "回复：[图片]";
-        } else if (replyModel is types.VideoMessage) {
-          replyTxt = "回复：[视频]";
-        }
-        debugPrint("replyModel:${replyModel.toJson()}");
-      }
-    } else {
-      //历史记录
-      if (replyList != null) {
-        index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
-
-        if (index >= 0) {
-          var msg = replyList![index];
-          if ((msg.image?.uri ?? "").isNotEmpty) {
-            replyTxt = "回复：[图片]";
-          } else if ((msg.video?.uri ?? "").isNotEmpty) {
-            replyTxt = "回复：[视频]";
-          } else {
-            replyTxt = "回复：${msg.content?.data ?? ""}";
-          }
-        }
-      }
-    }
-    return replyTxt;
-  }*/
 
   void handleUnSent() {}
 

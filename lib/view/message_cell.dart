@@ -15,6 +15,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import '../util/util.dart';
+import 'dart:io';
 import '../vc/FullImageView.dart';
 import '../vc/FullVideoPlayer.dart';
 import 'enhance_expansion_panel/enhance_expansion_panel.dart';
@@ -213,9 +214,13 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     : Colors.grey),
           )),
           GestureDetector(
-              onLongPress: () {
-                _toolTipController.showTooltip();
-              }, child:Container(
+              onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                  ? () => _toolTipController.showTooltip()
+                  : null,
+              onSecondaryTapDown: (details) {
+                if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+              },
+           child:Container(
               margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
               child:Text(
                 content,
@@ -402,9 +407,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: GestureDetector(
-        onLongPress: () {
-          _toolTipController.showTooltip();
-        },
         onTap: () async {
           var ext = fileName.split(".").last.toLowerCase();
           if (imageTypes.contains(ext)){
@@ -415,7 +417,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             Navigator.push(
                 context,
                 MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message.repliedMessage as types.VideoMessage)));
-          }else {
+          }else if(fileTypes.contains(ext)){
             var googleDocsUrl =
                 "https://docs.google.com/gview?embedded=true&url=${url}";
             _launchInWebView(Uri.parse(googleDocsUrl));

@@ -152,7 +152,7 @@ class _FileCellWidget extends State<FileCellWidget> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  "图片", Int64.parseInt(widget.message.remoteId.toString()));
+                  "文件", Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
