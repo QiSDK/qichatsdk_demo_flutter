@@ -396,6 +396,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       fileName = url
           .split('/')
           .last;
+    } else{
+      fileName = (widget.message.repliedMessage as types.TextMessage).text;
     }
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -404,7 +406,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           _toolTipController.showTooltip();
         },
         onTap: () async {
-
           var ext = fileName.split(".").last.toLowerCase();
           if (imageTypes.contains(ext)){
             Navigator.push(
@@ -423,7 +424,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         child: Row(
           children: [
             Text("回复："),
-            Image.asset(
+           if (url.isNotEmpty) Image.asset(
               Util().displayFileThumbnail(fileName),
               width: 40,
               height: 40,
