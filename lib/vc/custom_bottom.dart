@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:qichatsdk_demo_flutter/util/UploadUtil.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import '../base/custom_interceptors.dart';
 import '../model/Result.dart' as re;
+import 'package:file_picker/file_picker.dart';
 
 typedef SubmittedAction = void Function(String val);
 
@@ -157,7 +159,6 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       child: Row(
-
         children: [
          Text('回复：$replyText'),
           IconButton(onPressed: (){
@@ -165,7 +166,6 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           }, icon: Icon(Icons.close, color: Colors.blue, size: 20))
         ],
       )
-
     );
   }
 
@@ -255,8 +255,23 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   _pickImage() async {
     //await picker.pickImage(source: ImageSource.gallery);
-    final XFile? photo = await picker.pickMedia();
-    print(photo?.path ?? "本地图片");
+    //final XFile? photo = await picker.pickMedia();
+    //print(photo?.path ?? "本地图片");
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result == null) {
+      result;
+    } else {
+      // User canceled the picker
+    }
+
+    //File file = File(result.files.single.path!);
+    // All files
+    //List<XFile> xFiles = result!.xFiles;
+
+    // Individually
+    XFile photo = result!.files.first.xFile;
 
     var isVideo = true;
     // var imageTypes = {

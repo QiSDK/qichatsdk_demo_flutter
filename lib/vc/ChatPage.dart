@@ -540,6 +540,7 @@ class _ChatPageState extends State<ChatPage>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(PARAM_XTOKEN, xToken);
     _messages.clear();
+    SmartDialog.showLoading();
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
     _me = types.User(
@@ -548,7 +549,7 @@ class _ChatPageState extends State<ChatPage>
         firstName: userName);
     replyList = h?.replyList;
     _buildHistory(h);
-
+    SmartDialog.dismiss();
     if (_isFirstLoad) {
       _isFirstLoad = false;
       //自动回复
@@ -604,6 +605,7 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.isConnected = false;
     _timer?.cancel();
     _timer = null;
+    SmartDialog.dismiss();
     _getUnsentMessage();
     super.dispose();
   }
