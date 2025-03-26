@@ -378,6 +378,8 @@ class _ChatPageState extends State<ChatPage>
       } else {
         item.video?.uri = msg.video.uri;
       }
+      item.video?.thumbnailUri = msg.video.thumbnailUri;
+
       item.replyMsgId = msg.replyMsgId.toString();
 
       item.content = sy.Content();
@@ -681,7 +683,7 @@ class _ChatPageState extends State<ChatPage>
       {bool insert = false, bool isTipText = false, bool onlyCompose = false}) {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
-    String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
+    String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
     String fileUri = msgModel.file?.uri ?? '';
     String text = msgModel.content?.data ?? '';
     String senderId = msgModel.sender ?? '';

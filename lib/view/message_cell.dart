@@ -422,6 +422,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         },
         child: Row(
           children: [
+            Text("回复："),
             Image.asset(
               Util().displayFileThumbnail(fileName),
               width: 40,
