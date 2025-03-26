@@ -156,7 +156,16 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       color: Colors.grey.shade200,
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: Text('回复：$replyText'),
+      child: Row(
+
+        children: [
+         Text('回复：$replyText'),
+          IconButton(onPressed: (){
+            hideReply();
+          }, icon: Icon(Icons.close, color: Colors.blue, size: 20))
+        ],
+      )
+
     );
   }
 

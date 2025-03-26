@@ -131,8 +131,11 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                         ? Colors.white.withOpacity(0.5)
                         : Colors.grey),
               ), GestureDetector(
-                  onLongPress: () {
-                    _toolTipController.showTooltip();
+                  onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                      ? () => _toolTipController.showTooltip()
+                      : null,
+                  onSecondaryTapDown: (details) {
+                    if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
                   },
                   onTap: ()  {
                     Navigator.push(
@@ -162,7 +165,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  "视频", Int64.parseInt(widget.message.remoteId.toString()));
+                  "【视频】", Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),

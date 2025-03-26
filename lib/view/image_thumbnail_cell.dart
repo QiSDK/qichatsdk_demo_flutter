@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
@@ -101,8 +103,11 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                                 ? Colors.white.withOpacity(0.5)
                                 : Colors.grey),
                       ),GestureDetector(
-                        onLongPress: () {
-                          _toolTipController.showTooltip();
+                        onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                            ? () => _toolTipController.showTooltip()
+                            : null,
+                        onSecondaryTapDown: (details) {
+                          if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
                         },
                         onTap: ()  {
                           Navigator.push(
@@ -124,7 +129,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  "图片", Int64.parseInt(widget.message.remoteId.toString()));
+                  "【图片】", Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),

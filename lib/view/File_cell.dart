@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
@@ -99,8 +101,11 @@ class _FileCellWidget extends State<FileCellWidget> {
                             color: Colors.black, size: 30)),
 
                     GestureDetector(
-                      onLongPress: () {
-                        _toolTipController.showTooltip();
+                      onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                          ? () => _toolTipController.showTooltip()
+                          : null,
+                      onSecondaryTapDown: (details) {
+                        if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
                       },
                       onTap: () async {
                         var googleDocsUrl =
@@ -152,7 +157,7 @@ class _FileCellWidget extends State<FileCellWidget> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  "文件", Int64.parseInt(widget.message.remoteId.toString()));
+                  "【文件】", Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
