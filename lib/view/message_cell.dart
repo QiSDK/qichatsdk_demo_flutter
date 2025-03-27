@@ -18,6 +18,7 @@ import '../util/util.dart';
 import 'dart:io';
 import '../vc/FullImageView.dart';
 import '../vc/FullVideoPlayer.dart';
+import 'common_webview.dart';
 import 'enhance_expansion_panel/enhance_expansion_panel.dart';
 
 class TextMessageWidget extends StatefulWidget {
@@ -420,7 +421,16 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           }else if(fileTypes.contains(ext)){
             var googleDocsUrl =
                 "https://docs.google.com/gview?embedded=true&url=${url}";
-            _launchInWebView(Uri.parse(googleDocsUrl));
+            //_launchInWebView(Uri.parse(googleDocsUrl));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CommonWebView(
+                  url: googleDocsUrl,
+                  title: "文件",
+                ),
+              ),
+            );
           }
         },
         child: Row(

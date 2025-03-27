@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logman/logman.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
 import 'package:qichatsdk_demo_flutter/vc/entrancePage.dart';
@@ -115,11 +117,19 @@ class _MyHomePageState extends State<MyHomePage>
     implements LineDetectDelegate {
   String _textContent = "正在线路检测。。。";
   String _verionNo = "";
+  final Logman _logman = Logman.instance;
+
   @override
   void initState() {
     WidgetsBinding.instance?.addObserver(this);
     super.initState();
     loadData();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (kDebugMode) {
+        _logman.attachOverlay(context: context);
+      }
+    });
   }
 
   @override
