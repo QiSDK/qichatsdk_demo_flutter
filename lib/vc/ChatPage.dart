@@ -418,7 +418,7 @@ class _ChatPageState extends State<ChatPage>
     print("Connected with token: ${c.token}");
     xToken = c.token;
     Constant.instance.isConnected = true;
-    _updateUI("连接成功！");
+    //_updateUI("连接成功！");
     //c.workerId;
     ArticleRepository.assignWorker(consultId).then((onValue) {
       if (onValue != null) {
