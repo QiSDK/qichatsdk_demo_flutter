@@ -1,10 +1,10 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:fixnum/src/int64.dart';
+import 'package:qichatsdk_demo_flutter/view/common_webview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
@@ -60,69 +60,79 @@ class _FileCellWidget extends State<FileCellWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    return
-      Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          color: widget.message.author.id == widget.chatId
-              ? Colors.blue
-              : Colors.blue.shade100,
-          //child: _buildFileCell(),
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, //
+    return Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        color: widget.message.author.id == widget.chatId
+            ? Colors.blue
+            : Colors.blue.shade100,
+        //child: _buildFileCell(),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, //
             mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-        Text(
-          textAlign: TextAlign.start, // Aligns text to the right
-          "   " + msgTime,
-          style: TextStyle(
-              fontSize: 12,
-              color: widget.message.author.id == widget.chatId
-                  ? Colors.white.withOpacity(0.5)
-                  : Colors.grey),
-        ),
-        SuperTooltip(
-            content: buildToolAction(),
-            controller: _toolTipController,
-            child:  Row(
-                  children: [
-                    IconButton(
-                        onPressed: () async {
-                          SmartDialog.showLoading(msg: "正在下载");
-                          var downloaded = await ArticleRepository()
-                              .downloadVideo(widget.message.uri);
-                          SmartDialog.dismiss();
-                          if (downloaded) {
-                            SmartDialog.showToast("下载成功");
-                          } else {
-                            SmartDialog.showToast("下载失败");
-                          }
+            children: [
+              Text(
+                textAlign: TextAlign.start, // Aligns text to the right
+                "   " + msgTime,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white.withOpacity(0.5)
+                        : Colors.grey),
+              ),
+              SuperTooltip(
+                  content: buildToolAction(),
+                  controller: _toolTipController,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: () async {
+                            SmartDialog.showLoading(msg: "正在下载");
+                            var downloaded = await ArticleRepository()
+                                .downloadVideo(widget.message.uri);
+                            SmartDialog.dismiss();
+                            if (downloaded) {
+                              SmartDialog.showToast("下载成功");
+                            } else {
+                              SmartDialog.showToast("下载失败");
+                            }
+                          },
+                          icon: const Icon(Icons.save_alt_sharp,
+                              color: Colors.black, size: 30)),
+                      GestureDetector(
+                        onLongPress: ((Platform.isAndroid || Platform.isIOS) &&
+                                (widget.message.remoteId ?? "").length > 8)
+                            ? () => _toolTipController.showTooltip()
+                            : null,
+                        onSecondaryTapDown: (details) {
+                          if (!Platform.isAndroid &&
+                              !Platform.isIOS &&
+                              (widget.message.remoteId ?? "").length > 8)
+                            _toolTipController.showTooltip();
                         },
-                        icon: const Icon(Icons.save_alt_sharp,
-                            color: Colors.black, size: 30)),
+                        onTap: () async {
+                          var googleDocsUrl =
+                              "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
+                          // _launchInWebView(Uri.parse(googleDocsUrl));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CommonWebView(
+                                url: googleDocsUrl,
+                                title: widget.message.name,
+                              ),
+                            ),
+                          );
 
-                    GestureDetector(
-                      onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
-                          ? () => _toolTipController.showTooltip()
-                          : null,
-                      onSecondaryTapDown: (details) {
-                        if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
-                      },
-                      onTap: () async {
-                        var googleDocsUrl =
-                            "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
-                        _launchInWebView(Uri.parse(googleDocsUrl));
-
-                        //_launchUrl(widget.message.uri);
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
-                      },
-                      child: _buildFileCell(),
-                    ),
-
-                  ],
-                )
-            ),]));
+                          //_launchUrl(widget.message.uri);
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
+                        },
+                        child: _buildFileCell(),
+                      ),
+                    ],
+                  )),
+            ]));
   }
 
   _buildFileCell() {
@@ -147,7 +157,6 @@ class _FileCellWidget extends State<FileCellWidget> {
       ),
     );
   }
-
 
   buildToolAction() {
     return Column(

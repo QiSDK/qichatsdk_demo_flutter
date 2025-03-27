@@ -3,18 +3,29 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
-import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:qichatsdk_demo_flutter/vc/entrancePage.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:fixnum/src/int64.dart';
-import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'Constant.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化 WebView 平台
+  if (Platform.isIOS) {
+    WebViewPlatform.instance = WebKitWebViewPlatform();
+  } else if (Platform.isMacOS) {
+    WebViewPlatform.instance = WebKitWebViewPlatform();
+
+    // 对于 macOS，我们可能需要使用不同的实现或者禁用 WebView
+    debugPrint('WebView may not be fully supported on macOS');
+  } else {
+    debugPrint('WebView is not supported on this platform');
+  }
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     // Must add this line.
@@ -53,7 +64,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chat Demo',
-
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -99,7 +109,10 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver implements LineDetectDelegate {
+
+class _MyHomePageState extends State<MyHomePage>
+    with WidgetsBindingObserver
+    implements LineDetectDelegate {
   String _textContent = "正在线路检测。。。";
   String _verionNo = "";
   @override
@@ -122,15 +135,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
 
   Future<void> loadData() async {
     //if (domain.isEmpty) {
-      print("开始线路检测");
-      var lineDetect = LineDetectLib(
-          lines,
-          tenantId: merchantId);
-      lineDetect.getLine();
-      lineDetect.delegate = this;
+    print("开始线路检测");
+    var lineDetect = LineDetectLib(lines, tenantId: merchantId);
+    lineDetect.getLine();
+    lineDetect.delegate = this;
     //}
 
-      _verionNo = await Util().getAppVersion();
+    _verionNo = await Util().getAppVersion();
   }
 
   void _updateUI(String content) {
@@ -165,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
             children: <Widget>[
               ElevatedButton(
                   onPressed: () {
-                    if(domain.isEmpty){
+                    if (domain.isEmpty) {
                       SmartDialog.showToast("无可用线路");
                       return;
                     }
@@ -178,7 +189,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver imp
                   '$_textContent',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
-              ),  Padding(
+              ),
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   '版本号：$_verionNo',

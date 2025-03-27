@@ -78,8 +78,9 @@ dependencies:
   get_thumbnail_video: ^0.6.1
   #ffmpeg_kit_flutter_full_gpl: ^6.0.0
   ffmpeg_kit_flutter_full_gpl: ^6.0.3
-  webview_flutter: ^4.8.0
+  webview_flutter: ^4.9.0
   webview_flutter_wkwebview: ^3.14.0
+  webview_flutter_android: 3.16.0
   macos_webview_kit: ^0.0.3
   #auto_scroll: ^0.2.0
 
