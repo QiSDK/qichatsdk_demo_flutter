@@ -420,6 +420,7 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.isConnected = true;
     //_updateUI("连接成功！");
     //c.workerId;
+    SmartDialog.showLoading();
     ArticleRepository.assignWorker(consultId).then((onValue) {
       if (onValue != null) {
         _worker = Worker(
@@ -540,7 +541,7 @@ class _ChatPageState extends State<ChatPage>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(PARAM_XTOKEN, xToken);
     _messages.clear();
-    SmartDialog.showLoading();
+    //SmartDialog.showLoading();
     //聊天记录
     var h = await ArticleRepository.queryHistory(consultId);
     _me = types.User(
@@ -596,6 +597,7 @@ class _ChatPageState extends State<ChatPage>
     });
     //处理在无网、或断网情况下未发出去的消息
     _handleUnSent();
+    ArticleRepository.markRead(consultId);
   }
 
   @override
@@ -646,7 +648,6 @@ class _ChatPageState extends State<ChatPage>
     // if (mounted) {
     //   setState(() {});
     // }
-    ArticleRepository.markRead(consultId);
   }
 
   _getUnsentMessage() {
