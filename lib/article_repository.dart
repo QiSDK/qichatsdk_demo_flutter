@@ -10,6 +10,7 @@ import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'api_service.dart';
 import 'model/Entrance.dart';
+import 'model/ReplyList.dart';
 import 'model/Result.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:fixnum/src/int64.dart' as fixNum;
@@ -21,6 +22,7 @@ class ArticleRepository {
   static const String uploadAudioPath = '/api/PublishWork/';
   static const String queryEntrancePath = '/v1/api/query-entrance';
   static const String syncMessagePath = '/v1/api/message/sync';
+  static const String queryMessagePath = '/v1/api/message/reply-message/sync';
   static const String markReadPath = '/v1/api/chat/mark-read';
   static const String assignWorkerPath = '/v1/api/assign-worker';
   static const String queryAutoReplyPath = '/v1/api/query-auto-reply';
@@ -119,6 +121,41 @@ class ArticleRepository {
       var result = Result<Sync>.fromJson(
         resp,
             (json) => Sync.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (result != null && (result.code ?? -1) == 0) {
+        return result.data;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  static Future<ReplyList?> queryMessage(String msgId) async {
+    Resource res = Resource();
+    res.path = queryMessagePath;
+
+    var map = {
+      'chatId': Constant.instance.chatId,
+      "msgIds": [msgId]
+    };
+
+    /*
+    {
+    "chatId": "15814070250560",
+    "msgIds": ["1236806459393190976"]
+}
+     */
+    res.bodyParams = map;
+
+    try {
+      var resp = await Api().post(res);
+      var result = Result<ReplyList>.fromJson(
+        resp,
+            (json) => ReplyList.fromJson(json as Map<String, dynamic>),
       );
 
       if (result != null && (result.code ?? -1) == 0) {

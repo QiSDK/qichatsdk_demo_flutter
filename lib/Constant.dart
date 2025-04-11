@@ -133,6 +133,7 @@ class Constant {
 
   var chatLib = ChatLib();
   var isConnected = false;
+  var chatId = '0';
 
   // Mock of the utility method to convert a Date to the system zone
   static DateTime converDateToSystemZoneDate(DateTime date) {

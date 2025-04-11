@@ -550,6 +550,9 @@ class _ChatPageState extends State<ChatPage>
         firstName: userName);
     replyList = h?.replyList;
     _buildHistory(h);
+
+    var s = await ArticleRepository.queryMessage('1236806459393190976');
+    print(s);
     SmartDialog.dismiss();
     if (_isFirstLoad) {
       _isFirstLoad = false;
@@ -616,6 +619,7 @@ class _ChatPageState extends State<ChatPage>
     if (h == null || (h?.list?.length ?? 0) == 0) {
       return;
     }
+    Constant.instance.chatId = h.request?.chatId ?? '0';
     List<MsgItem> msgItems = h.list!;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {
