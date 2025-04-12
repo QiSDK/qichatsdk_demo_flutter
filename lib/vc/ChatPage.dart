@@ -551,8 +551,6 @@ class _ChatPageState extends State<ChatPage>
     replyList = h?.replyList;
     _buildHistory(h);
 
-    var s = await ArticleRepository.queryMessage('1236806459393190976');
-    print(s);
     SmartDialog.dismiss();
     if (_isFirstLoad) {
       _isFirstLoad = false;
@@ -798,7 +796,7 @@ class _ChatPageState extends State<ChatPage>
     return msg;
   }
 
-  types.Message? _getReplyMessage(String replyMsgId, bool isHistory) {
+  Future<types.Message?> _getReplyMessage(String replyMsgId, bool isHistory) async {
     if (replyMsgId.isEmpty) {
       return null;
     }
@@ -815,6 +813,17 @@ class _ChatPageState extends State<ChatPage>
       index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
       if (index >= 0) {
         replyModel = _messages[index];
+      }else{
+        var messageResponse = await ArticleRepository.queryMessage(replyMsgId);
+        final replyList = messageResponse?.replyList ?? [];
+
+        if (replyList.isNotEmpty) {
+          replyModel = composeLocalMsg(
+            replyList.first, // Safe since we checked isEmpty
+            onlyCompose: true,
+          );
+        }
+        print(s);
       }
     }
     return replyModel;
