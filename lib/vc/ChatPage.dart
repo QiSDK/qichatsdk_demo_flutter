@@ -385,7 +385,7 @@ class _ChatPageState extends State<ChatPage>
       item.content = sy.Content();
       item.content?.data = msg.content.data;
 
-      composeLocalMsg(item, insert: true);
+      composeLocalMsg(item);
       print("Received Message: ${msg}");
     }
     _updateUI("info");
@@ -484,7 +484,7 @@ class _ChatPageState extends State<ChatPage>
       item.msgId = msg.msgId.toString();
       item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
 
-      composeLocalMsg(item, insert: true, isTipText: true);
+      composeLocalMsg(item, isTipText: true);
       _updateUI("删除成功 msgId:${msg.msgId}");
       print("删除成功: ${msg.msgId} ");
     } else {
@@ -620,7 +620,7 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     Constant.instance.chatId = h.request?.chatId ?? '0';
-    List<MsgItem> msgItems = h.list!;
+    Iterable<MsgItem> msgItems = h.list!.reversed;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {
         continue;
@@ -687,7 +687,7 @@ class _ChatPageState extends State<ChatPage>
   }
 
   types.Message? composeLocalMsg(MsgItem msgModel,
-      {bool insert = false, bool isTipText = false, bool onlyCompose = false}) {
+      {bool isHistory = false, bool isTipText = false, bool onlyCompose = false}) {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
     String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
@@ -710,7 +710,7 @@ class _ChatPageState extends State<ChatPage>
    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     types.Message? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
     if ((msgModel.replyMsgId ?? "").length > 5){
-      replyMsg = _getReplyMessage(msgModel.replyMsgId ?? "", insert);
+      replyMsg = _getReplyMessage(msgModel.replyMsgId ?? "", isHistory);
     }
     var sender = types.User(id: senderId);
     if (sender.id == _me.id) {
@@ -791,28 +791,30 @@ class _ChatPageState extends State<ChatPage>
     }
 
     if (msg != null && !onlyCompose) {
-      insert ? _messages.insert(0, msg) : _messages.add(msg);
+      //insert ? _messages.insert(0, msg) : _messages.add(msg);
+      _messages.insert(0, msg);
+      //_messages.add(msg);
     }
     return msg;
   }
 
-  types.Message? _getReplyMessage(String replyMsgId, bool append) {
+  types.Message? _getReplyMessage(String replyMsgId, bool isHistory) {
     if (replyMsgId.isEmpty) {
       return null;
     }
     types.Message? replyModel;
     var index = -1;
-    if (append) {
-      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
-      if (index >= 0) {
-        replyModel = _messages[index];
-      }
-    } else {
+    if (isHistory) {
       //历史记录
       if (replyList != null) {
         index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
         var msg = replyList![index];
         replyModel = composeLocalMsg(msg, onlyCompose: true);
+      }
+    } else {
+      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
+      if (index >= 0) {
+        replyModel = _messages[index];
       }
     }
     return replyModel;

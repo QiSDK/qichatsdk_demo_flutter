@@ -142,15 +142,7 @@ class ArticleRepository {
       'chatId': Constant.instance.chatId,
       "msgIds": [msgId]
     };
-
-    /*
-    {
-    "chatId": "15814070250560",
-    "msgIds": ["1236806459393190976"]
-}
-     */
     res.bodyParams = map;
-
     try {
       var resp = await Api().post(res);
       var result = Result<ReplyList>.fromJson(
