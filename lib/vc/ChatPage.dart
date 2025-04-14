@@ -10,6 +10,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
+import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart' as sy;
 import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
@@ -111,7 +112,7 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        repliedMessage: await _getReplyMessage(replyId.toString(), false),
+        metadata: {'msgTime': DateTime.now().millisecondsSinceEpoch, 'replyMsg': await _getReplyMessage(replyId.toString(), false)},
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
     setState(() {
@@ -706,7 +707,7 @@ class _ChatPageState extends State<ChatPage>
     }
 
    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
-    types.Message? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
+    ReplyMessageItem? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
     if ((msgModel.replyMsgId ?? "").length > 5){
       replyMsg = await _getReplyMessage(msgModel.replyMsgId ?? "", isHistory);
     }
@@ -732,11 +733,11 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           createdAt: milliSeconds,
           uri: fileUri,
-          repliedMessage: replyMsg,
+          //repliedMessage: replyMsg,
           id: _generateRandomId(),
           name: msgModel.file?.fileName ?? 'no file name',
           size: msgModel.file?.size ?? 0,
-          metadata: {'msgTime': msgTime},
+          metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
           status: types.Status.sent,
           remoteId: msgId);
     } else if (imgUri.isNotEmpty) {
@@ -748,11 +749,10 @@ class _ChatPageState extends State<ChatPage>
           author: sender,
           createdAt: milliSeconds,
           uri: imgUrl,
-          repliedMessage: replyMsg,
           id: _generateRandomId(),
           name: 'dd',
           size: 150,
-          metadata: {'msgTime': msgTime},
+          metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
           status: types.Status.sent,
           remoteId: msgId);
     } else if (videoUri.isNotEmpty) {
@@ -763,23 +763,21 @@ class _ChatPageState extends State<ChatPage>
       msg = types.VideoMessage(
           author: sender,
           uri: url,
-          repliedMessage: replyMsg,
           createdAt: milliSeconds,
           id: _generateRandomId(),
           name: 'dd',
           size: 150,
-          metadata: {'msgTime': msgTime, 'thumbnailUri': thumbnailUri},
+          metadata: {'msgTime': msgTime, 'thumbnailUri': thumbnailUri, 'replyMsg': replyMsg},
           status: types.Status.sent,
           remoteId: msgId);
     } else if (text.isNotEmpty) {
       msg = types.TextMessage(
           author: sender,
           text: text,
-          repliedMessage: replyMsg,
           createdAt: milliSeconds,
           metadata: {
             'msgTime': msgTime,
-            'tipText': isTipText
+            'tipText': isTipText, 'replyMsg': replyMsg
           },
           id: _generateRandomId(),
           status: types.Status.sent,
@@ -796,39 +794,67 @@ class _ChatPageState extends State<ChatPage>
     return msg;
   }
 
-  Future<types.Message?> _getReplyMessage(String replyMsgId, bool isHistory) async {
+  Future<ReplyMessageItem?> _getReplyMessage(String replyMsgId, bool isHistory) async {
     if (replyMsgId.length < 5) {
       return null;
     }
-    types.Message? replyModel;
+    //types.Message? replyModel;
+    ReplyMessageItem? replyItem;
     var index = -1;
     if (isHistory) {
       //历史记录
       if (replyList != null) {
         index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
         if (index >= 0) {
-          var msg = replyList![index];
-          replyModel = await composeLocalMsg(msg, onlyCompose: true);
+          var oriMsg = replyList![index];
+          replyItem = _getReplyItem(oriMsg);
         }
       }
     } else {
       index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
       if (index >= 0) {
-        replyModel = _messages[index];
+        replyItem = ReplyMessageItem();
+       var oriMsg = _messages[index];
+       if (oriMsg.type == types.MessageType.text){
+         replyItem?.content = (oriMsg as types.TextMessage).text;
+       }else if (oriMsg.type == types.MessageType.image){
+         replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
+       }else if (oriMsg.type == types.MessageType.video){
+         replyItem?.fileName = (oriMsg as types.VideoMessage).uri;
+       }else if (oriMsg.type == types.MessageType.file){
+         replyItem?.fileName = (oriMsg as types.FileMessage).uri;
+         replyItem?.size = (oriMsg as types.FileMessage).size.toInt();
+       }
       }else{
         var messageResponse = await ArticleRepository.queryMessage(replyMsgId);
         final replyList = messageResponse?.replyList ?? [];
-
-        if (replyList.isNotEmpty) {
-          replyModel = await composeLocalMsg(
-            replyList.first, // Safe since we checked isEmpty
-            onlyCompose: true, //只生成消息模型，作为消息的附件，不添加到列表
-          );
-        }
+        replyItem = _getReplyItem(replyList[0]);
         print(s);
       }
     }
-    return replyModel;
+    return replyItem;
+  }
+
+  ReplyMessageItem _getReplyItem(MsgItem oriMsg) {
+    var replyItem = ReplyMessageItem();
+    if (oriMsg != null) {
+      switch (oriMsg.msgFmt.toString()) {
+        case "MSG_TEXT":
+          replyItem.content = oriMsg.content?.data ?? "";
+          break;
+        case "MSG_IMG":
+          replyItem.fileName = oriMsg.image?.uri ?? "";
+          break;
+        case "MSG_VIDEO":
+          replyItem.fileName = oriMsg.video?.uri ?? "";
+          break;
+        case "MSG_FILE":
+          replyItem.size = (oriMsg?.file?.size ?? 0);
+          replyItem.fileName = oriMsg?.file?.uri;
+          break;
+      }
+    }
+    return replyItem;
   }
 
   void handleUnSent() {}

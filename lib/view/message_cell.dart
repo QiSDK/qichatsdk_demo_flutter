@@ -3,6 +3,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;
 import 'package:fixnum/src/int64.dart';
@@ -47,7 +48,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   String get content => widget.message.text;
   //String get msgTime => widget.message.metadata?['msgTime'] ?? '';
   String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
-  //String get replyText => widget.message.metadata?['replyText'] ?? '';
+
+  ReplyMessageItem? replyItem;
 
   List<Qa> sectionList = [];
   AutoReply? autoReplyModel;
@@ -131,6 +133,10 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     }
     if (widget.message.metadata != null && widget.message.metadata!['tipText'] == true) {
       return initWithdraws();
+    }
+
+    if (widget.message.metadata != null && widget.message.metadata!['replyMsg'] != null){
+       replyItem = widget.message.metadata!['replyMsg'];
     }
     // if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
     //   return CachedNetworkImage(
@@ -226,7 +232,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               child:Text(
                 content,
                 style: textStyle,
-              ))),  widget.message.repliedMessage == null
+              ))),  replyItem == null
               ? const SizedBox()
               : _buildFileCell()
         ],
@@ -386,24 +392,28 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     var fileName = "";
     var fileSize;
     var url = "";
-    if (widget.message.repliedMessage?.type == MessageType.file) {
-      url = (widget.message.repliedMessage as types.FileMessage).uri;
-      fileSize = (widget.message.repliedMessage as types.FileMessage).size;
+    var ext = replyItem?.fileName?.split(".").last;
+    if (fileTypes.contains(ext)) {
+      url = replyItem?.fileName ?? "";
+      fileSize = replyItem?.size;
       fileName = url
           .split('/')
           .last;
-    } else if (widget.message.repliedMessage?.type == MessageType.image) {
-      url = (widget.message.repliedMessage as types.ImageMessage).uri;
+    } else if (imageTypes.contains(ext)) {
+      url = replyItem?.fileName ?? "";
       fileName = url
           .split('/')
           .last;
-    } else if (widget.message.repliedMessage?.type == MessageType.video) {
-      url = (widget.message.repliedMessage as types.VideoMessage).uri;
+    } else if (videoTypes.contains(ext)) {
+      url = replyItem?.fileName ?? "";
       fileName = url
           .split('/')
           .last;
     } else{
-      fileName = (widget.message.repliedMessage as types.TextMessage).text;
+      fileName = replyItem?.content ?? "";
+    }
+    if (!url.contains("http")) {
+      url = baseUrlImage + url;
     }
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -413,7 +423,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           if (imageTypes.contains(ext)){
             Navigator.push(
                 context,
-                MaterialPageRoute( builder: (context) => FullImageView(message: widget.message.repliedMessage as types.ImageMessage)));
+                MaterialPageRoute( builder: (context) => FullImageView(message: null, url: url,)));
           }else if(videoTypes.contains(ext)){
             Navigator.push(
                 context,
