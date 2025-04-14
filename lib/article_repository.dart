@@ -105,7 +105,7 @@ class ArticleRepository {
 
     var l = 50;
     if (kDebugMode){
-      l = 30;
+      l = 4;
     }
     var map = {
       'chatId': 0,

@@ -95,7 +95,7 @@ class _ChatPageState extends State<ChatPage>
     return Random().nextInt(1000000).toString();
   }
 
-  void _handleSendPressed(types.PartialText message) {
+  Future<void> _handleSendPressed(types.PartialText message) async {
     if (_me.id == "user") {
       SmartDialog.showToast("此时不能发消息，请检查网络或稍等片刻");
       return;
@@ -111,7 +111,7 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        repliedMessage: _getReplyMessage(replyId.toString(), true),
+        repliedMessage: await _getReplyMessage(replyId.toString(), false),
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
     setState(() {
@@ -618,7 +618,7 @@ class _ChatPageState extends State<ChatPage>
       return;
     }
     Constant.instance.chatId = h.request?.chatId ?? '0';
-    Iterable<MsgItem> msgItems = h.list!.reversed;
+    Iterable<MsgItem> msgItems = h.list!;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {
         continue;
@@ -634,9 +634,9 @@ class _ChatPageState extends State<ChatPage>
       // model.replyMsgId = msg.replyMsgId;
       if (msg.workerChanged != null) {
         msg.content?.data = msg.workerChanged?.greeting ?? "";
-        composeLocalMsg(msg, isTipText: true);
+        composeLocalMsg(msg, isHistory: true, isTipText: true);
       } else {
-        composeLocalMsg(msg);
+        composeLocalMsg(msg, isHistory: true);
       }
 
       /*
@@ -684,8 +684,8 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  types.Message? composeLocalMsg(MsgItem msgModel,
-      {bool isHistory = false, bool isTipText = false, bool onlyCompose = false}) {
+  Future<types.Message?> composeLocalMsg(MsgItem msgModel,
+      {bool isHistory = false, bool isTipText = false, bool onlyCompose = false}) async {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
     String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
@@ -708,7 +708,7 @@ class _ChatPageState extends State<ChatPage>
    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     types.Message? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
     if ((msgModel.replyMsgId ?? "").length > 5){
-      replyMsg = _getReplyMessage(msgModel.replyMsgId ?? "", isHistory);
+      replyMsg = await _getReplyMessage(msgModel.replyMsgId ?? "", isHistory);
     }
     var sender = types.User(id: senderId);
     if (sender.id == _me.id) {
@@ -789,15 +789,15 @@ class _ChatPageState extends State<ChatPage>
     }
 
     if (msg != null && !onlyCompose) {
-      //insert ? _messages.insert(0, msg) : _messages.add(msg);
-      _messages.insert(0, msg);
+      isHistory ? _messages.add(msg) : _messages.insert(0, msg)  ;
       //_messages.add(msg);
+      //_messages.insert(0, msg)  ;
     }
     return msg;
   }
 
   Future<types.Message?> _getReplyMessage(String replyMsgId, bool isHistory) async {
-    if (replyMsgId.isEmpty) {
+    if (replyMsgId.length < 5) {
       return null;
     }
     types.Message? replyModel;
@@ -806,8 +806,10 @@ class _ChatPageState extends State<ChatPage>
       //历史记录
       if (replyList != null) {
         index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
-        var msg = replyList![index];
-        replyModel = composeLocalMsg(msg, onlyCompose: true);
+        if (index >= 0) {
+          var msg = replyList![index];
+          replyModel = await composeLocalMsg(msg, onlyCompose: true);
+        }
       }
     } else {
       index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
@@ -818,9 +820,9 @@ class _ChatPageState extends State<ChatPage>
         final replyList = messageResponse?.replyList ?? [];
 
         if (replyList.isNotEmpty) {
-          replyModel = composeLocalMsg(
+          replyModel = await composeLocalMsg(
             replyList.first, // Safe since we checked isEmpty
-            onlyCompose: true,
+            onlyCompose: true, //只生成消息模型，作为消息的附件，不添加到列表
           );
         }
         print(s);
