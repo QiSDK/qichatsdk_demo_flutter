@@ -392,7 +392,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     var fileName = "";
     var fileSize;
     var url = "";
-    var ext = replyItem?.fileName?.split(".").last;
+    var ext = replyItem?.fileName?.split(".").last ?? "";
     if (fileTypes.contains(ext)) {
       url = replyItem?.fileName ?? "";
       fileSize = replyItem?.size;
@@ -446,7 +446,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         child: Row(
           children: [
             Text("回复："),
-           if (url.isNotEmpty) Image.asset(
+           if (ext.isNotEmpty) Image.asset(
               Util().displayFileThumbnail(fileName),
               width: 40,
               height: 40,

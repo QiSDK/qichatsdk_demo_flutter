@@ -112,7 +112,7 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        metadata: {'msgTime': DateTime.now().millisecondsSinceEpoch, 'replyMsg': await _getReplyMessage(replyId.toString(), false)},
+        metadata: {'msgTime': DateTime.now().millisecondsSinceEpoch, 'replyMsg': await _getReplyMessage(replyId.toString())},
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
     setState(() {
@@ -328,7 +328,7 @@ class _ChatPageState extends State<ChatPage>
   }
 
   @override
-  void receivedMsg(cMessage.Message msg) {
+  Future<void> receivedMsg(cMessage.Message msg) async {
     if (msg.msgOp == cMessage.MessageOperate.MSG_OP_EDIT) {
       var index =
           _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
@@ -709,7 +709,7 @@ class _ChatPageState extends State<ChatPage>
    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
     ReplyMessageItem? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
     if ((msgModel.replyMsgId ?? "").length > 5){
-      replyMsg = await _getReplyMessage(msgModel.replyMsgId ?? "", isHistory);
+      replyMsg =  isHistory ? _getReplyMessageFromHistory(msgModel.replyMsgId ?? "") : await _getReplyMessage(msgModel.replyMsgId ?? "");
     }
     var sender = types.User(id: senderId);
     if (sender.id == _me.id) {
@@ -794,15 +794,14 @@ class _ChatPageState extends State<ChatPage>
     return msg;
   }
 
-  Future<ReplyMessageItem?> _getReplyMessage(String replyMsgId, bool isHistory) async {
+  ReplyMessageItem? _getReplyMessageFromHistory(String replyMsgId)  {
     if (replyMsgId.length < 5) {
       return null;
     }
     //types.Message? replyModel;
     ReplyMessageItem? replyItem;
     var index = -1;
-    if (isHistory) {
-      //历史记录
+
       if (replyList != null) {
         index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
         if (index >= 0) {
@@ -810,7 +809,17 @@ class _ChatPageState extends State<ChatPage>
           replyItem = _getReplyItem(oriMsg);
         }
       }
-    } else {
+    return replyItem;
+  }
+
+  Future<ReplyMessageItem?> _getReplyMessage(String replyMsgId) async {
+    if (replyMsgId.length < 5) {
+      return null;
+    }
+    //types.Message? replyModel;
+    ReplyMessageItem? replyItem;
+    var index = -1;
+
       index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
       if (index >= 0) {
         replyItem = ReplyMessageItem();
@@ -830,8 +839,10 @@ class _ChatPageState extends State<ChatPage>
         final replyList = messageResponse?.replyList ?? [];
         replyItem = _getReplyItem(replyList[0]);
         print(s);
+        Timer(const Duration(seconds: 1), () {
+          _updateUI("info");
+        });
       }
-    }
     return replyItem;
   }
 
