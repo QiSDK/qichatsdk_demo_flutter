@@ -959,7 +959,7 @@ class _ChatPageState extends State<ChatPage>
         //每8秒检查一次状态
         if (_timerCount > 0 && _timerCount % 8 == 0) {
           //setState(() {
-          print("检查sdk状态");
+          print("检查sdk状态${DateTime.now()}");
           checkSDKStatus();
           //});
         }

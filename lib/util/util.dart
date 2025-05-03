@@ -51,8 +51,8 @@ class Util {
     // Convert to GMT-8 by subtracting 8 hours
     DateTime gmt8DateTime = dateTime.toUtc().add(Duration(hours: -8));
 
-    print("Original DateTime (UTC): $dateTime");
-    print("Converted to GMT-8: $gmt8DateTime");
+    //print("Original DateTime (UTC): $dateTime");
+    //print("Converted to GMT-8: $gmt8DateTime");
     return DateFormat("yyyy-MM-dd HH:mm:ss").format(gmt8DateTime);
   }
 
