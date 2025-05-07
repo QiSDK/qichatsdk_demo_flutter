@@ -9,8 +9,9 @@ import 'package:video_player/video_player.dart';
 //import 'package:video_player_win/video_player_win.dart' as winVideoPlayer;
 
 class Fullvideoplayer extends StatefulWidget {
-  final types.VideoMessage message;
-  const Fullvideoplayer({super.key, required this.message});
+  final types.VideoMessage? message;
+  final String? videoUrl;
+  const Fullvideoplayer({super.key,  this.message, this.videoUrl});
 
   @override
   State<Fullvideoplayer> createState() => _FullvideoplayerState();
@@ -32,8 +33,13 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
     Uri? uri;
     try {
 
-      uri = Uri.parse(widget.message.uri);
-      print("视频地址:${widget.message.uri}");
+      if ((widget.message?.uri ?? "").length > 0){
+        uri = Uri.parse(widget.message?.uri ?? "");
+      }else{
+        uri = Uri.parse(widget.videoUrl ?? "");
+      }
+
+      print("视频地址:${uri}");
       //uri = Uri.parse("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
       _videoPlayerController = VideoPlayerController.networkUrl(uri);
       await _videoPlayerController.initialize();

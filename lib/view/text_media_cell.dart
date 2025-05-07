@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:qichatsdk_demo_flutter/model/TextBody.dart';
 import 'package:qichatsdk_demo_flutter/util/util.dart';
+import 'package:qichatsdk_demo_flutter/vc/FullImageView.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullVideoPlayer.dart';
 import 'package:fixnum/src/int64.dart';
 import '../article_repository.dart';
@@ -35,10 +38,11 @@ class TextMediaCell extends StatefulWidget {
 class _text_media_cell extends State<TextMediaCell> {
   types.Status? get state => widget.message.status;
 
-  String content = "";
+  String get content => widget.message.text;
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
-  String get thumbnailUri => widget.message.metadata?['thumbnailUri'] ?? '';
+  String mediaUrl = '';
   final _toolTipController = SuperTooltipController();
+  bool isVideo = false;
 
   @override
   void initState() {
@@ -50,18 +54,27 @@ class _text_media_cell extends State<TextMediaCell> {
     return buildGptMessage(context);
   }
 
-  _remoteImag() {
-    return CachedNetworkImage(
-      key: Key(widget.message.remoteId.toString()),
-      width: 200,
-      height: 150,
-      imageUrl: thumbnailUri,
-    );
-  }
-
   Widget buildGptMessage(BuildContext context) {
     final isCurrentUser = widget.message.author.id == widget.chatId;
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
+
+    var msgTxt = content;
+    if (content.contains("\"color\"")){
+      final jsonData = jsonDecode(content);
+      var result = TextBody.fromJson(
+        jsonData,
+      );
+      if ((result.content ?? "").isNotEmpty){
+        msgTxt = result.content ?? "";
+      }
+      if ((result.image ?? "").isNotEmpty){
+        mediaUrl = result.image ?? "";
+      }
+      if ((result.video ?? "").isNotEmpty){
+        mediaUrl = (result.video ?? "").trim();
+        isVideo = true;
+      }
+    }
 
     return SuperTooltip(
       content: buildToolAction(),
@@ -92,7 +105,7 @@ class _text_media_cell extends State<TextMediaCell> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "abc 视频：666666用户推送",
+                    msgTxt,
                     style: TextStyle(
                       fontSize: 16,
                       color: isCurrentUser ? Colors.white : Colors.black,
@@ -113,24 +126,36 @@ class _text_media_cell extends State<TextMediaCell> {
                 }
               },
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Fullvideoplayer(
-                      message: widget.message as types.VideoMessage,
+                if (isVideo)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Fullvideoplayer(
+                            videoUrl: mediaUrl,
+                          ),
                     ),
-                  ),
-                );
+                  );
+                else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            FullImageView(
+                              url: mediaUrl,
+                            ),
+                      ));
+                }
               },
-              child: Stack(
+              child: mediaUrl.isEmpty ? Container() : Stack(
                 alignment: Alignment.center,
                 children: [
                   _remoteImag(), // 你应定义该函数返回 Widget
-                  Icon(
+                  isVideo ? Icon(
                     Icons.slow_motion_video_outlined,
                     size: 50.0,
                     color: Colors.white.withOpacity(0.8),
-                  ),
+                  ) : Container(),
                 ],
               ),
             ),
@@ -140,6 +165,24 @@ class _text_media_cell extends State<TextMediaCell> {
     );
   }
 
+  _remoteImag() {
+    if (isVideo){
+     // var file = Image.asset("name").image
+          return Image.asset(
+           'assets/png/video_default.png',
+            fit: BoxFit.contain,
+            width: 300,
+            height: 300,
+          );
+    }else {
+      return CachedNetworkImage(
+        key: Key(widget.message.remoteId.toString()),
+        width: 200,
+        height: 150,
+        imageUrl: mediaUrl,
+      );
+    }
+  }
 
   buildToolAction() {
     return Column(

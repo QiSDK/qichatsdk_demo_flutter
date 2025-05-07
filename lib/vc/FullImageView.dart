@@ -10,7 +10,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class FullImageView extends StatefulWidget {
   final types.ImageMessage? message;
   final String? url;
-  const FullImageView({super.key, required this.message, this.url});
+  const FullImageView({super.key, this.message, this.url});
   @override
   State<FullImageView> createState() => _FullImageViewState();
 }
