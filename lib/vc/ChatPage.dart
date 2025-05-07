@@ -20,6 +20,7 @@ import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/view/File_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
 import 'dart:math';
 import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
@@ -142,18 +143,27 @@ class _ChatPageState extends State<ChatPage>
             primaryColor: Colors.blueAccent,
             inputTextColor: Colors.black),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
-          return TextMessageWidget(
-            message: message,
-            autoReply: _autoReplyModel,
-            chatId: _me.id,
-            listener: this,
-            messageWidth: messageWidth ?? 0,
-            onExpandAction: (index, val) {
-              setState(() {
-                _autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val;
-              });
-            },
-          );
+          if (message.text.contains("\"color\"")){
+            return TextMediaCell(
+              message: message,
+              chatId: _me.id,
+              listener: this,
+              messageWidth: messageWidth ?? 0,
+            );
+          }else{
+            return TextMessageWidget(
+              message: message,
+              autoReply: _autoReplyModel,
+              chatId: _me.id,
+              listener: this,
+              messageWidth: messageWidth ?? 0,
+              onExpandAction: (index, val) {
+                setState(() {
+                  _autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val;
+                });
+              },
+            );
+          }
         },
         videoMessageBuilder: (message, {int? messageWidth}) {
           return VideoThumbnailCellWidget(
@@ -624,33 +634,14 @@ class _ChatPageState extends State<ChatPage>
       if (msg.msgOp == "MSG_OP_DELETE") {
         continue;
       }
-      // MyMsg model = MyMsg();
-      // model.imgUri = msg.image?.uri ?? '';
-      //
-      // model.videoUri = (msg.video?.hlsUri ?? '').isEmpty ? (msg.video?.uri ?? '') : (msg.video?.hlsUri ?? '');
-      // model.text = msg.content?.data ?? '';
-      // model.senderId = msg.sender;
-      // model.msgId = msg.msgId;
-      // model.msgTime = Util.parseStringToDateTime(msg.msgTime);
-      // model.replyMsgId = msg.replyMsgId;
+
       if (msg.workerChanged != null) {
         msg.content?.data = msg.workerChanged?.greeting ?? "";
         composeLocalMsg(msg, isHistory: true, isTipText: true);
       } else {
         composeLocalMsg(msg, isHistory: true);
       }
-
-      /*
-       else if (history.workerChanged != null){
-            cMContent.data = history.workerChanged.greeting
-            chatModel.cellType = CellType.TYPE_Tip
-        }
-       */
-      // composeLocalMsg(msg.image?.uri ?? "", msg.video?.uri ?? "", msg.content?.data ?? "", msg.sender.toString(), msg.msgId.toString());
     }
-    // if (mounted) {
-    //   setState(() {});
-    // }
   }
 
   _getUnsentMessage() {
@@ -712,6 +703,13 @@ class _ChatPageState extends State<ChatPage>
       replyMsg =  isHistory ? _getReplyMessageFromHistory(msgModel.replyMsgId ?? "") : await _getReplyMessage(msgModel.replyMsgId ?? "");
     }
     var sender = types.User(id: senderId);
+
+    if (msgModel.msgSourceType == "MST_SYSTEM_WORKER"){
+      sender = _me;
+    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER"){
+      sender = _friend;
+    }
+
     if (sender.id == _me.id) {
       sender = _me;
     } else {
