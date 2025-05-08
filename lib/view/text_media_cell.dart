@@ -60,18 +60,18 @@ class _text_media_cell extends State<TextMediaCell> {
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
 
     msgTxt = content;
-    if (content.contains("\"color\"")){
+    if (content.contains("\"color\"")) {
       final jsonData = jsonDecode(content);
       var result = TextBody.fromJson(
         jsonData,
       );
-      if ((result.content ?? "").isNotEmpty){
+      if ((result.content ?? "").isNotEmpty) {
         msgTxt = result.content ?? "";
       }
-      if ((result.image ?? "").isNotEmpty){
+      if ((result.image ?? "").isNotEmpty) {
         mediaUrl = result.image ?? "";
       }
-      if ((result.video ?? "").isNotEmpty){
+      if ((result.video ?? "").isNotEmpty) {
         mediaUrl = (result.video ?? "").trim();
         isVideo = true;
       }
@@ -80,10 +80,11 @@ class _text_media_cell extends State<TextMediaCell> {
     return SuperTooltip(
         content: buildToolAction(),
         controller: _toolTipController,
-        child:   GestureDetector(
-          onLongPress: (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
-              ? () => _toolTipController.showTooltip()
-              : null,
+        child: GestureDetector(
+          onLongPress:
+              (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
+                  ? () => _toolTipController.showTooltip()
+                  : null,
           onSecondaryTapDown: (details) {
             if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
               _toolTipController.showTooltip();
@@ -94,20 +95,18 @@ class _text_media_cell extends State<TextMediaCell> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      Fullvideoplayer(
-                        videoUrl: mediaUrl,
-                      ),
+                  builder: (context) => Fullvideoplayer(
+                    videoUrl: mediaUrl,
+                  ),
                 ),
               );
             else {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        FullImageView(
-                          url: mediaUrl,
-                        ),
+                    builder: (context) => FullImageView(
+                      url: mediaUrl,
+                    ),
                   ));
             }
           },
@@ -124,7 +123,9 @@ class _text_media_cell extends State<TextMediaCell> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: Column(
-                    crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment: isCurrentUser
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
                     children: [
                       Text(
                         msgTime,
@@ -142,41 +143,46 @@ class _text_media_cell extends State<TextMediaCell> {
                           fontSize: 16,
                           color: isCurrentUser ? Colors.white : Colors.black,
                         ),
+                        maxLines: 10,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 8),
                 // 视频缩略图和图标
-                mediaUrl.isEmpty ? Container() : Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _remoteImag(), // 你应定义该函数返回 Widget
-                    isVideo ? Icon(
-                      Icons.slow_motion_video_outlined,
-                      size: 50.0,
-                      color: Colors.white.withOpacity(0.8),
-                    ) : Container(),
-                  ],
-                ),
+                mediaUrl.isEmpty
+                    ? Container()
+                    : Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          _remoteImag(), // 你应定义该函数返回 Widget
+                          isVideo
+                              ? Icon(
+                                  Icons.slow_motion_video_outlined,
+                                  size: 50.0,
+                                  color: Colors.white.withOpacity(0.8),
+                                )
+                              : Container(),
+                        ],
+                      ),
                 //),
               ],
             ),
           ),
-        )
-    );
+        ));
   }
 
   _remoteImag() {
-    if (isVideo){
-     // var file = Image.asset("name").image
-          return Image.asset(
-           'assets/png/video_default.png',
-            fit: BoxFit.contain,
-            width: 300,
-            height: 300,
-          );
-    }else {
+    if (isVideo) {
+      // var file = Image.asset("name").image
+      return Image.asset(
+        'assets/png/video_default.png',
+        fit: BoxFit.contain,
+        width: 300,
+        height: 300,
+      );
+    } else {
       return CachedNetworkImage(
         key: Key(widget.message.remoteId.toString()),
         width: 200,

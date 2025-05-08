@@ -451,13 +451,15 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               width: 40,
               height: 40,
             ),
-            Column(
+            Expanded(
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(fileName),
                 // 转kb或者M
                 if (fileSize != null) Text(Util().formatFileSize(fileSize)),
               ],
+            )
             )
           ],
         ),

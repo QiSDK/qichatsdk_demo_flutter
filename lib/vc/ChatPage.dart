@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -35,6 +36,7 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../model/TextBody.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -823,7 +825,18 @@ class _ChatPageState extends State<ChatPage>
         replyItem = ReplyMessageItem();
        var oriMsg = _messages[index];
        if (oriMsg.type == types.MessageType.text){
-         replyItem?.content = (oriMsg as types.TextMessage).text;
+
+         var txtMsg = (oriMsg as types.TextMessage).text;
+         final jsonData = jsonDecode(txtMsg);
+         var result = TextBody.fromJson(
+           jsonData,
+         );
+
+         if (!(result.content ?? "").isEmpty){
+           txtMsg = result.content ?? "";
+         }
+
+         replyItem?.content = txtMsg;
        }else if (oriMsg.type == types.MessageType.image){
          replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
        }else if (oriMsg.type == types.MessageType.video){
