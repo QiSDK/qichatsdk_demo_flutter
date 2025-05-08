@@ -43,6 +43,7 @@ class _text_media_cell extends State<TextMediaCell> {
   String mediaUrl = '';
   final _toolTipController = SuperTooltipController();
   bool isVideo = false;
+  String msgTxt = '';
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _text_media_cell extends State<TextMediaCell> {
     final isCurrentUser = widget.message.author.id == widget.chatId;
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
 
-    var msgTxt = content;
+    msgTxt = content;
     if (content.contains("\"color\"")){
       final jsonData = jsonDecode(content);
       var result = TextBody.fromJson(
@@ -77,91 +78,92 @@ class _text_media_cell extends State<TextMediaCell> {
     }
 
     return SuperTooltip(
-      content: buildToolAction(),
-      controller: _toolTipController,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        decoration: BoxDecoration(
-          color: isCurrentUser ? Colors.blueAccent : Colors.blue.shade100,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部时间和标题
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Column(
-                crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    msgTime,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isCurrentUser
-                          ? Colors.white.withOpacity(0.5)
-                          : Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    msgTxt,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isCurrentUser ? Colors.white : Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+        content: buildToolAction(),
+        controller: _toolTipController,
+        child:   GestureDetector(
+          onLongPress: (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
+              ? () => _toolTipController.showTooltip()
+              : null,
+          onSecondaryTapDown: (details) {
+            if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
+              _toolTipController.showTooltip();
+            }
+          },
+          onTap: () {
+            if (isVideo)
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      Fullvideoplayer(
+                        videoUrl: mediaUrl,
+                      ),
+                ),
+              );
+            else {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        FullImageView(
+                          url: mediaUrl,
+                        ),
+                  ));
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: BoxDecoration(
+              color: isCurrentUser ? Colors.blueAccent : Colors.blue.shade100,
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(height: 8),
-            // 视频缩略图和图标
-            GestureDetector(
-              onLongPress: (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
-                  ? () => _toolTipController.showTooltip()
-                  : null,
-              onSecondaryTapDown: (details) {
-                if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
-                  _toolTipController.showTooltip();
-                }
-              },
-              onTap: () {
-                if (isVideo)
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          Fullvideoplayer(
-                            videoUrl: mediaUrl,
-                          ),
-                    ),
-                  );
-                else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            FullImageView(
-                              url: mediaUrl,
-                            ),
-                      ));
-                }
-              },
-              child: mediaUrl.isEmpty ? Container() : Stack(
-                alignment: Alignment.center,
-                children: [
-                  _remoteImag(), // 你应定义该函数返回 Widget
-                  isVideo ? Icon(
-                    Icons.slow_motion_video_outlined,
-                    size: 50.0,
-                    color: Colors.white.withOpacity(0.8),
-                  ) : Container(),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 顶部时间和标题
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Column(
+                    crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        msgTime,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isCurrentUser
+                              ? Colors.white.withOpacity(0.5)
+                              : Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        msgTxt,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isCurrentUser ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 视频缩略图和图标
+                mediaUrl.isEmpty ? Container() : Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    _remoteImag(), // 你应定义该函数返回 Widget
+                    isVideo ? Icon(
+                      Icons.slow_motion_video_outlined,
+                      size: 50.0,
+                      color: Colors.white.withOpacity(0.8),
+                    ) : Container(),
+                  ],
+                ),
+                //),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        )
     );
   }
 
@@ -192,7 +194,7 @@ class _text_media_cell extends State<TextMediaCell> {
         TextButton(
             onPressed: () {
               widget.listener.onReply(
-                  "【视频】", Int64.parseInt(widget.message.remoteId.toString()));
+                  msgTxt, Int64.parseInt(widget.message.remoteId.toString()));
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
