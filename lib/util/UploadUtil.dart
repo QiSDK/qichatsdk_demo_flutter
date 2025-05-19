@@ -24,7 +24,7 @@ class UploadUtil {
 
   //, filePath: String?, fileSize: Int32 = 0
   Future<void> upload(Uint8List imgData,
-      bool isVideo, UploadListener? mylistener, String? filePath, int length) async {
+      bool isVideo, UploadListener? mylistener, String? filePath) async {
     this.listener = mylistener;
     // 设置URL
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v4';
@@ -106,7 +106,7 @@ class UploadUtil {
         if (filePath.isNotEmpty) {
           var urls = Urls();
           urls.uri = filePath;
-          urls.size = length;
+          urls.size = imgData.length;
           urls.fileName = fileName;
           listener?.uploadSuccess(urls, false);
         }

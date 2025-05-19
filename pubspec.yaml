@@ -76,8 +76,7 @@ dependencies:
   emoji_picker_flutter: ^2.2.0
   window_manager: ^0.4.3
   get_thumbnail_video: ^0.6.1
-  #ffmpeg_kit_flutter_full_gpl: ^6.0.0
-  ffmpeg_kit_flutter_full_gpl: ^6.0.3
+  #ffmpeg_kit_flutter_full_gpl: ^5.1.0
   webview_flutter: ^4.9.0
   webview_flutter_wkwebview: ^3.14.0
   webview_flutter_android: 3.16.0

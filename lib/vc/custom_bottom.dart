@@ -300,7 +300,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      UploadUtil().upload(val, isVideo, this,  photo.path, imageBytes.length);
+      UploadUtil().upload(val, isVideo, this,  photo.path);
     }
   }
 

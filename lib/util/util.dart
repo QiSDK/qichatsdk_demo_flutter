@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
+//import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -74,7 +74,7 @@ class Util {
     final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
     return formattedDate;
   }
-
+/*
   Future<String> generateThumbnail(String videoPath) async {
     try {
       // Get the temporary directory to store the thumbnail
@@ -116,7 +116,7 @@ class Util {
       return "";
     }
   }
-
+*/
   Future<String> getAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
       var _versionName = packageInfo.version; // Version name (e.g., 1.0.0)
