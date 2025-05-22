@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart' as sy;
-import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
@@ -22,25 +22,19 @@ import 'package:qichatsdk_demo_flutter/view/File_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'dart:math';
-import 'package:qichatsdk_flutter/src/ChatLib.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
-import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import '../Constant.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../model/TextBody.dart';
-import '../util/UploadUtil.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-
 import '../view/video_thumbnail_cell.dart';
 
 class ChatPage extends StatefulWidget {
@@ -212,7 +206,7 @@ class _ChatPageState extends State<ChatPage>
               final partialText = types.PartialText(text: trimmedText);
               _handleSendPressed(partialText);
             },
-            onUploadSuccess: (Urls urls) {
+            onUploaded: (Urls urls) {
               if ((urls.uri ?? "").isEmpty) {
                 SmartDialog.showToast("上传错误，返回路径为空！");
                 return;

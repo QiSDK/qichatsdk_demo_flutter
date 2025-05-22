@@ -1,34 +1,26 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
-import 'package:dio/dio.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:qichatsdk_demo_flutter/model/Sync.dart';
-import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
-import 'package:qichatsdk_demo_flutter/util/UploadUtil.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
-import '../base/custom_interceptors.dart';
-import '../model/Result.dart' as re;
 import 'package:file_picker/file_picker.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+
+//import '../model/UploadPercent.dart';
 
 typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
-  Function(Urls) onUploadSuccess;
+  Function(Urls) onUploaded;
   ChatCustomBottom({
     super.key,
     required this.onSubmitted,
-    required this.onUploadSuccess
+    required this.onUploaded
   });
 
   @override
@@ -269,7 +261,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      UploadUtil().upload(val, this,  photo.path);
+      UploadUtil(this, xToken, baseUrlApi()).upload(val, photo.path);
     }
   }
 
@@ -285,9 +277,9 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   @override
-  void uploadSuccess(Urls urls) {
-      widget.onUploadSuccess(urls);
-      uploadProgress = 0;
-      SmartDialog.dismiss();
+  void uploadSuccess(Urls urls){
+    uploadProgress = 0;
+    widget.onUploaded(urls);
+    SmartDialog.dismiss();
   }
 }

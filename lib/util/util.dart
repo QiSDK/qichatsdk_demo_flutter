@@ -10,8 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 
 import 'package:qichatsdk_demo_flutter/Constant.dart';
-
-import 'UploadUtil.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 class Util {
   static Future<String?> xFileToBase64(XFile xFile) async {

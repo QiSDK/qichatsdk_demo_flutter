@@ -1,7 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qichatsdk_demo_flutter/model/UploadPercent.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 
 class Sync {
   Request? request;

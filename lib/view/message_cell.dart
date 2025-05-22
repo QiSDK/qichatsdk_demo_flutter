@@ -4,6 +4,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;
 import 'package:fixnum/src/int64.dart';
@@ -15,7 +16,6 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-import '../util/UploadUtil.dart';
 import '../util/util.dart';
 import 'dart:io';
 import '../vc/FullImageView.dart';

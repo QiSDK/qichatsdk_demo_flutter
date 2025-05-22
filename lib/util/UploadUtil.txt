@@ -18,10 +18,10 @@ abstract class UploadListener {
   void uploadFailed(String msg);
 }
 
-
 const imageTypes = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "jfif", "heic"]; // 图片
 const videoTypes = ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"]; // 视频
 const fileTypes = ["docx", "doc", "pdf", "xls", "xlsx", "csv"]; // 文件
+int uploadProgress = 0;
 
 class UploadUtil {
 
@@ -48,7 +48,7 @@ class UploadUtil {
     dio.options.connectTimeout = const Duration(minutes: 10);
     dio.options.receiveTimeout = const Duration(minutes: 15); // 接收超时
     dio.options.sendTimeout = const Duration(minutes: 15); // 接收超时
-    dio.interceptors.add(CustomInterceptors());
+    //dio.interceptors.add(CustomInterceptors());
     uploadProgress = 1;
     listener?.updateProgress(uploadProgress);
 
