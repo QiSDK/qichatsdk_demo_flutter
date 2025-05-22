@@ -11,6 +11,8 @@ import 'dart:math';
 
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 
+import 'UploadUtil.dart';
+
 class Util {
   static Future<String?> xFileToBase64(XFile xFile) async {
     try {

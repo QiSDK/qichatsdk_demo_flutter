@@ -15,6 +15,7 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+import '../util/UploadUtil.dart';
 import '../util/util.dart';
 import 'dart:io';
 import '../vc/FullImageView.dart';

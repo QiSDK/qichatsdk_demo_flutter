@@ -13,18 +13,20 @@ import '../model/Result.dart' as re;
 import '../model/UploadPercent.dart';
 
 abstract class UploadListener {
-  void uploadSuccess(Urls path, bool isVideo);
+  void uploadSuccess(Urls path);
   void updateProgress(int progress);
   void uploadFailed(String msg);
 }
 
+
+const imageTypes = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "jfif", "heic"]; // 图片
+const videoTypes = ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"]; // 视频
+const fileTypes = ["docx", "doc", "pdf", "xls", "xlsx", "csv"]; // 文件
+
 class UploadUtil {
 
   UploadListener? listener;
-
-  //, filePath: String?, fileSize: Int32 = 0
-  Future<void> upload(Uint8List imgData,
-      bool isVideo, UploadListener? mylistener, String? filePath) async {
+  Future<void> upload(Uint8List imgData, UploadListener? mylistener, String? filePath) async {
     this.listener = mylistener;
     // 设置URL
     final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v4';
@@ -40,16 +42,6 @@ class UploadUtil {
         return;
       }
     }
-
-
-    // let ext = filePath?.split(separator: ".").last?.lowercased() ?? "$"
-    //
-    // //目前只有pdf, word, excel等文件，filePath才不为空
-    // if (filePath != nil && !fileTypes.contains(ext)){
-    //   self.listener?.uploadFailed(msg: "不支持的文件格式")
-    //   return
-    // }
-
 
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
@@ -108,7 +100,7 @@ class UploadUtil {
           urls.uri = filePath;
           urls.size = imgData.length;
           urls.fileName = fileName;
-          listener?.uploadSuccess(urls, false);
+          listener?.uploadSuccess(urls);
         }
         print('上传成功: $filePath ${DateTime.now()}');
       } else if (response.statusCode == 202) {
@@ -141,9 +133,6 @@ class UploadUtil {
   }
 
   Future<void> subscribeToSee(String url) async {
-    // 设置URL
-    //final String apiUrl = '${baseUrlApi()}/v1/assets/upload-v4';
-
     Dio dio = Dio();
     // 设置 Dio 的一些默认配置（如果需要）
     dio.options.connectTimeout = const Duration(seconds: 5);
@@ -155,10 +144,7 @@ class UploadUtil {
       'Accept': 'text/event-stream',
       'X-Token': xToken,
     };
-
     debugPrint('xToken=$xToken');
-    // try {
-    //SmartDialog.showLoading(msg: "上传中");
     Constant.instance.chatLib.idleTimes = 0;
     final Response response = await dio.get(url,
         onReceiveProgress: (int rece, int total) {
@@ -193,7 +179,7 @@ class UploadUtil {
             final result = UploadPercent.fromJson(jsonDecode(data));
 
             if (result.percentage == 100 && result.data != null) {
-              listener?.uploadSuccess(result.data!, true);
+              listener?.uploadSuccess(result.data!);
               print("上传成功 ${result.data?.uri}");
               print("${DateFormat('yyyy-MM-dd HH:mm:ss').format(
                   DateTime.now())} 上传进度 ${result.percentage}");

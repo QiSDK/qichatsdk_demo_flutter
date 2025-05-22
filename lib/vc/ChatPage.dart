@@ -37,6 +37,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../model/TextBody.dart';
+import '../util/UploadUtil.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -211,13 +212,15 @@ class _ChatPageState extends State<ChatPage>
               final partialText = types.PartialText(text: trimmedText);
               _handleSendPressed(partialText);
             },
-            onUploadSuccess: (Urls urls, bool isVideo) {
+            onUploadSuccess: (Urls urls) {
               if ((urls.uri ?? "").isEmpty) {
                 SmartDialog.showToast("上传错误，返回路径为空！");
                 return;
               }
+              var ext = (urls.uri ?? "").split(".").lastOrNull ?? "#";
+              
               debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
-              if (isVideo) {
+              if (videoTypes.contains(ext)) {
                 print("发送视频消息");
                 var videoUrl = urls.hlsUri == null ? urls.uri : urls.hlsUri;
                 Constant.instance.chatLib.sendVideoMessage(urls.uri ?? "",
@@ -241,7 +244,6 @@ class _ChatPageState extends State<ChatPage>
                 });
               } else {
                 print("发送文件消息-${urls.uri}");
-                var ext = (urls.uri ?? "").split(".").lastOrNull ?? "#";
                 if (fileTypes.contains(ext)) {
                   Constant.instance.chatLib.sendMessage(urls.uri ?? "",
                       cMessage.MessageFormat.MSG_FILE, consultId,

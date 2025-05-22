@@ -24,7 +24,7 @@ typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
-  Function(Urls, bool) onUploadSuccess;
+  Function(Urls) onUploadSuccess;
   ChatCustomBottom({
     super.key,
     required this.onSubmitted,
@@ -254,53 +254,22 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage() async {
-    //await picker.pickImage(source: ImageSource.gallery);
-    //final XFile? photo = await picker.pickMedia();
-    //print(photo?.path ?? "本地图片");
-
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result == null) {
       result;
     } else {
-      // User canceled the picker
     }
 
-    //File file = File(result.files.single.path!);
-    // All files
-    //List<XFile> xFiles = result!.xFiles;
-
-    // Individually
     XFile photo = result!.files.first.xFile;
-
-    var isVideo = true;
-    // var imageTypes = {
-    //   "tif",
-    //   "tiff",
-    //   "bmp",
-    //   "jpg",
-    //   "jpeg",
-    //   "png",
-    //   "gif",
-    //   "webp",
-    //   "ico",
-    //   "svg"
-    // };
     var ar = (photo?.name ?? "").split(".");
-    if (ar.length > 1) {
-      if (imageTypes.contains(ar.last.toLowerCase())) {
-        isVideo = false;
-      }
-    } else {
-      if (ar[0].isNotEmpty) {
-        return SmartDialog.showToast("不能识别的文件");
-      }
+    if (ar.length < 2) {
+      return SmartDialog.showToast("不能识别的文件");
     }
-
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      UploadUtil().upload(val, isVideo, this,  photo.path);
+      UploadUtil().upload(val, this,  photo.path);
     }
   }
 
@@ -316,8 +285,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   @override
-  void uploadSuccess(Urls urls, bool isVideo) {
-      widget.onUploadSuccess(urls, isVideo);
+  void uploadSuccess(Urls urls) {
+      widget.onUploadSuccess(urls);
       uploadProgress = 0;
       SmartDialog.dismiss();
   }

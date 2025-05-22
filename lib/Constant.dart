@@ -16,10 +16,6 @@ const String PARAM_MERCHANT_ID = "MERCHANT_ID";
 const String PARAM_LINES = "LINES";
 const String PARAM_ImageBaseURL = "IMAGEURL";
 
-const imageTypes = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "jfif", "heic"]; // 图片
-const videoTypes = ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"]; // 视频
-const fileTypes = ["docx", "doc", "pdf", "xls", "xlsx", "csv"]; // 文件
-
 // These are the values to be configured in settings
 String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
 //String cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg";
