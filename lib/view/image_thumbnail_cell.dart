@@ -89,34 +89,35 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                 }
 
                 }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
-                Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        textAlign: TextAlign.left, // Aligns text to the right
-                        "   " + msgTime,
-                        style: TextStyle(
-                            fontSize: 12,
 
-                            color: widget.message.author.id == widget.chatId
-                                ? Colors.white.withOpacity(0.5)
-                                : Colors.grey),
-                      ),GestureDetector(
-                        onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
-                            ? () => _toolTipController.showTooltip()
-                            : null,
-                        onSecondaryTapDown: (details) {
-                          if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
-                        },
-                        onTap: ()  {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
-                        },
-                        child: _remoteImag(),
-                      ),
-                    ])
+               Expanded(child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   mainAxisAlignment: MainAxisAlignment.start,
+                   children: [
+                     Text(
+                       textAlign: TextAlign.left, // Aligns text to the right
+                       "   " + msgTime,
+                       style: TextStyle(
+                           fontSize: 12,
+
+                           color: widget.message.author.id == widget.chatId
+                               ? Colors.white.withOpacity(0.5)
+                               : Colors.grey),
+                     ),GestureDetector(
+                       onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                           ? () => _toolTipController.showTooltip()
+                           : null,
+                       onSecondaryTapDown: (details) {
+                         if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+                       },
+                       onTap: ()  {
+                         Navigator.push(
+                             context,
+                             MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
+                       },
+                       child: _remoteImag(),
+                     ),
+                   ]))
               ],)
         ));
   }

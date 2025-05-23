@@ -354,20 +354,6 @@ class _ChatPageState extends State<ChatPage>
                 status: types.Status.sent,
                 remoteId: msg.msgId.toString()));
       }
-      //应该是不需要
-      //index =
-      //     _messages.indexWhere((p) => (p.repliedMessage?.remoteId ?? '#')  == msg.msgId.toString());
-      // if (index >= 0){
-      //   var replyMsg =  types.TextMessage(
-      //       author: types.User(id: msg.sender.toString()),
-      //       text: msg.content.data,
-      //       createdAt: DateTime.now().millisecondsSinceEpoch,
-      //       metadata: {'msgTime': Util.convertDateToString(DateTime.now())},
-      //       id: _generateRandomId(),
-      //       status: types.Status.sent,
-      //       remoteId: msg.msgId.toString());
-      //   _messages[index] = _messages[index].copyWith(repliedMessage: replyMsg);
-      // }
     } else {
       MsgItem item = MsgItem();
       item.sender = msg.sender.toString();
