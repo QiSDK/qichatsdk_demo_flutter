@@ -60,7 +60,7 @@ dependencies:
   easy_refresh: ^3.4.0
   flutter_smart_dialog: ^4.9.4
   easy_debounce: ^2.0.3
-  connectivity_plus: ^6.1.0
+  connectivity_plus: ^6.1.4
   flutter_statusbarcolor_ns: ^0.5.0
   path: ^1.8.3
   logman: ^0.0.16
