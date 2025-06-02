@@ -791,14 +791,13 @@ class _ChatPageState extends State<ChatPage>
     //types.Message? replyModel;
     ReplyMessageItem? replyItem;
     var index = -1;
-
-      if (replyList != null) {
-        index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
-        if (index >= 0) {
-          var oriMsg = replyList![index];
-          replyItem = _getReplyItem(oriMsg);
-        }
+    if (replyList != null) {
+      index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
+      if (index >= 0) {
+        var oriMsg = replyList![index];
+        replyItem = _getReplyItem(oriMsg);
       }
+    }
     return replyItem;
   }
 
@@ -852,7 +851,15 @@ class _ChatPageState extends State<ChatPage>
     if (oriMsg != null) {
       switch (oriMsg.msgFmt.toString()) {
         case "MSG_TEXT":
-          replyItem.content = oriMsg.content?.data ?? "";
+          var txtMsg = oriMsg.content?.data ?? "";
+          final jsonData = jsonDecode(txtMsg);
+          var result = TextBody.fromJson(
+            jsonData,
+          );
+          if (!(result.content ?? "").isEmpty){
+            txtMsg = result.content ?? "";
+          }
+          replyItem.content = txtMsg;
           break;
         case "MSG_IMG":
           replyItem.fileName = oriMsg.image?.uri ?? "";
