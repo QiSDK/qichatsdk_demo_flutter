@@ -21,6 +21,7 @@ import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/view/File_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/text_images_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'dart:math';
@@ -142,6 +143,13 @@ class _ChatPageState extends State<ChatPage>
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           if (message.text.contains("\"color\"")){
             return TextMediaCell(
+              message: message,
+              chatId: _me.id,
+              listener: this,
+              messageWidth: messageWidth ?? 0,
+            );
+          } else if (message.text.contains("\"imgs\"")){
+            return TextImagesCell(
               message: message,
               chatId: _me.id,
               listener: this,

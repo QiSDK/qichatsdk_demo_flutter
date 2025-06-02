@@ -105,9 +105,9 @@ class ArticleRepository {
     res.path = syncMessagePath;
 
     var l = 50;
-    if (kDebugMode){
-      l = 15;
-    }
+    // if (kDebugMode){
+    //   l = 15;
+    // }
     var map = {
       'chatId': 0,
       "count": l,
