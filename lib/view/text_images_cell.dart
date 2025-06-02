@@ -78,6 +78,17 @@ class _text_images_cell extends State<TextImagesCell> {
     return SuperTooltip(
         content: buildToolAction(),
         controller: _toolTipController,
+        popupDirection: TooltipDirection.up,
+        minimumOutsideMargin: 20.0,
+        arrowLength: 10.0,
+        arrowBaseWidth: 15.0,
+        borderRadius: 8.0,
+        constraints: const BoxConstraints(
+          minHeight: 0.0,
+          maxHeight: 200.0,
+          minWidth: 0.0,
+          maxWidth: 250.0,
+        ),
         child: GestureDetector(
           onLongPress:
               (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId

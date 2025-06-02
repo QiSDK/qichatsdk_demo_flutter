@@ -15,6 +15,7 @@ import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart' as sy;
+import 'package:qichatsdk_demo_flutter/model/TextImages.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
@@ -814,17 +815,20 @@ class _ChatPageState extends State<ChatPage>
         replyItem = ReplyMessageItem();
        var oriMsg = _messages[index];
        if (oriMsg.type == types.MessageType.text){
-
          var txtMsg = (oriMsg as types.TextMessage).text;
-         final jsonData = jsonDecode(txtMsg);
-         var result = TextBody.fromJson(
-           jsonData,
-         );
-
-         if (!(result.content ?? "").isEmpty){
+         if (txtMsg.contains("\"color\"")) {
+           final jsonData = jsonDecode(txtMsg);
+           var result = TextBody.fromJson(
+             jsonData,
+           );
            txtMsg = result.content ?? "";
+         }else if(txtMsg.contains("\"imgs\"")) {
+           final jsonData = jsonDecode(txtMsg);
+           var result = TextImages.fromJson(
+             jsonData,
+           );
+           txtMsg = result.message ?? "";
          }
-
          replyItem?.content = txtMsg;
        }else if (oriMsg.type == types.MessageType.image){
          replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
@@ -852,12 +856,18 @@ class _ChatPageState extends State<ChatPage>
       switch (oriMsg.msgFmt.toString()) {
         case "MSG_TEXT":
           var txtMsg = oriMsg.content?.data ?? "";
-          final jsonData = jsonDecode(txtMsg);
-          var result = TextBody.fromJson(
-            jsonData,
-          );
-          if (!(result.content ?? "").isEmpty){
+          if (txtMsg.contains("\"color\"")) {
+            final jsonData = jsonDecode(txtMsg);
+            var result = TextBody.fromJson(
+              jsonData,
+            );
             txtMsg = result.content ?? "";
+          }else if(txtMsg.contains("\"imgs\"")) {
+            final jsonData = jsonDecode(txtMsg);
+            var result = TextImages.fromJson(
+              jsonData,
+            );
+            txtMsg = result.message ?? "";
           }
           replyItem.content = txtMsg;
           break;
