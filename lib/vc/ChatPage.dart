@@ -699,7 +699,7 @@ class _ChatPageState extends State<ChatPage>
 
     if (msgModel.msgSourceType == "MST_SYSTEM_WORKER"){
       sender = _me;
-    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER"){
+    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER" || msgModel.msgSourceType == "MST_AI") {
       sender = _friend;
     }
 

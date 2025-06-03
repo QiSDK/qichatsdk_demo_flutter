@@ -105,14 +105,17 @@ class ArticleRepository {
     res.path = syncMessagePath;
 
     var l = 50;
-    // if (kDebugMode){
-    //   l = 15;
-    // }
+    var msgId = null;
+    if (kDebugMode){
+      l = 15;
+     // msgId = "1331873452448907298";
+    }
     var map = {
       'chatId': 0,
       "count": l,
       "consultId": consultId.toInt(),
-      "userId": userId
+      "userId": userId,
+      "msgId": msgId,
     };
     //var formData = FormData.fromMap(map);
     res.bodyParams = map;
