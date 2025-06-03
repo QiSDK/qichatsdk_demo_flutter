@@ -85,9 +85,9 @@ class _text_images_cell extends State<TextImagesCell> {
         borderRadius: 8.0,
         constraints: const BoxConstraints(
           minHeight: 0.0,
-          maxHeight: 200.0,
+          maxHeight: 50.0,
           minWidth: 0.0,
-          maxWidth: 250.0,
+          maxWidth: 50.0,
         ),
         child: GestureDetector(
           onLongPress:
@@ -150,7 +150,7 @@ class _text_images_cell extends State<TextImagesCell> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: mediaUrls.length == 1 ? 1 : 2,
+                            crossAxisCount: mediaUrls.length > 6 ? 2 : 3,
                             crossAxisSpacing: 4,
                             mainAxisSpacing: 4,
                             childAspectRatio: 1.0,
@@ -214,6 +214,15 @@ class _text_images_cell extends State<TextImagesCell> {
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
+        TextButton(
+            onPressed: () {
+              FlutterClipboard.copy(msgTxt).then((value) {
+                _toolTipController.hideTooltip().then((val) {
+                  SmartDialog.showToast("已复制到剪切板");
+                });
+              });
+            },
+            child: buildRowText(Icons.copy, '复制'))
       ],
     );
   }

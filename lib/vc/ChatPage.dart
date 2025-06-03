@@ -579,7 +579,6 @@ class _ChatPageState extends State<ChatPage>
       }
     }
 
-    //String hello = "您好，${_worker?.nick ?? "_"} 已为您转接！${myWorker.nick}为您服务";
     if (workerChanged) {
       _worker = myWorker;
     }
