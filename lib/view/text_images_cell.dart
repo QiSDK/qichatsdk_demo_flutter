@@ -75,31 +75,7 @@ class _text_images_cell extends State<TextImagesCell> {
         mediaUrls = result.imgs;
     }
 
-    return SuperTooltip(
-        content: buildToolAction(),
-        controller: _toolTipController,
-        popupDirection: TooltipDirection.up,
-        minimumOutsideMargin: 20.0,
-        arrowLength: 10.0,
-        arrowBaseWidth: 15.0,
-        borderRadius: 8.0,
-        constraints: const BoxConstraints(
-          minHeight: 0.0,
-          maxHeight: 50.0,
-          minWidth: 0.0,
-          maxWidth: 50.0,
-        ),
-        child: GestureDetector(
-          onLongPress:
-              (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
-                  ? () => _toolTipController.showTooltip()
-                  : null,
-          onSecondaryTapDown: (details) {
-            if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
-              _toolTipController.showTooltip();
-            }
-          },
-          child: Container(
+    return Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             decoration: BoxDecoration(
               color: isCurrentUser ? Colors.blueAccent : Colors.blue.shade100,
@@ -126,14 +102,40 @@ class _text_images_cell extends State<TextImagesCell> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        msgTxt,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isCurrentUser ? Colors.white : Colors.black,
+                      SuperTooltip(
+                        content: buildToolAction(),
+                        controller: _toolTipController,
+                        popupDirection: TooltipDirection.up,
+                        minimumOutsideMargin: 20.0,
+                        arrowLength: 10.0,
+                        arrowBaseWidth: 15.0,
+                        borderRadius: 8.0,
+                        constraints: const BoxConstraints(
+                          minHeight: 0.0,
+                          maxHeight: 50.0,
+                          minWidth: 0.0,
+                          maxWidth: 50.0,
                         ),
-                        maxLines: 10,
-                        overflow: TextOverflow.ellipsis,
+                        child: GestureDetector(
+                          onLongPress:
+                          (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
+                              ? () => _toolTipController.showTooltip()
+                              : null,
+                          onSecondaryTapDown: (details) {
+                            if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
+                              _toolTipController.showTooltip();
+                            }
+                          },
+                          child: Text(
+                            msgTxt,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isCurrentUser ? Colors.white : Colors.black,
+                            ),
+                            maxLines: 10,
+                            overflow: TextOverflow.ellipsis,
+                      )
+                        ),
                       ),
                     ],
                   ),
@@ -198,8 +200,7 @@ class _text_images_cell extends State<TextImagesCell> {
                       ),
               ],
             ),
-          ),
-        ));
+        );
   }
 
   buildToolAction() {
