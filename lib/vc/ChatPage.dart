@@ -15,12 +15,14 @@ import 'package:qichatsdk_demo_flutter/model/MyMsg.dart';
 import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Sync.dart' as sy;
+import 'package:qichatsdk_demo_flutter/model/TextImages.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'package:qichatsdk_demo_flutter/store/chat_store.dart';
 import 'package:qichatsdk_demo_flutter/vc/custom_bottom.dart';
 import 'package:qichatsdk_demo_flutter/view/File_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/text_images_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import 'dart:math';
@@ -142,6 +144,13 @@ class _ChatPageState extends State<ChatPage>
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           if (message.text.contains("\"color\"")){
             return TextMediaCell(
+              message: message,
+              chatId: _me.id,
+              listener: this,
+              messageWidth: messageWidth ?? 0,
+            );
+          } else if (message.text.contains("\"imgs\"")){
+            return TextImagesCell(
               message: message,
               chatId: _me.id,
               listener: this,
@@ -570,7 +579,6 @@ class _ChatPageState extends State<ChatPage>
       }
     }
 
-    //String hello = "您好，${_worker?.nick ?? "_"} 已为您转接！${myWorker.nick}为您服务";
     if (workerChanged) {
       _worker = myWorker;
     }
@@ -690,7 +698,7 @@ class _ChatPageState extends State<ChatPage>
 
     if (msgModel.msgSourceType == "MST_SYSTEM_WORKER"){
       sender = _me;
-    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER"){
+    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER" || msgModel.msgSourceType == "MST_AI") {
       sender = _friend;
     }
 
@@ -783,14 +791,13 @@ class _ChatPageState extends State<ChatPage>
     //types.Message? replyModel;
     ReplyMessageItem? replyItem;
     var index = -1;
-
-      if (replyList != null) {
-        index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
-        if (index >= 0) {
-          var oriMsg = replyList![index];
-          replyItem = _getReplyItem(oriMsg);
-        }
+    if (replyList != null) {
+      index = replyList!.indexWhere((p) => p.msgId == replyMsgId);
+      if (index >= 0) {
+        var oriMsg = replyList![index];
+        replyItem = _getReplyItem(oriMsg);
       }
+    }
     return replyItem;
   }
 
@@ -807,17 +814,20 @@ class _ChatPageState extends State<ChatPage>
         replyItem = ReplyMessageItem();
        var oriMsg = _messages[index];
        if (oriMsg.type == types.MessageType.text){
-
          var txtMsg = (oriMsg as types.TextMessage).text;
-         final jsonData = jsonDecode(txtMsg);
-         var result = TextBody.fromJson(
-           jsonData,
-         );
-
-         if (!(result.content ?? "").isEmpty){
+         if (txtMsg.contains("\"color\"")) {
+           final jsonData = jsonDecode(txtMsg);
+           var result = TextBody.fromJson(
+             jsonData,
+           );
            txtMsg = result.content ?? "";
+         }else if(txtMsg.contains("\"imgs\"")) {
+           final jsonData = jsonDecode(txtMsg);
+           var result = TextImages.fromJson(
+             jsonData,
+           );
+           txtMsg = result.message ?? "";
          }
-
          replyItem?.content = txtMsg;
        }else if (oriMsg.type == types.MessageType.image){
          replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
@@ -844,7 +854,21 @@ class _ChatPageState extends State<ChatPage>
     if (oriMsg != null) {
       switch (oriMsg.msgFmt.toString()) {
         case "MSG_TEXT":
-          replyItem.content = oriMsg.content?.data ?? "";
+          var txtMsg = oriMsg.content?.data ?? "";
+          if (txtMsg.contains("\"color\"")) {
+            final jsonData = jsonDecode(txtMsg);
+            var result = TextBody.fromJson(
+              jsonData,
+            );
+            txtMsg = result.content ?? "";
+          }else if(txtMsg.contains("\"imgs\"")) {
+            final jsonData = jsonDecode(txtMsg);
+            var result = TextImages.fromJson(
+              jsonData,
+            );
+            txtMsg = result.message ?? "";
+          }
+          replyItem.content = txtMsg;
           break;
         case "MSG_IMG":
           replyItem.fileName = oriMsg.image?.uri ?? "";

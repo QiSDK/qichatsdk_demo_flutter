@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
@@ -104,14 +105,17 @@ class ArticleRepository {
     res.path = syncMessagePath;
 
     var l = 50;
+    var msgId = null;
     if (kDebugMode){
       l = 15;
+     // msgId = "1331873452448907298";
     }
     var map = {
       'chatId': 0,
       "count": l,
       "consultId": consultId.toInt(),
-      "userId": userId
+      "userId": userId,
+      "msgId": msgId,
     };
     //var formData = FormData.fromMap(map);
     res.bodyParams = map;
@@ -224,15 +228,21 @@ class ArticleRepository {
       Dio dio = Dio();
       var fileName = url.split("/").last;
       // Get the app's document directory to save the file
-      //Directory downloadDirectory = await getTemporaryDirectory();
-      //String savePath = '${downloadDirectory.path}/$fileName';
+      Directory downloadDirectory = await getTemporaryDirectory();
+      String? savePath = '${downloadDirectory.path}/$fileName';
       //String savePath = '/Users/xuefeng/Downloads/$fileName';
 
+      if (!Platform.isAndroid && !Platform.isIOS)
       // Let the user choose the save location
-      String? savePath = await FilePicker.platform.saveFile(
+       savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save your file',
         fileName: fileName,
       );
+      if (savePath == null) {
+        print('Download cancelled by user');
+        return false;
+      }
+      SmartDialog.showLoading();
       // Start downloading
       await dio.download(
         url,
