@@ -17,14 +17,20 @@ const String PARAM_LINES = "LINES";
 const String PARAM_ImageBaseURL = "IMAGEURL";
 
 // These are the values to be configured in settings
-String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
+
 //String cert = "COEBEAUYASDjASiewpj-8TE.-1R9Mw9xzDNrSxoQ5owopxciklACjBUe43NANibVuy-XPlhqnhAOEaZpxjvTyJ6n79P5bUBCGxO7PcEFQ9p9Cg";
-String cert = "COYBEAIYwNgoIPIBKIOzgtGXMg.-t5P7JEo-Dg7nlJpu6uZzNJE3QtRaJV9bE1yhZqduThDLHE6MGxCBFuwF38v5z5SJhoD40fmwAtPj4iIL9iPAQ";
 //String cert = "COgBEAUYASDzASitlJSF9zE.5uKWeVH-7G8FIgkaLIhvzCROkWr4D3pMU0-tqk58EAQcLftyD2KBMIdYetjTYQEyQwWLy7Lfkm8cs3aogaThAw";
 //String cert = "COYBEAUYASDyASiG2piD9zE.te46qua5ha2r-Caz03Vx2JXH5OLSRRV2GqdYcn9UslwibsxBSP98GhUKSGEI0Z84FRMkp16ZK8eS-y72QVE2AQ";
 int merchantId = 230;
 int userId = 666667; // Example: 1125324
-String baseUrlImage = "https://imagesacc.hfxg.xyz"; // For constructing image URLs
+
+// String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
+// String baseUrlImage = "https://imagesacc.hfxg.xyz"; // For constructing image URLs
+// String cert = "COYBEAIYwNgoIPIBKIOzgtGXMg.-t5P7JEo-Dg7nlJpu6uZzNJE3QtRaJV9bE1yhZqduThDLHE6MGxCBFuwF38v5z5SJhoD40fmwAtPj4iIL9iPAQ";
+
+String cert = "CAEQBRgBIIcCKPHr3dPoMg.ed_euM3a4Ew7QTiJKg4XQskD5KTzvqXdFKRPnVyNmyZNF-Cyq7g9XMr3a41OvVtoovp15IBrfYveDZTJPEldBA";
+String lines = "https://d2jt4g8mgfvbcl.cloudfront.net";
+String baseUrlImage = "https://d2uzsk40324g7l.cloudfront.net";
 
 String xToken = "";
 String domain = "";  // Domain
@@ -35,7 +41,7 @@ String baseUrlApi(){
 }
 //int workerId = -1;
 String userName ='王五';
-int maxSessionMins = 5;
+int maxSessionMins = 300;
 
 // Unsent messages list
 Map<Int64, List<types.Message>> unSentMessage = {Int64(0): []};

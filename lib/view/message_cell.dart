@@ -128,7 +128,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    // && (widget.autoReply?.autoReplyItem?.qa?.length ?? 0) > 0
     if (content == 'autoReplay' && widget.message.metadata != null) {
       return initAutoReplay();
     }
@@ -139,16 +138,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (widget.message.metadata != null && widget.message.metadata!['replyMsg'] != null){
        replyItem = widget.message.metadata!['replyMsg'];
     }
-    // if (widget.message.type == types.MessageType.image || widget.message.type == types.MessageType.video) {
-    //   return CachedNetworkImage(
-    //     key: Key(widget.message.remoteId.toString()),
-    //     width: 200,
-    //     height: 150,
-    //     imageUrl: widget.message.text,
-    //   );
-    // }
     return buildNormalMessage();
-
   }
 
   buildToolAction() {
@@ -306,9 +296,9 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           EnhanceExpansionPanelList(
             elevation: 0,
             expansionCallback: (index, expand) {
-              setState(() {
+              //setState(() {
                 sectionList[index].isExpanded = !expand;
-              });
+              //});
               // 告诉外面的数据源，哪个展开了
               widget.onExpandAction(index, !expand);
             },
@@ -346,6 +336,12 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                         onTap: () {
                           if (relatedList.isEmpty) {
                             qaClicked(qa);
+                          }else{
+                            //setState(() {
+                              sectionList[index].isExpanded = !(sectionList[index].isExpanded ?? false);
+                            //});
+                            // 告诉外面的数据源，哪个展开了
+                            widget.onExpandAction(index, sectionList[index].isExpanded ?? false);
                           }
                         },
                         child: Padding(
@@ -491,35 +487,32 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     // Sending question message
     if (txtAnswer.isNotEmpty) {
       // Auto-reply
-      widget.listener.onSendLocalMsg(txtAnswer, false);
       var uAnswer = cmessage.MessageUnion();
       var uQC = cmessage.MessageContent();
       uQC.data = txtAnswer;
       uAnswer.content = uQC;
       withAutoReplyBuilder?.answers.add(uAnswer);
+      widget.listener.onSendLocalMsg(txtAnswer, false);
     }
 
-    //if (multipAnswer.isNotEmpty) {
     for (var a in qa.answer ?? []) {
       if (a?.image?.uri != null) {
         // Auto-reply with image
-        widget.listener.onSendLocalMsg(a!.image!.uri!, false, "MSG_IMAGE");
-
         var uAnswer = cmessage.MessageUnion();
         var uQC = cmessage.MessageImage();
         uQC.uri = a.image!.uri!;
         uAnswer.image = uQC;
         withAutoReplyBuilder?.answers.add(uAnswer);
+        widget.listener.onSendLocalMsg(a!.image!.uri!, false, "MSG_IMAGE");
       } else if (a?.content?.data != null) {
-        widget.listener.onSendLocalMsg(a?.content?.data ?? "", false);
         var uAnswer = cmessage.MessageUnion();
         var uQC = cmessage.MessageContent();
         uQC.data = txtAnswer;
         uAnswer.content = uQC;
         withAutoReplyBuilder?.answers.add(uAnswer);
+        widget.listener.onSendLocalMsg(a?.content?.data ?? "", false);
       }
     }
-    //}
   }
 
   Future<void> _launchInWebView(Uri url) async {
