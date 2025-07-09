@@ -82,6 +82,7 @@ dependencies:
   webview_flutter_android: 3.16.0
   macos_webview_kit: ^0.0.3
   #auto_scroll: ^0.2.0
+  camera: ^0.10.5+9
 
 dev_dependencies:
   flutter_test:

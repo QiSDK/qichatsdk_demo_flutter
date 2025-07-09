@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +11,8 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:file_picker/file_picker.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+
+import 'CameraVC.dart';
 
 //import '../model/UploadPercent.dart';
 
@@ -191,6 +195,16 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 _pickEmoji();
               },
               icon: const Icon(Icons.emoji_emotions)),
+         if (Platform.isIOS || Platform.isAndroid) IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(
+                  builder: (context) => CameraExampleHome(
+                  ),
+                ));
+                //_pickEmoji();
+              },
+              icon: const Icon(Icons.photo_camera)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
