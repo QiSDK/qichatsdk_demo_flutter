@@ -228,6 +228,7 @@ class _ChatPageState extends State<ChatPage>
               }
               final partialText = types.PartialText(text: trimmedText);
               _handleSendPressed(partialText);
+
             },
             onUploaded: (Urls urls) {
               if ((urls.uri ?? "").isEmpty) {

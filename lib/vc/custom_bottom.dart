@@ -224,6 +224,9 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 FocusScope.of(context).unfocus();
                 // 放在最后，清空
                 hideReply();
+                setState(() {
+                  _emojiShowing = false;
+                });
               },
               icon: const Icon(
                 Icons.send,
