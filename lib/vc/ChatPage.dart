@@ -112,7 +112,10 @@ class _ChatPageState extends State<ChatPage>
         author: _me,
         id: "${Constant.instance.chatLib.payloadId}",
         text: message.text,
-        metadata: {'msgTime': DateTime.now().millisecondsSinceEpoch, 'replyMsg': await _getReplyMessage(replyId.toString())},
+        metadata: {
+          'msgTime': DateTime.now().millisecondsSinceEpoch,
+          'replyMsg': await _getReplyMessage(replyId.toString())
+        },
         createdAt: DateTime.now().millisecondsSinceEpoch,
         status: types.Status.sending);
     setState(() {
@@ -142,21 +145,21 @@ class _ChatPageState extends State<ChatPage>
             primaryColor: Colors.blueAccent,
             inputTextColor: Colors.black),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
-          if (message.text.contains("\"color\"")){
+          if (message.text.contains("\"color\"")) {
             return TextMediaCell(
               message: message,
               chatId: _me.id,
               listener: this,
               messageWidth: messageWidth ?? 0,
             );
-          } else if (message.text.contains("\"imgs\"")){
+          } else if (message.text.contains("\"imgs\"")) {
             return TextImagesCell(
               message: message,
               chatId: _me.id,
               listener: this,
               messageWidth: messageWidth ?? 0,
             );
-          }else{
+          } else {
             return TextMessageWidget(
               message: message,
               autoReply: _autoReplyModel,
@@ -165,7 +168,18 @@ class _ChatPageState extends State<ChatPage>
               messageWidth: messageWidth ?? 0,
               onExpandAction: (index, val) {
                 setState(() {
-                  _autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val;
+                  if (val) {
+                    // If the current section is expanding
+                    _autoReplyModel?.autoReplyItem?.qa
+                        ?.asMap()
+                        .forEach((i, qaItem) {
+                      if (i != index) {
+                        // Collapse all other sections
+                        qaItem.isExpanded = false;
+                      }
+                    });
+                  }
+                  //_autoReplyModel?.autoReplyItem?.qa?[index].isExpanded = val; // Set the clicked section's state
                 });
               },
             );
@@ -214,6 +228,7 @@ class _ChatPageState extends State<ChatPage>
               }
               final partialText = types.PartialText(text: trimmedText);
               _handleSendPressed(partialText);
+
             },
             onUploaded: (Urls urls) {
               if ((urls.uri ?? "").isEmpty) {
@@ -221,7 +236,7 @@ class _ChatPageState extends State<ChatPage>
                 return;
               }
               var ext = (urls.uri ?? "").split(".").lastOrNull ?? "#";
-              
+
               debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
               if (videoTypes.contains(ext)) {
                 print("发送视频消息");
@@ -316,7 +331,12 @@ class _ChatPageState extends State<ChatPage>
               ),
             ),
           ),
-          errorWidget: (context, url, error) => Image.asset(""),
+            errorWidget: (context, url, error) => Image.asset("png/imgloading")
+          // errorWidget: (context, url, error)
+          // {
+          //   print("加载 avatar 失败 ${url}");
+          //   return Image.asset("png/imgloading");
+          // }
         ),
       ),
     );
@@ -498,16 +518,7 @@ class _ChatPageState extends State<ChatPage>
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // if (_scrollController.hasClients) {
-      //   _scrollController.animateTo(
-      //     _scrollController.position.maxScrollExtent,
-      //     duration: const Duration(milliseconds: 300),
-      //     curve: Curves.easeOut,
-      //
-      //   );
-      // }
-
-      if (_scrollController.hasClients && _messages.length < 5) {
+      if (_scrollController.hasClients && _messages.length > 5) {
         _scrollController.animateTo(
           0.0,
           curve: Curves.easeOut,
@@ -515,15 +526,15 @@ class _ChatPageState extends State<ChatPage>
         );
       }
     });
-
     //行不同
     //_scrollController?.scrollToIndex(_messages.length);
   }
 
   _updateUI(String info) {
     if (mounted) {
-      setState(() {});
+      print("_scrollToBottom 滑到底部了");
       _scrollToBottom();
+      setState(() {});
     }
   }
 
@@ -669,10 +680,13 @@ class _ChatPageState extends State<ChatPage>
   }
 
   Future<types.Message?> composeLocalMsg(MsgItem msgModel,
-      {bool isHistory = false, bool isTipText = false, bool onlyCompose = false}) async {
+      {bool isHistory = false,
+      bool isTipText = false,
+      bool onlyCompose = false}) async {
     String imgUri = msgModel.image?.uri ?? '';
     String videoUri = msgModel.video?.uri ?? '';
-    String thumbnailUri = msgModel.video?.thumbnailUri ?? 'https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
+    String thumbnailUri = msgModel.video?.thumbnailUri ??
+        'https://www.bing.com/th?id=OHR.GoldfinchSunflower_ROW8225520434_1920x1200.jpg&rf=LaDigue_1920x1200.jpg';
     String fileUri = msgModel.file?.uri ?? '';
     String text = msgModel.content?.data ?? '';
     String senderId = msgModel.sender ?? '';
@@ -685,20 +699,24 @@ class _ChatPageState extends State<ChatPage>
           Util.parseStringToDateTime(msgModel.msgTime!)?.millisecondsSinceEpoch;
     }
 
-    if (!thumbnailUri.contains("http")){
+    if (!thumbnailUri.contains("http")) {
       thumbnailUri = baseUrlImage + thumbnailUri;
     }
 
-   // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
-    ReplyMessageItem? replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
-    if ((msgModel.replyMsgId ?? "").length > 5){
-      replyMsg =  isHistory ? _getReplyMessageFromHistory(msgModel.replyMsgId ?? "") : await _getReplyMessage(msgModel.replyMsgId ?? "");
+    // var replyText = _getReplyText(msgModel.replyMsgId ?? "", insert);
+    ReplyMessageItem?
+        replyMsg; // _getReplyMessage(msgModel.replyMsgId ?? "", insert);
+    if ((msgModel.replyMsgId ?? "").length > 5) {
+      replyMsg = isHistory
+          ? _getReplyMessageFromHistory(msgModel.replyMsgId ?? "")
+          : await _getReplyMessage(msgModel.replyMsgId ?? "");
     }
     var sender = types.User(id: senderId);
 
-    if (msgModel.msgSourceType == "MST_SYSTEM_WORKER"){
+    if (msgModel.msgSourceType == "MST_SYSTEM_WORKER") {
       sender = _me;
-    }else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER" || msgModel.msgSourceType == "MST_AI") {
+    } else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER" ||
+        msgModel.msgSourceType == "MST_AI") {
       sender = _friend;
     }
 
@@ -757,7 +775,11 @@ class _ChatPageState extends State<ChatPage>
           id: _generateRandomId(),
           name: 'dd',
           size: 150,
-          metadata: {'msgTime': msgTime, 'thumbnailUri': thumbnailUri, 'replyMsg': replyMsg},
+          metadata: {
+            'msgTime': msgTime,
+            'thumbnailUri': thumbnailUri,
+            'replyMsg': replyMsg
+          },
           status: types.Status.sent,
           remoteId: msgId);
     } else if (text.isNotEmpty) {
@@ -767,7 +789,8 @@ class _ChatPageState extends State<ChatPage>
           createdAt: milliSeconds,
           metadata: {
             'msgTime': msgTime,
-            'tipText': isTipText, 'replyMsg': replyMsg
+            'tipText': isTipText,
+            'replyMsg': replyMsg
           },
           id: _generateRandomId(),
           status: types.Status.sent,
@@ -777,14 +800,14 @@ class _ChatPageState extends State<ChatPage>
     }
 
     if (msg != null && !onlyCompose) {
-      isHistory ? _messages.add(msg) : _messages.insert(0, msg)  ;
+      isHistory ? _messages.add(msg) : _messages.insert(0, msg);
       //_messages.add(msg);
       //_messages.insert(0, msg)  ;
     }
     return msg;
   }
 
-  ReplyMessageItem? _getReplyMessageFromHistory(String replyMsgId)  {
+  ReplyMessageItem? _getReplyMessageFromHistory(String replyMsgId) {
     if (replyMsgId.length < 5) {
       return null;
     }
@@ -809,43 +832,43 @@ class _ChatPageState extends State<ChatPage>
     ReplyMessageItem? replyItem;
     var index = -1;
 
-      index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
-      if (index >= 0) {
-        replyItem = ReplyMessageItem();
-       var oriMsg = _messages[index];
-       if (oriMsg.type == types.MessageType.text){
-         var txtMsg = (oriMsg as types.TextMessage).text;
-         if (txtMsg.contains("\"color\"")) {
-           final jsonData = jsonDecode(txtMsg);
-           var result = TextBody.fromJson(
-             jsonData,
-           );
-           txtMsg = result.content ?? "";
-         }else if(txtMsg.contains("\"imgs\"")) {
-           final jsonData = jsonDecode(txtMsg);
-           var result = TextImages.fromJson(
-             jsonData,
-           );
-           txtMsg = result.message ?? "";
-         }
-         replyItem?.content = txtMsg;
-       }else if (oriMsg.type == types.MessageType.image){
-         replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
-       }else if (oriMsg.type == types.MessageType.video){
-         replyItem?.fileName = (oriMsg as types.VideoMessage).uri;
-       }else if (oriMsg.type == types.MessageType.file){
-         replyItem?.fileName = (oriMsg as types.FileMessage).uri;
-         replyItem?.size = (oriMsg as types.FileMessage).size.toInt();
-       }
-      }else{
-        var messageResponse = await ArticleRepository.queryMessage(replyMsgId);
-        final replyList = messageResponse?.replyList ?? [];
-        replyItem = _getReplyItem(replyList[0]);
-        print(s);
-        Timer(const Duration(seconds: 1), () {
-          _updateUI("info");
-        });
+    index = _messages.indexWhere((item) => item.remoteId == replyMsgId);
+    if (index >= 0) {
+      replyItem = ReplyMessageItem();
+      var oriMsg = _messages[index];
+      if (oriMsg.type == types.MessageType.text) {
+        var txtMsg = (oriMsg as types.TextMessage).text;
+        if (txtMsg.contains("\"color\"")) {
+          final jsonData = jsonDecode(txtMsg);
+          var result = TextBody.fromJson(
+            jsonData,
+          );
+          txtMsg = result.content ?? "";
+        } else if (txtMsg.contains("\"imgs\"")) {
+          final jsonData = jsonDecode(txtMsg);
+          var result = TextImages.fromJson(
+            jsonData,
+          );
+          txtMsg = result.message ?? "";
+        }
+        replyItem?.content = txtMsg;
+      } else if (oriMsg.type == types.MessageType.image) {
+        replyItem?.fileName = (oriMsg as types.ImageMessage).uri;
+      } else if (oriMsg.type == types.MessageType.video) {
+        replyItem?.fileName = (oriMsg as types.VideoMessage).uri;
+      } else if (oriMsg.type == types.MessageType.file) {
+        replyItem?.fileName = (oriMsg as types.FileMessage).uri;
+        replyItem?.size = (oriMsg as types.FileMessage).size.toInt();
       }
+    } else {
+      var messageResponse = await ArticleRepository.queryMessage(replyMsgId);
+      final replyList = messageResponse?.replyList ?? [];
+      replyItem = _getReplyItem(replyList[0]);
+      print(s);
+      Timer(const Duration(seconds: 1), () {
+        _updateUI("info");
+      });
+    }
     return replyItem;
   }
 
@@ -861,7 +884,7 @@ class _ChatPageState extends State<ChatPage>
               jsonData,
             );
             txtMsg = result.content ?? "";
-          }else if(txtMsg.contains("\"imgs\"")) {
+          } else if (txtMsg.contains("\"imgs\"")) {
             final jsonData = jsonDecode(txtMsg);
             var result = TextImages.fromJson(
               jsonData,
@@ -958,7 +981,11 @@ class _ChatPageState extends State<ChatPage>
             ));
       }
     }
+
+    //滑动到底部
+    //delayExecution(1, () => {
     _updateUI("info");
+    // });
   }
 
   void startTimer() {
