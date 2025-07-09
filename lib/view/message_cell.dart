@@ -296,9 +296,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           EnhanceExpansionPanelList(
             elevation: 0,
             expansionCallback: (index, expand) {
-              //setState(() {
-                sectionList[index].isExpanded = !expand;
-              //});
+              sectionList[index].isExpanded = !expand;
               // 告诉外面的数据源，哪个展开了
               widget.onExpandAction(index, !expand);
             },
@@ -337,11 +335,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                           if (relatedList.isEmpty) {
                             qaClicked(qa);
                           }else{
-                            //setState(() {
                               sectionList[index].isExpanded = !(sectionList[index].isExpanded ?? false);
-                            //});
-                            // 告诉外面的数据源，哪个展开了
-                            widget.onExpandAction(index, sectionList[index].isExpanded ?? false);
+                              widget.onExpandAction(index, sectionList[index].isExpanded ?? false);
                           }
                         },
                         child: Padding(

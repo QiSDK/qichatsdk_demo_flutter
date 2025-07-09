@@ -24,13 +24,13 @@ const String PARAM_ImageBaseURL = "IMAGEURL";
 int merchantId = 230;
 int userId = 666667; // Example: 1125324
 
-// String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
-// String baseUrlImage = "https://imagesacc.hfxg.xyz"; // For constructing image URLs
-// String cert = "COYBEAIYwNgoIPIBKIOzgtGXMg.-t5P7JEo-Dg7nlJpu6uZzNJE3QtRaJV9bE1yhZqduThDLHE6MGxCBFuwF38v5z5SJhoD40fmwAtPj4iIL9iPAQ";
+String lines = "https://csapi.hfxg.xyz,https://xxx.qixin14.xxx";
+String baseUrlImage = "https://imagesacc.hfxg.xyz"; // For constructing image URLs
+String cert = "COYBEAIYwNgoIPIBKIOzgtGXMg.-t5P7JEo-Dg7nlJpu6uZzNJE3QtRaJV9bE1yhZqduThDLHE6MGxCBFuwF38v5z5SJhoD40fmwAtPj4iIL9iPAQ";
 
-String cert = "CAEQBRgBIIcCKPHr3dPoMg.ed_euM3a4Ew7QTiJKg4XQskD5KTzvqXdFKRPnVyNmyZNF-Cyq7g9XMr3a41OvVtoovp15IBrfYveDZTJPEldBA";
-String lines = "https://d2jt4g8mgfvbcl.cloudfront.net";
-String baseUrlImage = "https://d2uzsk40324g7l.cloudfront.net";
+// String cert = "CAEQBRgBIIcCKPHr3dPoMg.ed_euM3a4Ew7QTiJKg4XQskD5KTzvqXdFKRPnVyNmyZNF-Cyq7g9XMr3a41OvVtoovp15IBrfYveDZTJPEldBA";
+// String lines = "https://d2jt4g8mgfvbcl.cloudfront.net";
+// String baseUrlImage = "https://d2uzsk40324g7l.cloudfront.net";
 
 String xToken = "";
 String domain = "";  // Domain

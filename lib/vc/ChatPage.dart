@@ -331,7 +331,11 @@ class _ChatPageState extends State<ChatPage>
               ),
             ),
           ),
-          errorWidget: (context, url, error) => Image.asset(""),
+          errorWidget: (context, url, error)
+          {
+            print("加载 avatar 失败 ${url}");
+            return Image.asset("png/imgloading");
+          }
         ),
       ),
     );
