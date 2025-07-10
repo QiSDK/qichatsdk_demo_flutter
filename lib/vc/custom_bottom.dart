@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:qichatsdk_demo_flutter/Constant.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:qichatsdk_demo_flutter/vc/camera_page.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:file_picker/file_picker.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
@@ -21,18 +21,16 @@ typedef SubmittedAction = void Function(String val);
 class ChatCustomBottom extends StatefulWidget {
   SubmittedAction onSubmitted;
   Function(Urls) onUploaded;
-  ChatCustomBottom({
-    super.key,
-    required this.onSubmitted,
-    required this.onUploaded
-  });
+  ChatCustomBottom(
+      {super.key, required this.onSubmitted, required this.onUploaded});
 
   @override
   State<StatefulWidget> createState() => ChatCustomBottomState();
 }
 
 class ChatCustomBottomState extends State<ChatCustomBottom>
-    with TickerProviderStateMixin implements UploadListener{
+    with TickerProviderStateMixin
+    implements UploadListener {
   late FocusNode focusNode = FocusNode();
   late TextEditingController inputController = TextEditingController();
   var lastWords = '';
@@ -151,18 +149,19 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   _initReply() {
     return Container(
-      color: Colors.grey.shade200,
-      width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      child: Row(
-        children: [
-         Text('回复：$replyText'),
-          IconButton(onPressed: (){
-            hideReply();
-          }, icon: Icon(Icons.close, color: Colors.blue, size: 20))
-        ],
-      )
-    );
+        color: Colors.grey.shade200,
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+        child: Row(
+          children: [
+            Text('回复：$replyText'),
+            IconButton(
+                onPressed: () {
+                  hideReply();
+                },
+                icon: Icon(Icons.close, color: Colors.blue, size: 20))
+          ],
+        ));
   }
 
   Widget buildInput() {
@@ -195,16 +194,19 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 _pickEmoji();
               },
               icon: const Icon(Icons.emoji_emotions)),
-         if (Platform.isIOS || Platform.isAndroid) IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(
-                  builder: (context) => CameraExampleHome(
-                  ),
-                ));
-                //_pickEmoji();
-              },
-              icon: const Icon(Icons.photo_camera)),
+          if (Platform.isIOS || Platform.isAndroid)
+            IconButton(
+                onPressed: () async {
+                  final String? path = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CameraPage()),
+                  );
+                  if (path != null) {
+                    // Handle the captured image/video path
+                    print('Captured file path: $path');
+                  }
+                },
+                icon: const Icon(Icons.photo_camera)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -267,8 +269,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
     if (result == null) {
       result;
-    } else {
-    }
+    } else {}
 
     XFile photo = result!.files.first.xFile;
     var ar = (photo?.name ?? "").split(".");
@@ -290,11 +291,11 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   @override
   void updateProgress(int progress) {
-    SmartDialog.showLoading(msg:"正在上传 ${progress}%");
+    SmartDialog.showLoading(msg: "正在上传 ${progress}%");
   }
 
   @override
-  void uploadSuccess(Urls urls){
+  void uploadSuccess(Urls urls) {
     uploadProgress = 0;
     widget.onUploaded(urls);
     SmartDialog.dismiss();
