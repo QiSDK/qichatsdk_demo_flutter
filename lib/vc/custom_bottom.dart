@@ -197,13 +197,14 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           if (Platform.isIOS || Platform.isAndroid)
             IconButton(
                 onPressed: () async {
-                  final String? path = await Navigator.push(
+                  final XFile? path = await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const CameraPage()),
                   );
                   if (path != null) {
                     // Handle the captured image/video path
                     print('Captured file path: $path');
+                    _doUpload(path);
                   }
                 },
                 icon: const Icon(Icons.photo_camera)),
@@ -265,13 +266,24 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-    if (result == null) {
-      result;
-    } else {}
+    if (Platform.isIOS || Platform.isAndroid) {
+      final XFile? photo = await picker.pickImage(source: ImageSource.gallery);
+      if (photo != null)
+        _doUpload(photo);
+    }else {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      if (result == null) {
+        result;
+      } else {}
 
-    XFile photo = result!.files.first.xFile;
+      XFile photo = result!.files.first.xFile;
+      _doUpload(photo);
+    }
+
+  }
+
+  void _doUpload(XFile photo) async{
     var ar = (photo?.name ?? "").split(".");
     if (ar.length < 2) {
       return SmartDialog.showToast("不能识别的文件");

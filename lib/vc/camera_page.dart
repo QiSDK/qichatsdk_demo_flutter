@@ -102,7 +102,7 @@ class _CameraPageState extends State<CameraPage> {
         ),
       );
       if (confirmed == true) {
-        Navigator.pop(context, file.path);
+        Navigator.pop(context, file);
       }
     } catch (e) {
       print(e);
@@ -134,15 +134,7 @@ class _CameraPageState extends State<CameraPage> {
       setState(() {
         _isRecording = false;
       });
-      // final bool? confirmed = await Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => PreviewPage(filePath: file.path, isVideo: true),
-      //   ),
-      // );
-      // if (confirmed == true) {
-        Navigator.pop(context, file.path);
-      //}
+        Navigator.pop(context, file);
     } catch (e) {
       print(e);
     }
