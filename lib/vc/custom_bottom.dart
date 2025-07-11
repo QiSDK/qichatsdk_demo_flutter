@@ -186,17 +186,23 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       child: Row(
         children: [
           IconButton(
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
               onPressed: () {
                 _pickImage();
               },
               icon: const Icon(Icons.photo)),
           IconButton(
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
               onPressed: () {
                 _pickEmoji();
               },
               icon: const Icon(Icons.emoji_emotions)),
           if (Platform.isIOS || Platform.isAndroid)
             IconButton(
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
                 onPressed: () async {
                   final XFile? path = await Navigator.push(
                     context,
@@ -211,8 +217,11 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 icon: const Icon(Icons.photo_camera)),
           if (Platform.isIOS || Platform.isAndroid)
             IconButton(
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
                 onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
                   if (result == null) {
                     result;
                   } else {
@@ -248,6 +257,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
             ),
           ),
           IconButton(
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
               onPressed: () {
                 widget.onSubmitted(inputController.text);
                 inputController.clear();
@@ -280,9 +291,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   _pickImage() async {
     if (Platform.isIOS || Platform.isAndroid) {
-       var files = await picker.pickMultipleMedia(limit: 2);
-       if (files != null)
-         _doUpload(files.first);
+      var files = await picker.pickMultipleMedia(limit: 2);
+      if (files != null) _doUpload(files.first);
       /*var c = AssetPickerConfig(maxAssets: 1);
       final List<AssetEntity>? result = await AssetPicker.pickAssets(
         context,
@@ -296,7 +306,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         print(photo);
         //_doUpload(photo);
       }*/
-    }else {
+    } else {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result == null) {
         result;
@@ -307,7 +317,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     }
   }
 
-  void _doUpload(XFile photo) async{
+  void _doUpload(XFile photo) async {
     SmartDialog.showLoading(msg: "开始上传。。。");
     var ar = (photo?.name ?? "").split(".");
     if (ar.length < 2) {
