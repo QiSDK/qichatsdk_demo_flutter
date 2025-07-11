@@ -11,6 +11,7 @@ import 'package:qichatsdk_demo_flutter/vc/camera_page.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:file_picker/file_picker.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import 'CameraVC.dart';
 
@@ -208,6 +209,18 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                   }
                 },
                 icon: const Icon(Icons.photo_camera)),
+          if (Platform.isIOS || Platform.isAndroid)
+            IconButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  if (result == null) {
+                    result;
+                  } else {
+                    XFile photo = result!.files.first.xFile;
+                    _doUpload(photo);
+                  }
+                },
+                icon: const Icon(Icons.file_present_sharp)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -266,24 +279,36 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage() async {
-
     if (Platform.isIOS || Platform.isAndroid) {
-      final XFile? photo = await picker.pickImage(source: ImageSource.gallery);
-      if (photo != null)
-        _doUpload(photo);
+       var files = await picker.pickMultipleMedia(limit: 2);
+       if (files != null)
+         _doUpload(files.first);
+      /*var c = AssetPickerConfig(maxAssets: 1);
+      final List<AssetEntity>? result = await AssetPicker.pickAssets(
+        context,
+        pickerConfig: c,
+      );
+
+      if (result == null) {
+        result;
+      } else {
+        var photo = result!.first.file;
+        print(photo);
+        //_doUpload(photo);
+      }*/
     }else {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result == null) {
         result;
-      } else {}
-
-      XFile photo = result!.files.first.xFile;
-      _doUpload(photo);
+      } else {
+        XFile photo = result!.files.first.xFile;
+        _doUpload(photo);
+      }
     }
-
   }
 
   void _doUpload(XFile photo) async{
+    SmartDialog.showLoading(msg: "开始上传。。。");
     var ar = (photo?.name ?? "").split(".");
     if (ar.length < 2) {
       return SmartDialog.showToast("不能识别的文件");
