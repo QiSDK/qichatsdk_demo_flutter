@@ -332,6 +332,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   @override
   void uploadFailed(String msg) {
+    SmartDialog.dismiss();
     SmartDialog.showToast(msg);
     uploadProgress = 0;
   }

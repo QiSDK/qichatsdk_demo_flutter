@@ -84,7 +84,7 @@ class _FileCellWidget extends State<FileCellWidget> {
                   controller: _toolTipController,
                   child: Row(
                     children: [
-                      IconButton(
+                    if (!Platform.isAndroid && !Platform.isIOS)   IconButton(
                           onPressed: () async {
                             SmartDialog.showLoading(msg: "正在下载");
                             var downloaded = await ArticleRepository()
@@ -177,6 +177,20 @@ class _FileCellWidget extends State<FileCellWidget> {
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
+        TextButton(
+            onPressed: () async {
+              _toolTipController.hideTooltip();
+              SmartDialog.showLoading(msg: "正在下载");
+              var downloaded = await ArticleRepository()
+                  .downloadVideo(widget.message.uri);
+              SmartDialog.dismiss();
+              if (downloaded) {
+                SmartDialog.showToast("下载成功");
+              } else {
+                SmartDialog.showToast("下载失败");
+              }
+            },
+            child: buildRowText(Icons.sms, '下载')),
       ],
     );
   }

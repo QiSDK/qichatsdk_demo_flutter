@@ -41,7 +41,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return buildGptMessage(context);
+    return buildMessage(context);
   }
 
   _remoteImag(){
@@ -66,7 +66,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
         ));
   }
 
-  buildGptMessage(BuildContext context) {
+  buildMessage(BuildContext context) {
     return SuperTooltip(
       content: buildToolAction(),
       controller: _toolTipController,
@@ -78,7 +78,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
               : Colors.blue.shade100,
           child:
               Row( children: [
-                IconButton(onPressed: () async {
+               if(!Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
                   SmartDialog.showLoading(msg:"正在下载");
                 var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
                   SmartDialog.dismiss();
@@ -87,7 +87,6 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                 }else{
                   SmartDialog.showToast("下载失败");
                 }
-
                 }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
 
                Expanded(child: Column(
@@ -134,6 +133,19 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
+        TextButton(
+            onPressed: () async {
+              _toolTipController.hideTooltip();
+              SmartDialog.showLoading(msg:"正在下载");
+              var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
+              SmartDialog.dismiss();
+              if (downloaded){
+                SmartDialog.showToast("下载成功");
+              }else{
+                SmartDialog.showToast("下载失败");
+              }
+            },
+            child: buildRowText(Icons.download_outlined, '下载')),
       ],
     );
   }
