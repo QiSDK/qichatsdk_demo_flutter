@@ -41,52 +41,16 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   String get msgTime => widget.message.metadata?['msgTime'] ?? '';
   String get thumbnailUri => widget.message.metadata?['thumbnailUri'] ?? '';
   final _toolTipController = SuperTooltipController();
-  //Uint8List? thumbnail;
 
   @override
    void initState() {
     super.initState();
-    //getThumbnail();
   }
-
-  // Future<void> getThumbnail() async {
-  //   if (widget.message is types.VideoMessage){
-  //
-  //     if (Platform.isWindows || Platform.isMacOS){
-  //       final data = await rootBundle
-  //           .load('assets/png/defaultthumbnail.jpg'); // replace with your image path
-  //       thumbnail = data.buffer.asUint8List();
-  //     }else {
-  //       var uri = (widget.message as types.VideoMessage).uri;
-  //       var t = await Util().generateThumbnail(uri);
-  //       var f = File(t);
-  //       thumbnail = await f.readAsBytes();
-  //       if (mounted) {
-  //         setState(() {});
-  //       }
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     return buildGptMessage(context);
   }
-
-  // _localImage() {
-  //   if (thumbnail == null){
-  //     return  CircularProgressIndicator(
-  //       color: Colors.red,
-  //     );
-  //   }else{
-  //     return Image.memory(
-  //       thumbnail!,
-  //       fit: BoxFit.contain,
-  //       width: 300,
-  //       height: 300,
-  //     );
-  //   }
-  // }
 
   _remoteImag(){
     return CachedNetworkImage(
@@ -99,62 +63,60 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
 
   buildGptMessage(BuildContext context) {
     return SuperTooltip(
-      content: buildToolAction(),
-      controller: _toolTipController,
+        content: buildToolAction(),
+        controller: _toolTipController,
         child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             color: widget.message.author.id == widget.chatId
-            ? Colors.blueAccent
-            : Colors.blue.shade100, child:   Row( children: [
-            IconButton(onPressed: () async {
-        SmartDialog.showLoading(msg:"正在下载");
-
-        var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
-        SmartDialog.dismiss();
-        if (downloaded){
-        SmartDialog.showToast("下载成功");
-        }else{
-        SmartDialog.showToast("下载失败");
-        }
-
-        }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
+                ? Colors.blueAccent
+                : Colors.blue.shade100, child:   Row( children: [
+        if(!Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
+            SmartDialog.showLoading(msg:"正在下载");
+            var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
+            SmartDialog.dismiss();
+            if (downloaded){
+              SmartDialog.showToast("下载成功");
+            }else{
+              SmartDialog.showToast("下载失败");
+            }
+          }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
           Column(
               crossAxisAlignment: CrossAxisAlignment.end, //
               mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                "   " +  msgTime,
-                textAlign: TextAlign.right, // Aligns text to the right
-                style: TextStyle(
-                    fontSize: 12,
-                    color: widget.message.author.id == widget.chatId
-                        ? Colors.white.withOpacity(0.5)
-                        : Colors.grey),
-              ), GestureDetector(
-                  onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
-                      ? () => _toolTipController.showTooltip()
-                      : null,
-                  onSecondaryTapDown: (details) {
-                    if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
-                  },
-                  onTap: ()  {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
-                  },
-                  child:
-                  Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        //_localImage(),
-                        _remoteImag(),
-                        Icon(Icons.slow_motion_video_outlined,
-                            size: 50.0,
-                            color: Colors.white.withOpacity(0.8))
-                      ]
-                  )
-              ),
-            ])])));
+              children: [
+                Text(
+                  "   " +  msgTime,
+                  textAlign: TextAlign.right, // Aligns text to the right
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: widget.message.author.id == widget.chatId
+                          ? Colors.white.withOpacity(0.5)
+                          : Colors.grey),
+                ), GestureDetector(
+                    onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                        ? () => _toolTipController.showTooltip()
+                        : null,
+                    onSecondaryTapDown: (details) {
+                      if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+                    },
+                    onTap: ()  {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
+                    },
+                    child:
+                    Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          //_localImage(),
+                          _remoteImag(),
+                          Icon(Icons.slow_motion_video_outlined,
+                              size: 50.0,
+                              color: Colors.white.withOpacity(0.8))
+                        ]
+                    )
+                ),
+              ])])));
   }
 
   buildToolAction() {
@@ -169,6 +131,16 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
               _toolTipController.hideTooltip();
             },
             child: buildRowText(Icons.sms, '回复')),
+        TextButton(onPressed: () async {
+          SmartDialog.showLoading(msg:"正在下载");
+          var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
+          SmartDialog.dismiss();
+          if (downloaded){
+            SmartDialog.showToast("下载成功");
+          }else{
+            SmartDialog.showToast("下载失败");
+          }
+        }, child: buildRowText(Icons.download_outlined, '下载'))
       ],
     );
   }
