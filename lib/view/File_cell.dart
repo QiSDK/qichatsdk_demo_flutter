@@ -113,12 +113,15 @@ class _FileCellWidget extends State<FileCellWidget> {
                           //var googleDocsUrl =
                             //  "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
                           var ext = (widget.message.uri ?? "").split(".");
-                          if (ext.last.toLowerCase() == "pdf" || ext.last.toLowerCase() == "csv") {
+                          if ((ext.last.toLowerCase() == "pdf" || ext.last.toLowerCase() == "csv") && !Platform.isIOS) {
                             //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
                             SmartDialog.showToast("暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序");
                             return;
                           }
                           var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=${widget.message.uri}";
+                          if (Platform.isIOS){
+                            googleDocsUrl = widget.message.uri;
+                          }
                           // _launchInWebView(Uri.parse(googleDocsUrl));
                           Navigator.push(
                             context,

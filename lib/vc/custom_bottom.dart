@@ -191,14 +191,14 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
               onPressed: () {
                 _pickImage();
               },
-              icon: const Icon(Icons.photo)),
+              icon: const Icon(Icons.photo, color: Colors.grey)),
           IconButton(
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
               onPressed: () {
                 _pickEmoji();
               },
-              icon: const Icon(Icons.emoji_emotions)),
+              icon: const Icon(Icons.emoji_emotions, color: Colors.grey)),
           if (Platform.isIOS || Platform.isAndroid)
             IconButton(
                 padding: EdgeInsets.zero,
@@ -214,7 +214,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                     _doUpload(path);
                   }
                 },
-                icon: const Icon(Icons.photo_camera)),
+                icon: const Icon(Icons.photo_camera, color: Colors.grey)),
           if (Platform.isIOS || Platform.isAndroid)
             IconButton(
                 padding: EdgeInsets.zero,
@@ -229,7 +229,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                     _doUpload(photo);
                   }
                 },
-                icon: const Icon(Icons.file_present_sharp)),
+                icon: const Icon(Icons.file_present_sharp, color: Colors.grey)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
