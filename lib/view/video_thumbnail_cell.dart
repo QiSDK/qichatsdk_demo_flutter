@@ -55,8 +55,9 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   _remoteImag(){
     return CachedNetworkImage(
       key: Key(widget.message.remoteId.toString()),
-      width: 200,
-      height: 150,
+      width: 300,
+      height: 300,
+      fit: BoxFit.contain,
       imageUrl: thumbnailUri,
     );
   }
@@ -81,7 +82,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
             }
           }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
           Column(
-              crossAxisAlignment: CrossAxisAlignment.end, //
+              crossAxisAlignment: CrossAxisAlignment.start, //
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
