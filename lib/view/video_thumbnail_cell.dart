@@ -55,8 +55,8 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   _remoteImag(){
     return CachedNetworkImage(
       key: Key(widget.message.remoteId.toString()),
-      width: 300,
-      height: 300,
+      width: 260,
+      height: 260,
       fit: BoxFit.contain,
       imageUrl: thumbnailUri,
     );
