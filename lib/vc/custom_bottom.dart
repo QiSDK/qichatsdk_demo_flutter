@@ -185,13 +185,42 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       padding: const EdgeInsets.fromLTRB(15, 0, 6, 0),
       child: Row(
         children: [
-          IconButton(
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              onPressed: () {
-                _pickImage();
-              },
-              icon: const Icon(Icons.photo, color: Colors.grey)),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: (TapDownDetails details) async {
+              final tapPosition = details.globalPosition;
+              final RenderBox overlay =
+                  Overlay.of(context).context.findRenderObject() as RenderBox;
+              final RelativeRect position = RelativeRect.fromRect(
+                tapPosition &
+                    const Size(40, 40), // smaller rect at tap position
+                Offset.zero & overlay.size,
+              );
+              final selected = await showMenu<String>(
+                context: context,
+                position: position,
+                items: [
+                  const PopupMenuItem(
+                    value: 'image',
+                    child: Text('图片'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'video',
+                    child: Text('视频'),
+                  ),
+                ],
+              );
+              if (selected == 'image') {
+                _pickImage(false);
+              } else if (selected == 'video') {
+                _pickImage(true);
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.photo, color: Colors.grey),
+            ),
+          ),
           IconButton(
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
@@ -289,32 +318,28 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     super.dispose();
   }
 
-  _pickImage() async {
-    if (Platform.isIOS) {
-      var files = await picker.pickMultipleMedia(limit: 2);
-      if (files != null) _doUpload(files.first);
-      /*var c = AssetPickerConfig(maxAssets: 1);
-      final List<AssetEntity>? result = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: c,
-      );
-
-      if (result == null) {
-        result;
+  _pickImage(bool isVideo) async {
+    if (Platform.isIOS || Platform.isAndroid) {
+      List<int>? imageBytes = null;
+      var path = "";
+      if (isVideo) {
+        var f = await picker.pickVideo(source: ImageSource.gallery);
+        path = f?.path ?? "";
+        imageBytes = await f?.readAsBytes();
       } else {
-        var photo = result!.first.file;
-        print(photo);
-        //_doUpload(photo);
-      }*/
-    } else if(Platform.isAndroid) {
-      var f = await picker.pickImage(source: ImageSource.gallery);
-      List<int>? imageBytes = await f?.readAsBytes();
-      if (imageBytes == null){
+        var f = await picker.pickImage(source: ImageSource.gallery);
+        path = f?.path ?? "";
+        imageBytes = await f?.readAsBytes();
+      }
+      if (imageBytes == null) {
         return;
       }
       Uint8List val = Uint8List.fromList(imageBytes!);
-      UploadUtil(this, xToken, baseUrlApi()).upload(val, f?.path ?? "");
-    } else{
+      UploadUtil(this, xToken, baseUrlApi()).upload(val, path);
+    } else if (Platform.isIOS) {
+      var files = await picker.pickMultipleMedia(limit: 2);
+      if (files != null) _doUpload(files.first);
+    } else {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result == null) {
         result;
