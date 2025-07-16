@@ -290,7 +290,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage() async {
-    if (Platform.isIOS || Platform.isAndroid) {
+    if (Platform.isIOS) {
       var files = await picker.pickMultipleMedia(limit: 2);
       if (files != null) _doUpload(files.first);
       /*var c = AssetPickerConfig(maxAssets: 1);
@@ -306,7 +306,15 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
         print(photo);
         //_doUpload(photo);
       }*/
-    } else {
+    } else if(Platform.isAndroid) {
+      var f = await picker.pickImage(source: ImageSource.gallery);
+      List<int>? imageBytes = await f?.readAsBytes();
+      if (imageBytes == null){
+        return;
+      }
+      Uint8List val = Uint8List.fromList(imageBytes!);
+      UploadUtil(this, xToken, baseUrlApi()).upload(val, f?.path ?? "");
+    } else{
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result == null) {
         result;

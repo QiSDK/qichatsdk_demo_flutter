@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
           ),
         );
       }),
-      home: const MyHomePage(title: 'Qi Chat Demo App'),
+      home: const MyHomePage(title: 'Qi Chat Flutter App'),
     );
   }
 }
