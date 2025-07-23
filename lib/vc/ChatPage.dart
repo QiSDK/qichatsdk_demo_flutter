@@ -354,7 +354,7 @@ class _ChatPageState extends State<ChatPage>
     Constant.instance.chatLib.initialize(
         userId: userId,
         cert: cert,
-        token: "",
+        token: xToken,
         baseUrl: "wss://" + domain + "/v1/gateway/h5",
         sign: "9zgd9YUc",
         custom: getCustomParam(userName, 1),

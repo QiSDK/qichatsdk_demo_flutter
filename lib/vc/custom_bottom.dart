@@ -188,6 +188,17 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (TapDownDetails details) async {
+              if (!Platform.isIOS && !Platform.isAndroid){
+                FilePickerResult? result = await FilePicker.platform.pickFiles();
+                if (result == null) {
+                  result;
+                } else {
+                  XFile photo = result!.files.first.xFile;
+                  _doUpload(photo);
+                }
+                return;
+              }
+
               final tapPosition = details.globalPosition;
               final RenderBox overlay =
                   Overlay.of(context).context.findRenderObject() as RenderBox;
@@ -339,14 +350,6 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     } else if (Platform.isIOS) {
       var files = await picker.pickMultipleMedia(limit: 2);
       if (files != null) _doUpload(files.first);
-    } else {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
-      if (result == null) {
-        result;
-      } else {
-        XFile photo = result!.files.first.xFile;
-        _doUpload(photo);
-      }
     }
   }
 
