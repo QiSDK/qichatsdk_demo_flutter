@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
 import 'package:fixnum/src/int64.dart';
+import 'package:qichatsdk_demo_flutter/vc/pdf_viewer.dart';
 import 'package:qichatsdk_demo_flutter/view/common_webview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/MessageItemOperateListener.dart';
@@ -112,8 +113,19 @@ class _FileCellWidget extends State<FileCellWidget> {
                         onTap: () async {
                           //var googleDocsUrl =
                             //  "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
-                          var ext = (widget.message.uri ?? "").split(".");
-                          if ((ext.last.toLowerCase() == "pdf" || ext.last.toLowerCase() == "csv") && !Platform.isIOS) {
+                          var ext = (widget.message.uri).split(".");
+                          if (ext.last.toLowerCase() == "pdf"){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyPdfViewer(
+                                    fileUrl: widget.message.uri
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+                          else if (ext.last.toLowerCase() == "csv" && !Platform.isIOS) {
                             //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
                             SmartDialog.showToast("暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序");
                             return;
