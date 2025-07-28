@@ -384,6 +384,9 @@ class _ChatPageState extends State<ChatPage>
                 remoteId: msg.msgId.toString()));
       }
     } else {
+      if (msg.msgSourceType == MsgSourceType.MST_SYSTEM_AUTO_TRANSFER){
+        print("这种消息是自动回复的消息，不会计入未读消息");
+      }
       MsgItem item = MsgItem();
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
