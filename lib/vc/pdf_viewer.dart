@@ -52,6 +52,8 @@ class _MyPdfViewerState extends State<MyPdfViewer> {
           controller: controller,
           params: PdfViewerParams(
             maxScale: 8,
+            onViewerReady: (document, controller) async {
+            },
             enableTextSelection: true,
             panEnabled: true,
             scaleEnabled: true,
