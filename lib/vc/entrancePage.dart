@@ -131,7 +131,12 @@ class _EntrancePageState extends State<EntrancePage> {
     print("调用queryEntrance ${DateTime.now()}");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
-
+    // 获取线路之后，获取咨询类型列表
+    /* 获取咨询列表有3个接口：
+                    1. 普通咨询列表 + 隐藏咨询列表, 使用接口：v1/api/query-entrance-hidden
+                    2. 普通咨询列表, 使用接口：v1/api/query-entrance
+                    3. 获取特定咨询列表, 使用接口：v1/api/query-consult-user
+                   */
     entrance = await ArticleRepository.queryEntrance();
     if (entrance != null && mounted)
       setState(() {});
