@@ -84,6 +84,7 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
               ?.videoPlayerController.value.isInitialized ==
               true
           ? Chewie(
+
         controller: _chewieController!,
       )
           : Center(

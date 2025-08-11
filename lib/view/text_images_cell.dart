@@ -14,6 +14,7 @@ import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullImageView.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullVideoPlayer.dart';
 import 'package:fixnum/src/int64.dart';
+import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
@@ -73,6 +74,19 @@ class _text_images_cell extends State<TextImagesCell> {
         msgTxt = result.message ?? "";
       }
         mediaUrls = result.imgs;
+    } else if (content.contains("\"color\"")) {
+      final jsonData = jsonDecode(content);
+      var result = TextBody.fromJson(
+        jsonData,
+      );
+      if ((result.content ?? "").isNotEmpty) {
+        msgTxt = result.content ?? "";
+      }
+      if ((result.image ?? "").isNotEmpty) {
+        mediaUrls = (result.image ?? "").split(";");
+      }else if ((result.video ?? "").isNotEmpty) {
+        mediaUrls = (result.video ?? "").split(";");
+      }
     }
 
     return Container(
@@ -159,24 +173,37 @@ class _text_images_cell extends State<TextImagesCell> {
                           ),
                           itemCount: mediaUrls.length,
                           itemBuilder: (context, index) {
+                            var ext = mediaUrls[index].split(".").last.toLowerCase();
+                            var mediaUrl = baseUrlImage + mediaUrls[index];
+                            if (mediaUrls[index].contains("http")){
+                              mediaUrl = mediaUrls[index];
+                            }
                             return GestureDetector(
                               onTap: () {
-                                // 点击图片查看大图
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FullImageView(
-                                      url: baseUrlImage + mediaUrls[index],
-                                    ),
-                                  ),
-                                );
+                                if (videoTypes.contains(ext)){
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Fullvideoplayer(
+                                          videoUrl: mediaUrl))
+                                  );
+                                }else { // 点击图片查看大图
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            FullImageView(
+                                              url: mediaUrl,
+                                            ),
+                                      ));
+                                }
                               },
-                              child: Hero(
-                                tag: 'image_$index',
+                             // child: Hero(
+                             //   tag: 'image_$index',
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: CachedNetworkImage(
-                                    imageUrl: baseUrlImage + mediaUrls[index],
+                                    child:  videoTypes.contains(ext) ? Image.asset("assets/png/video_default.png") :  CachedNetworkImage(
+                                    imageUrl: mediaUrl,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Container(
                                       color: Colors.grey[300],
@@ -192,7 +219,7 @@ class _text_images_cell extends State<TextImagesCell> {
                                       ),
                                     ),
                                   ),
-                                ),
+                               // ),
                               ),
                             );
                           },

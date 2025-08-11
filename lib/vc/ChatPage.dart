@@ -145,14 +145,15 @@ class _ChatPageState extends State<ChatPage>
             primaryColor: Colors.blueAccent,
             inputTextColor: Colors.black),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
-          if (message.text.contains("\"color\"")) {
-            return TextMediaCell(
-              message: message,
-              chatId: _me.id,
-              listener: this,
-              messageWidth: messageWidth ?? 0,
-            );
-          } else if (message.text.contains("\"imgs\"")) {
+          // if (message.text.contains("\"color\"")) {
+          //   return TextMediaCell(
+          //     message: message,
+          //     chatId: _me.id,
+          //     listener: this,
+          //     messageWidth: messageWidth ?? 0,
+          //   );
+          // } else
+            if (message.text.contains("\"color\"") || message.text.contains("\"imgs\"")) {
             return TextImagesCell(
               message: message,
               chatId: _me.id,
