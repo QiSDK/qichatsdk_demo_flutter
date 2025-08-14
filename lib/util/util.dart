@@ -37,7 +37,7 @@ class Util {
       return "2000-05-12 12:00:00";
     }
     // Convert to GMT-8 by subtracting 8 hours
-    DateTime gmt8DateTime = dateTime.toUtc().add(Duration(hours: 8));
+    DateTime gmt8DateTime = dateTime.toLocal().add(Duration(hours: 0));
 
     //print("Original DateTime (UTC): $dateTime");
     //print("Converted to GMT-8: $gmt8DateTime");
@@ -50,7 +50,7 @@ class Util {
     DateTime dateTime = DateTime.parse(dateString);
 
     // Convert to GMT-8 by subtracting 8 hours
-    DateTime gmt8DateTime = dateTime.toUtc().add(Duration(hours: -8));
+    DateTime gmt8DateTime = dateTime.toLocal().add(Duration(hours: 0));
 
     //print("Original DateTime (UTC): $dateTime");
     //print("Converted to GMT-8: $gmt8DateTime");

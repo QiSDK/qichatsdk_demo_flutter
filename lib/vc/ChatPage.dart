@@ -717,9 +717,9 @@ class _ChatPageState extends State<ChatPage>
     }
     var sender = types.User(id: senderId);
 
-    if (msgModel.msgSourceType == "MST_SYSTEM_WORKER") {
+    if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER") {
       sender = _me;
-    } else if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER" ||
+    } else if (msgModel.msgSourceType == "MST_SYSTEM_WORKER" ||
         msgModel.msgSourceType == "MST_AI") {
       sender = _friend;
     }
