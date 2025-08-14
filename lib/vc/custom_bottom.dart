@@ -46,6 +46,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   final ImagePicker picker = ImagePicker();
   bool _emojiShowing = false;
   final emojiEditingController = TextEditingController();
+  bool isFilePickerShowing = false;
 
   @override
   void initState() {
@@ -188,15 +189,24 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (TapDownDetails details) async {
-              if (!Platform.isIOS && !Platform.isAndroid){
-                FilePickerResult? result = await FilePicker.platform.pickFiles();
-                if (result == null) {
-                  result;
-                } else {
-                  XFile photo = result!.files.first.xFile;
-                  _doUpload(photo);
+              if (isFilePickerShowing) return; // Prevent multiple file pickers
+              isFilePickerShowing = true;
+              if (!Platform.isIOS && !Platform.isAndroid) {
+                try {
+                  FilePickerResult? result = await FilePicker.platform
+                      .pickFiles();
+                  if (result == null) {
+                    result;
+                  } else {
+                    XFile photo = result!.files.first.xFile;
+                    _doUpload(photo);
+                  }
+                  return;
+                } catch (e) {
+
+                } finally {
+                  isFilePickerShowing = false; // Reset flag when done
                 }
-                return;
               }
 
               final tapPosition = details.globalPosition;
