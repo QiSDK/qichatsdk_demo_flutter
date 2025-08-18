@@ -189,9 +189,9 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (TapDownDetails details) async {
-              if (isFilePickerShowing) return; // Prevent multiple file pickers
-              isFilePickerShowing = true;
               if (!Platform.isIOS && !Platform.isAndroid) {
+                if (isFilePickerShowing) return; // Prevent multiple file pickers
+                isFilePickerShowing = true;
                 try {
                   FilePickerResult? result = await FilePicker.platform
                       .pickFiles();
