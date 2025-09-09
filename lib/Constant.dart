@@ -42,6 +42,7 @@ String baseUrlApi(){
 //int workerId = -1;
 String userName ='王五';
 int maxSessionMins = 300;
+int usertype = 2;
 
 // Unsent messages list
 Map<Int64, List<types.Message>> unSentMessage = {Int64(0): []};

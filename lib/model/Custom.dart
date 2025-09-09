@@ -1,18 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../Constant.dart';
+
 class Custom {
   String username;
   int platform;
   int userlevel;
+  int usertype;
 
-  Custom({required this.username, required this.platform, required this.userlevel});
+  Custom({required this.username, required this.platform, required this.userlevel, required this.usertype});
 
   Map<String, dynamic> toJson() {
     return {
       'username': username,
       'platform': platform,
       'userlevel': userlevel,
+      'usertype': usertype
     };
   }
 }
@@ -23,6 +27,7 @@ String getCustomParam(String userName, int userLevel) {
     username: userName,
     platform: getPlatformCode(),
     userlevel: userLevel,
+    usertype: usertype,
   );
 
   String jsonString = jsonEncode(custom.toJson());
