@@ -24,9 +24,17 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     'User Id',
     'User Name',
     'Image Base URL',
-    'Max Session Mins'
+    'Max Session Mins',
+    'User Type'
   ];
   final List<TextEditingController> controllers = List.generate(7, (index) => TextEditingController());
+  
+  int selectedUserType = 0;
+  final Map<int, String> userTypeMap = {
+    0: '官方会员',
+    1: '邀请好友',
+    2: '合营会员'
+  };
 
 
   @override
@@ -52,6 +60,12 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     controllers[4].text = prefs.getString('PARAM_USERNAME') ?? userName;
     controllers[5].text = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
     controllers[6].text = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins).toString();
+    
+    setState(() {
+      int savedUserType = prefs.getInt(PARAM_USERTYPE) ?? usertype - 1;
+      // 确保 selectedUserType 在有效范围内 (0, 1, 2)
+      selectedUserType = savedUserType >= 0 && savedUserType <= 2 ? savedUserType : 0;
+    });
   }
 
   void dismissKeyboard() {
@@ -78,10 +92,14 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     await prefs.setString('PARAM_ImageBaseURL', baseUrlImage);
     await prefs.setString('PARAM_USERNAME', userName);
     await prefs.setInt('PARAM_MAXSESSIONMINS', maxSessionMins);
+    await prefs.setInt(PARAM_USERTYPE, selectedUserType);
+    usertype = selectedUserType + 1;
 
     if (widget.callBack != null) {
       widget.callBack!();
     }
+
+    debugPrint("选择的usertype是$usertype");
 
     Navigator.of(context).pop();
   }
@@ -108,7 +126,9 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildTextField(labels[index], controllers[index])
+                            index == labels.length - 1
+                                ? _buildUserTypeDropdown()
+                                : _buildTextField(labels[index], controllers[index])
                           ],
                         ),
                       );
@@ -141,6 +161,45 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
             controller: controller,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserTypeDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('User Type'),
+          SizedBox(height: 5),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: userTypeMap.containsKey(selectedUserType) ? selectedUserType : 0,
+                isExpanded: true,
+                items: userTypeMap.entries.map((entry) {
+                  return DropdownMenuItem<int>(
+                    value: entry.key,
+                    child: Text('${entry.key + 1}-${entry.value}'),
+                  );
+                }).toList(),
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      selectedUserType = newValue;
+                    });
+                  }
+                },
+              ),
             ),
           ),
         ],

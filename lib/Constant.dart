@@ -15,6 +15,7 @@ const String PARAM_CERT = "CERT";
 const String PARAM_MERCHANT_ID = "MERCHANT_ID";
 const String PARAM_LINES = "LINES";
 const String PARAM_ImageBaseURL = "IMAGEURL";
+const String PARAM_USERTYPE = "USERTYPE";
 
 // These are the values to be configured in settings
 
