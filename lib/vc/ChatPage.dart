@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_format/date_format.dart';
 import 'package:fixnum/src/int64.dart';
@@ -38,6 +36,8 @@ import '../model/TextBody.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import '../view/video_thumbnail_cell.dart';
+import '../manager/global_chat_manager.dart';
+import '../manager/unread_manager.dart';
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -76,17 +76,36 @@ class _ChatPageState extends State<ChatPage>
   void initState() {
     super.initState();
     consultId = widget.consultId;
+
+    // 清零当前会话的未读数
+    UnreadManager.instance.clearUnread(consultId.toInt());
+
+    // 设置当前打开的聊天页面
+    GlobalChatManager.instance.setCurrentChatConsultId(consultId.toInt());
+
     // _loadInitialMessages();
-    initSDK();
+    // initSDK已经在GlobalChatManager中处理，不需要在这里调用
     startTimer();
+
+    if (Constant.instance.chatLib.isConnected){
+      assignWork();
+    }
+
+    // 添加消息接收监听器
+    GlobalChatManager.instance.addReceivedMsgListener(_onReceivedMsg);
+    GlobalChatManager.instance.addSystemMsgListener(_onSystemMsg);
+    GlobalChatManager.instance.addConnectedListener(_onConnected);
+    GlobalChatManager.instance.addWorkChangedListener(_onWorkChanged);
+    GlobalChatManager.instance.addMsgReceiptListener(_onMsgReceipt);
+    GlobalChatManager.instance.addMsgDeletedListener(_onMsgDeleted);
     Connectivity().onConnectivityChanged.listen((onData) {
       if (onData is List<ConnectivityResult>) {
         if ((onData as List<ConnectivityResult>).first ==
             ConnectivityResult.none) {
           print("请检查网络${DateTime.now()}");
-          Constant.instance.isConnected = false;
+          Constant.instance.chatLib.isConnected = false;
           //把未发送的消息保存起来
-          _getUnsentMessage();
+          //_getUnsentMessage();
         }
       }
     });
@@ -343,26 +362,29 @@ class _ChatPageState extends State<ChatPage>
     );
   }
 
-  void initSDK() {
-    if (Constant.instance.isConnected) {
-      return;
-    }
-    print("正在初始化sdk${DateTime.now()}");
-    // Assign the listener to the ChatLib delegate
-    Constant.instance.chatLib.delegate = this;
+  // 通过GlobalChatManager接收各种事件
+  void _onReceivedMsg(cMessage.Message msg) {
+    receivedMsg(msg);
+  }
 
-    // Initialize the chat library with necessary parameters
-    Constant.instance.chatLib.initialize(
-        userId: userId,
-        cert: cert,
-        token: xToken,
-        baseUrl: "wss://" + domain + "/v1/gateway/h5",
-        sign: "9zgd9YUc",
-        custom: getCustomParam(userName, 1),
-        maxSessionMinutes: maxSessionMins);
+  void _onSystemMsg(Result result) {
+    systemMsg(result);
+  }
 
-    // Now the listener will receive the delegate events
-    Constant.instance.chatLib.callWebSocket();
+  void _onConnected(SCHi c) {
+    connected(c);
+  }
+
+  void _onWorkChanged(SCWorkerChanged msg) {
+    workChanged(msg);
+  }
+
+  void _onMsgReceipt(cMessage.Message msg, int payloadId, String? errMsg) {
+    msgReceipt(msg, Int64(payloadId), errMsg);
+  }
+
+  void _onMsgDeleted(cMessage.Message msg, int payloadId, String? errMsg) {
+    msgDeleted(msg, Int64(payloadId), errMsg);
   }
 
   @override
@@ -422,7 +444,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void systemMsg(Result result) {
     print("System Message: ${result.message} Code:${result.code}");
-    Constant.instance.isConnected = false;
+    //Constant.instance.isConnected = false;
     if (result.code == 1002 || result.code == 1010 || result.code == 1005) {
       if (result.code == 1002) {
         //showTip("无效的Token")
@@ -437,7 +459,7 @@ class _ChatPageState extends State<ChatPage>
         Navigator.pop(context);
       }
     } else {
-      _getUnsentMessage();
+     // _getUnsentMessage();
     }
   }
 
@@ -445,9 +467,13 @@ class _ChatPageState extends State<ChatPage>
   void connected(SCHi c) {
     print("Connected with token: ${c.token}");
     xToken = c.token;
-    Constant.instance.isConnected = true;
+    //Constant.instance.isConnected = true;
+    assignWork();
     //_updateUI("连接成功！");
     //c.workerId;
+  }
+
+  void assignWork(){
     SmartDialog.showLoading();
     ArticleRepository.assignWorker(consultId).then((onValue) {
       if (onValue != null) {
@@ -615,19 +641,29 @@ class _ChatPageState extends State<ChatPage>
       store.workerAvatar = myWorker.avatar ?? "";
     });
     //处理在无网、或断网情况下未发出去的消息
-    _handleUnSent();
+    //_handleUnSent();
     ArticleRepository.markRead(consultId);
   }
 
   @override
   void dispose() {
     print("chat page disposed");
-    Constant.instance.chatLib.disconnect();
-    Constant.instance.isConnected = false;
+    ArticleRepository.markRead(consultId);
+    // 清空当前打开的聊天页面ID
+    GlobalChatManager.instance.setCurrentChatConsultId(null);
+
+    // 移除所有监听器
+    GlobalChatManager.instance.removeReceivedMsgListener(_onReceivedMsg);
+    GlobalChatManager.instance.removeSystemMsgListener(_onSystemMsg);
+    GlobalChatManager.instance.removeConnectedListener(_onConnected);
+    GlobalChatManager.instance.removeWorkChangedListener(_onWorkChanged);
+    GlobalChatManager.instance.removeMsgReceiptListener(_onMsgReceipt);
+    GlobalChatManager.instance.removeMsgDeletedListener(_onMsgDeleted);
+
     _timer?.cancel();
     _timer = null;
     SmartDialog.dismiss();
-    _getUnsentMessage();
+    //_getUnsentMessage();
     super.dispose();
   }
 
@@ -651,7 +687,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  _getUnsentMessage() {
+ /* _getUnsentMessage() {
     if (_messages.isEmpty) {
       return;
     }
@@ -662,8 +698,8 @@ class _ChatPageState extends State<ChatPage>
     //}
     print("获取到未发送的消息总数${unSentMessage?.length}");
   }
-
-  _handleUnSent() {
+*/
+  /*_handleUnSent() {
     print("处理未发送的消息 ${unSentMessage?.length}");
     if (Constant.instance.isConnected &&
         unSentMessage[consultId] != null &&
@@ -681,7 +717,7 @@ class _ChatPageState extends State<ChatPage>
       }
       unSentMessage[consultId]!.clear();
     }
-  }
+  }*/
 
   Future<types.Message?> composeLocalMsg(MsgItem msgModel,
       {bool isHistory = false,
@@ -1022,9 +1058,10 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void checkSDKStatus() {
-    if (Constant.instance.isConnected == false) {
+    if (Constant.instance.chatLib.isConnected == false) {
       Constant.instance.chatLib.disconnect();
-      initSDK();
+      // SDK连接由GlobalChatManager自动管理，不需要手动调用
+      GlobalChatManager.instance.connectIfNeeded();
     }
   }
 

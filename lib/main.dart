@@ -13,6 +13,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'Constant.dart';
+import 'manager/global_chat_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +55,9 @@ Future<void> main() async {
   userName = prefs.getString('PARAM_USERNAME') ?? userName;
   baseUrlImage = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
   maxSessionMins = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins);
+
+  // 初始化全局聊天管理器
+  GlobalChatManager.instance.initialize();
 
   runApp(const MyApp());
 }
@@ -138,8 +142,17 @@ class _MyHomePageState extends State<MyHomePage>
     if (state == AppLifecycleState.resumed) {
       // This is similar to `onResume`
       print("App has resumed");
+      // 应用恢复时，确保连接
+      GlobalChatManager.instance.connectIfNeeded();
       // Perform the actions you want when the page is resumed
       //loadData();
+    } else if (state == AppLifecycleState.paused) {
+      // 应用进入后台
+      print("App paused");
+    } else if (state == AppLifecycleState.detached) {
+      // 应用即将退出
+      print("App detached - disconnecting chat");
+      GlobalChatManager.instance.stop();
     }
   }
 
@@ -258,6 +271,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
+    Constant.instance.chatLib.disconnect();
     super.dispose();
   }
 }
