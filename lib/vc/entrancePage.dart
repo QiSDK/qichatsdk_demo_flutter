@@ -160,9 +160,11 @@ class _EntrancePageState extends State<EntrancePage> {
      await Navigator.push(
        context,
        MaterialPageRoute( builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
-
-     // Call loadData when returning from Page B
-     loadData();
+     ArticleRepository.markRead(Int64(model.consultId ?? 0));
+     delayExecution(1, () => {
+       // Call loadData when returning from Page B
+       loadData()
+     });
    }
 
   loadData() async {

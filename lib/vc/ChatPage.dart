@@ -164,15 +164,8 @@ class _ChatPageState extends State<ChatPage>
             primaryColor: Colors.blueAccent,
             inputTextColor: Colors.black),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
-          // if (message.text.contains("\"color\"")) {
-          //   return TextMediaCell(
-          //     message: message,
-          //     chatId: _me.id,
-          //     listener: this,
-          //     messageWidth: messageWidth ?? 0,
-          //   );
-          // } else
-            if (message.text.contains("\"color\"") || message.text.contains("\"imgs\"")) {
+          var msgSourceType = message.metadata?["msgSourceType"] ?? "";
+            if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER" || message.text.contains("\"imgs\"")) {
             return TextImagesCell(
               message: message,
               chatId: _me.id,
@@ -411,11 +404,13 @@ class _ChatPageState extends State<ChatPage>
         print("这种消息是自动回复的消息，不会计入未读消息");
       }
       MsgItem item = MsgItem();
+      item.msgSourceType = msg.msgSourceType.name;
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
       item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
       item.image = Media();
       item.image?.uri = msg.image.uri;
+
 
       item.file = Urls();
       item.file?.uri = msg.file.uri;
@@ -648,7 +643,6 @@ class _ChatPageState extends State<ChatPage>
   @override
   void dispose() {
     print("chat page disposed");
-    ArticleRepository.markRead(consultId);
     // 清空当前打开的聊天页面ID
     GlobalChatManager.instance.setCurrentChatConsultId(null);
 
@@ -785,7 +779,8 @@ class _ChatPageState extends State<ChatPage>
           id: _generateRandomId(),
           name: msgModel.file?.fileName ?? 'no file name',
           size: msgModel.file?.size ?? 0,
-          metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
+          //metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
+          metadata: msgModel.toJson(),
           status: types.Status.sent,
           remoteId: msgId);
     } else if (imgUri.isNotEmpty) {
@@ -830,7 +825,8 @@ class _ChatPageState extends State<ChatPage>
           metadata: {
             'msgTime': msgTime,
             'tipText': isTipText,
-            'replyMsg': replyMsg
+            'replyMsg': replyMsg,
+            'msgSourceType': msgModel.msgSourceType
           },
           id: _generateRandomId(),
           status: types.Status.sent,
@@ -878,7 +874,8 @@ class _ChatPageState extends State<ChatPage>
       var oriMsg = _messages[index];
       if (oriMsg.type == types.MessageType.text) {
         var txtMsg = (oriMsg as types.TextMessage).text;
-        if (txtMsg.contains("\"color\"")) {
+        var msgSourceType = oriMsg.metadata?["msgSourceType"] ?? "";
+        if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER") {
           final jsonData = jsonDecode(txtMsg);
           var result = TextBody.fromJson(
             jsonData,
@@ -918,7 +915,7 @@ class _ChatPageState extends State<ChatPage>
       switch (oriMsg.msgFmt.toString()) {
         case "MSG_TEXT":
           var txtMsg = oriMsg.content?.data ?? "";
-          if (txtMsg.contains("\"color\"")) {
+          if (oriMsg.msgSourceType == "MST_SYSTEM_WORKER" || oriMsg.msgSourceType == "MST_SYSTEM_CUSTOMER") {
             final jsonData = jsonDecode(txtMsg);
             var result = TextBody.fromJson(
               jsonData,

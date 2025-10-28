@@ -58,9 +58,9 @@ class _text_media_cell extends State<TextMediaCell> {
   Widget buildGptMessage(BuildContext context) {
     final isCurrentUser = widget.message.author.id == widget.chatId;
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
-
     msgTxt = content;
-    if (content.contains("\"color\"")) {
+    var msgSourceType = widget.message.metadata?["msgSourceType"] ?? "";
+    if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER") {
       final jsonData = jsonDecode(content);
       var result = TextBody.fromJson(
         jsonData,
