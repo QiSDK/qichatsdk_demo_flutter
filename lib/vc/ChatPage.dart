@@ -85,7 +85,7 @@ class _ChatPageState extends State<ChatPage>
 
     // _loadInitialMessages();
     // initSDK已经在GlobalChatManager中处理，不需要在这里调用
-    startTimer();
+    // startTimer(); // 不在这里启动，改为在updateProgress(1)时启动
 
     if (Constant.instance.chatLib.isConnected){
       assignWork();
@@ -243,7 +243,16 @@ class _ChatPageState extends State<ChatPage>
               _handleSendPressed(partialText);
 
             },
+            onProgress: (progress) {
+              // 接收来自 custom_bottom 的进度更新
+              updateProgress(progress);
+            },
             onUploaded: (Urls urls) {
+              // 上传完成，停止定时器
+              _timer?.cancel();
+              _timer = null;
+              SmartDialog.dismiss();
+
               if ((urls.uri ?? "").isEmpty) {
                 SmartDialog.showToast("上传错误，返回路径为空！");
                 return;
@@ -1026,43 +1035,35 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void startTimer() {
+    print('ChatPage: 启动上传进度定时器');
     const oneSec = const Duration(seconds: 1);
     _timer = new Timer.periodic(
       oneSec,
       (Timer timer) {
         //上传视频的时候，在这里更新上传进度，对接开发人员可以有自己的办法，和聊天sdk无关。
+        print('ChatPage: 定时器触发 uploadProgress=$uploadProgress');
         if (uploadProgress > 0 &&
             (uploadProgress < 67 || uploadProgress >= 70) &&
             uploadProgress < 96) {
           uploadProgress += 1;
+          print('更新进度到 $uploadProgress%');
           this.updateProgress(uploadProgress);
+        } else {
+          print('ChatPage: 不满足更新条件 uploadProgress=$uploadProgress');
         }
-        //每8秒检查一次状态
-        if (_timerCount > 0 && _timerCount % 8 == 0) {
-          //setState(() {
-          print("检查sdk状态${DateTime.now()}");
-          checkSDKStatus();
-          //});
-        }
+
         _timerCount += 1;
-        // else {
-        //   setState(() {
-        //     _timerCount--;
-        //   });
-        // }
       },
     );
   }
 
-  void checkSDKStatus() {
-    if (Constant.instance.chatLib.isConnected == false) {
-      Constant.instance.chatLib.disconnect();
-      // SDK连接由GlobalChatManager自动管理，不需要手动调用
-      GlobalChatManager.instance.connectIfNeeded();
-    }
-  }
-
   void updateProgress(int progress) {
+    print('ChatPage: updateProgress 被调用 progress=$progress, uploadProgress=$uploadProgress');
+    // 当进度为1%时，启动定时器
+    if (progress == 1 && (_timer == null || !_timer!.isActive)) {
+      print('ChatPage: 满足条件，准备启动定时器');
+      startTimer();
+    }
     SmartDialog.showLoading(msg: "正在上传 ${progress}%");
   }
 }

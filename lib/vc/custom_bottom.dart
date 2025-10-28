@@ -20,10 +20,11 @@ import 'CameraVC.dart';
 typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
-  SubmittedAction onSubmitted;
-  Function(Urls) onUploaded;
-  ChatCustomBottom(
-      {super.key, required this.onSubmitted, required this.onUploaded});
+  final SubmittedAction onSubmitted;
+  final Function(Urls) onUploaded;
+  final Function(int)? onProgress; // 新增进度回调
+  const ChatCustomBottom(
+      {super.key, required this.onSubmitted, required this.onUploaded, this.onProgress});
 
   @override
   State<StatefulWidget> createState() => ChatCustomBottomState();
@@ -385,6 +386,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   @override
   void updateProgress(int progress) {
+    // 通知 ChatPage 更新进度（用于启动定时器）
+    widget.onProgress?.call(progress);
     SmartDialog.showLoading(msg: "正在上传 ${progress}%");
   }
 
