@@ -246,6 +246,8 @@ class _MyHomePageState extends State<MyHomePage>
       MaterialPageRoute(builder: (context) => BWSettingViewController()),
     );
 
+    GlobalChatManager.instance.stop();
+
     // Call loadData when returning from Page B
     loadData();
   }

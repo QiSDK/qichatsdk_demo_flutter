@@ -164,6 +164,7 @@ class GlobalChatManager implements TeneasySDKDelegate {
 
   @override
   void connected(SCHi c) {
+    xToken = c.token;
     print('GlobalChatManager: 连接成功 token=${c.token}');
     _notifyConnected(c);
   }
