@@ -158,6 +158,9 @@ class GlobalChatManager implements TeneasySDKDelegate {
 
   @override
   void systemMsg(Result result) {
+    if (result.code == 1010){
+      GlobalChatManager.instance.stop();
+    }
     print('GlobalChatManager: 系统消息 ${result.message}');
     _notifySystemMsg(result);
   }

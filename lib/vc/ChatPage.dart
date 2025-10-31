@@ -89,6 +89,8 @@ class _ChatPageState extends State<ChatPage>
 
     if (Constant.instance.chatLib.isConnected){
       assignWork();
+    }else{
+      GlobalChatManager.instance.connectIfNeeded();
     }
 
     // 添加消息接收监听器

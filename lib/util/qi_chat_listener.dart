@@ -1,3 +1,4 @@
+import 'package:qichatsdk_demo_flutter/manager/global_chat_manager.dart';
 import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
 //import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
 
@@ -56,7 +57,10 @@ class QiChatListener implements TeneasySDKDelegate {
 
   @override
   void systemMsg(result) {
-    //MyLogger.w("系统消息: ${result.message}");
+    print("系统消息: ${result.message}");
+    if (result.code == 1007){
+      GlobalChatManager.instance.stop();
+    }
     onSystemMsg.call(result);
   }
 
