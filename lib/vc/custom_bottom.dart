@@ -36,12 +36,12 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   late FocusNode focusNode = FocusNode();
   late TextEditingController inputController = TextEditingController();
   var lastWords = '';
-  BoxDecoration boxDecoration = const BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-  );
-  void Function(void Function())? setDialogState;
+  // BoxDecoration boxDecoration = const BoxDecoration(
+  //   color: Colors.white,
+  //   borderRadius: BorderRadius.only(
+  //       topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+  // );
+  //void Function(void Function())? setDialogState;
   String replyText = '';
   Int64 replyId = Int64();
   final ImagePicker picker = ImagePicker();
@@ -184,7 +184,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   initTextInputWidget() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(15, 0, 6, 0),
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
       child: Row(
         children: [
           GestureDetector(

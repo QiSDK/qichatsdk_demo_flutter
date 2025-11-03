@@ -15,6 +15,7 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 import '../util/util.dart';
 import 'dart:io';
@@ -289,9 +290,16 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            autoReplyModel?.autoReplyItem?.title ?? '',
-            style: const TextStyle(fontSize: 16, color: Colors.black),
+          Html(
+            data: autoReplyModel?.autoReplyItem?.title ?? '',
+            style: {
+              "body": Style(
+                fontSize: FontSize(16),
+                color: Colors.black,
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+              ),
+            },
           ),
           EnhanceExpansionPanelList(
             elevation: 0,

@@ -85,6 +85,7 @@ dependencies:
   camera: ^0.10.5+9
   wechat_assets_picker: ^9.5.1
   pdfrx: ^1.0.94
+  flutter_html: ^3.0.0-beta.2
 
 dev_dependencies:
   flutter_test:

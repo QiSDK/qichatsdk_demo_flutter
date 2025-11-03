@@ -302,7 +302,7 @@ class _ChatPageState extends State<ChatPage>
                       id: "${Constant.instance.chatLib.payloadId}",
                       name: urls.fileName ?? '',
                       size: urls.size ?? 0,
-                      status: types.Status.sent,
+                      status: types.Status.sending,
                       remoteId: '0');
                   setState(() {
                     _messages.insert(0, msg);
@@ -321,7 +321,7 @@ class _ChatPageState extends State<ChatPage>
                       id: "${Constant.instance.chatLib.payloadId}",
                       name: 'dd',
                       size: 200,
-                      status: types.Status.sent,
+                      status: types.Status.sending,
                       remoteId: '0');
                   setState(() {
                     _messages.insert(0, msg);
