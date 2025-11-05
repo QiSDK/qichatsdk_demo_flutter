@@ -494,6 +494,7 @@ class _ChatPageState extends State<ChatPage>
         store.loadingMsg = onValue?.nick ?? "..";
       } else {
         store.loadingMsg = "分配客服失败";
+        SmartDialog.dismiss(status: SmartStatus.loading);
         SmartDialog.showToast("分配客服失败");
       }
     });
