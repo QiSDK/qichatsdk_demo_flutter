@@ -10,6 +10,7 @@ import '../Constant.dart';
 import '../article_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fixnum/src/int64.dart';
+import '../manager/unread_manager.dart';
 
 class EntrancePage extends StatefulWidget {
   const EntrancePage({super.key});
@@ -20,11 +21,23 @@ class EntrancePage extends StatefulWidget {
 
 class _EntrancePageState extends State<EntrancePage> {
   //final AppPurchaseV2 _appPurchase = AppPurchaseV2.instance;
+
+  // 未读消息变化的订阅
+  StreamSubscription<Map<int, int>>? _unreadSubscription;
+
   @override
   void initState() {
     super.initState();
     //WidgetsBinding.instance.addObserver(this);
     loadData();
+
+    // 监听未读数变化
+    _unreadSubscription = UnreadManager.instance.unreadStream.listen((unreadMap) {
+      // 当未读数发生变化时，刷新UI
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -73,7 +86,13 @@ class _EntrancePageState extends State<EntrancePage> {
         ? baseUrlImage + model.works![0].avatar!
         : "default_thumbnail_url"; // Provide a default or fallback URL if `works` is null or empty
     print(thumbnail);
-    var unread = model.unread ?? 0;
+
+    // 从UnreadManager获取实时未读数，如果没有则使用model中的默认未读数
+    var unread = UnreadManager.instance.getUnread(model.consultId ?? 0);
+    if (unread == 0) {
+      unread = model.unread ?? 0;
+    }
+
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(8),
@@ -108,9 +127,28 @@ class _EntrancePageState extends State<EntrancePage> {
                   Text('${model.name}',
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
-                   SizedBox(
-                      child: unread > 0 ? const Icon(Icons.circle, color: Colors.red, size: 15) : Container()
-                  )
+                  const Spacer(),
+                  if (unread > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                      child: Text(
+                        unread > 99 ? '99+' : '$unread',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
                 ],
               )
             ],
@@ -122,9 +160,11 @@ class _EntrancePageState extends State<EntrancePage> {
      await Navigator.push(
        context,
        MaterialPageRoute( builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
-
-     // Call loadData when returning from Page B
-     loadData();
+     ArticleRepository.markRead(Int64(model.consultId ?? 0));
+     delayExecution(1, () => {
+       // Call loadData when returning from Page B
+       loadData()
+     });
    }
 
   loadData() async {
@@ -144,6 +184,8 @@ class _EntrancePageState extends State<EntrancePage> {
 
    @override
    void dispose() {
+     // 取消未读数变化的订阅
+     _unreadSubscription?.cancel();
      super.dispose();
    }
 }

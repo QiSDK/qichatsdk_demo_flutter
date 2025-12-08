@@ -63,8 +63,8 @@ class _text_images_cell extends State<TextImagesCell> {
   Widget buildGptMessage(BuildContext context) {
     final isCurrentUser = widget.message.author.id == widget.chatId;
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
-
     msgTxt = content;
+    var msgSourceType = widget.message.metadata?["msgSourceType"] ?? "";
     if (content.contains("\"imgs\"")) {
       final jsonData = jsonDecode(content);
       var result = TextImages.fromJson(
@@ -74,7 +74,7 @@ class _text_images_cell extends State<TextImagesCell> {
         msgTxt = result.message ?? "";
       }
         mediaUrls = result.imgs;
-    } else if (content.contains("\"color\"")) {
+    } else if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER") {
       final jsonData = jsonDecode(content);
       var result = TextBody.fromJson(
         jsonData,

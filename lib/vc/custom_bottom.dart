@@ -20,10 +20,11 @@ import 'CameraVC.dart';
 typedef SubmittedAction = void Function(String val);
 
 class ChatCustomBottom extends StatefulWidget {
-  SubmittedAction onSubmitted;
-  Function(Urls) onUploaded;
-  ChatCustomBottom(
-      {super.key, required this.onSubmitted, required this.onUploaded});
+  final SubmittedAction onSubmitted;
+  final Function(Urls) onUploaded;
+  final Function(int)? onProgress; // 新增进度回调
+  const ChatCustomBottom(
+      {super.key, required this.onSubmitted, required this.onUploaded, this.onProgress});
 
   @override
   State<StatefulWidget> createState() => ChatCustomBottomState();
@@ -35,12 +36,12 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   late FocusNode focusNode = FocusNode();
   late TextEditingController inputController = TextEditingController();
   var lastWords = '';
-  BoxDecoration boxDecoration = const BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-  );
-  void Function(void Function())? setDialogState;
+  // BoxDecoration boxDecoration = const BoxDecoration(
+  //   color: Colors.white,
+  //   borderRadius: BorderRadius.only(
+  //       topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+  // );
+  //void Function(void Function())? setDialogState;
   String replyText = '';
   Int64 replyId = Int64();
   final ImagePicker picker = ImagePicker();
@@ -183,7 +184,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   initTextInputWidget() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(15, 0, 6, 0),
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
       child: Row(
         children: [
           GestureDetector(
@@ -385,6 +386,8 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
 
   @override
   void updateProgress(int progress) {
+    // 通知 ChatPage 更新进度（用于启动定时器）
+    widget.onProgress?.call(progress);
     SmartDialog.showLoading(msg: "正在上传 ${progress}%");
   }
 

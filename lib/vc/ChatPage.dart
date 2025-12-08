@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_format/date_format.dart';
 import 'package:fixnum/src/int64.dart';
@@ -38,6 +36,8 @@ import '../model/TextBody.dart';
 import '../util/util.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import '../view/video_thumbnail_cell.dart';
+import '../manager/global_chat_manager.dart';
+import '../manager/unread_manager.dart';
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -76,17 +76,38 @@ class _ChatPageState extends State<ChatPage>
   void initState() {
     super.initState();
     consultId = widget.consultId;
+
+    // 清零当前会话的未读数
+    UnreadManager.instance.clearUnread(consultId.toInt());
+
+    // 设置当前打开的聊天页面
+    GlobalChatManager.instance.setCurrentChatConsultId(consultId.toInt());
+
     // _loadInitialMessages();
-    initSDK();
-    startTimer();
+    // initSDK已经在GlobalChatManager中处理，不需要在这里调用
+    // startTimer(); // 不在这里启动，改为在updateProgress(1)时启动
+
+    if (Constant.instance.chatLib.isConnected){
+      assignWork();
+    }else{
+      GlobalChatManager.instance.connectIfNeeded();
+    }
+
+    // 添加消息接收监听器
+    GlobalChatManager.instance.addReceivedMsgListener(_onReceivedMsg);
+    GlobalChatManager.instance.addSystemMsgListener(_onSystemMsg);
+    GlobalChatManager.instance.addConnectedListener(_onConnected);
+    GlobalChatManager.instance.addWorkChangedListener(_onWorkChanged);
+    GlobalChatManager.instance.addMsgReceiptListener(_onMsgReceipt);
+    GlobalChatManager.instance.addMsgDeletedListener(_onMsgDeleted);
     Connectivity().onConnectivityChanged.listen((onData) {
       if (onData is List<ConnectivityResult>) {
         if ((onData as List<ConnectivityResult>).first ==
             ConnectivityResult.none) {
           print("请检查网络${DateTime.now()}");
-          Constant.instance.isConnected = false;
+          Constant.instance.chatLib.isConnected = false;
           //把未发送的消息保存起来
-          _getUnsentMessage();
+          //_getUnsentMessage();
         }
       }
     });
@@ -145,15 +166,8 @@ class _ChatPageState extends State<ChatPage>
             primaryColor: Colors.blueAccent,
             inputTextColor: Colors.black),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
-          // if (message.text.contains("\"color\"")) {
-          //   return TextMediaCell(
-          //     message: message,
-          //     chatId: _me.id,
-          //     listener: this,
-          //     messageWidth: messageWidth ?? 0,
-          //   );
-          // } else
-            if (message.text.contains("\"color\"") || message.text.contains("\"imgs\"")) {
+          var msgSourceType = message.metadata?["msgSourceType"] ?? "";
+            if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER" || message.text.contains("\"imgs\"")) {
             return TextImagesCell(
               message: message,
               chatId: _me.id,
@@ -231,7 +245,16 @@ class _ChatPageState extends State<ChatPage>
               _handleSendPressed(partialText);
 
             },
+            onProgress: (progress) {
+              // 接收来自 custom_bottom 的进度更新
+              updateProgress(progress);
+            },
             onUploaded: (Urls urls) {
+              // 上传完成，停止定时器
+              _timer?.cancel();
+              _timer = null;
+              SmartDialog.dismiss();
+
               if ((urls.uri ?? "").isEmpty) {
                 SmartDialog.showToast("上传错误，返回路径为空！");
                 return;
@@ -279,7 +302,7 @@ class _ChatPageState extends State<ChatPage>
                       id: "${Constant.instance.chatLib.payloadId}",
                       name: urls.fileName ?? '',
                       size: urls.size ?? 0,
-                      status: types.Status.sent,
+                      status: types.Status.sending,
                       remoteId: '0');
                   setState(() {
                     _messages.insert(0, msg);
@@ -298,7 +321,7 @@ class _ChatPageState extends State<ChatPage>
                       id: "${Constant.instance.chatLib.payloadId}",
                       name: 'dd',
                       size: 200,
-                      status: types.Status.sent,
+                      status: types.Status.sending,
                       remoteId: '0');
                   setState(() {
                     _messages.insert(0, msg);
@@ -343,26 +366,29 @@ class _ChatPageState extends State<ChatPage>
     );
   }
 
-  void initSDK() {
-    if (Constant.instance.isConnected) {
-      return;
-    }
-    print("正在初始化sdk${DateTime.now()}");
-    // Assign the listener to the ChatLib delegate
-    Constant.instance.chatLib.delegate = this;
+  // 通过GlobalChatManager接收各种事件
+  void _onReceivedMsg(cMessage.Message msg) {
+    receivedMsg(msg);
+  }
 
-    // Initialize the chat library with necessary parameters
-    Constant.instance.chatLib.initialize(
-        userId: userId,
-        cert: cert,
-        token: xToken,
-        baseUrl: "wss://" + domain + "/v1/gateway/h5",
-        sign: "9zgd9YUc",
-        custom: getCustomParam(userName, 1),
-        maxSessionMinutes: maxSessionMins);
+  void _onSystemMsg(Result result) {
+    systemMsg(result);
+  }
 
-    // Now the listener will receive the delegate events
-    Constant.instance.chatLib.callWebSocket();
+  void _onConnected(SCHi c) {
+    connected(c);
+  }
+
+  void _onWorkChanged(SCWorkerChanged msg) {
+    workChanged(msg);
+  }
+
+  void _onMsgReceipt(cMessage.Message msg, int payloadId, String? errMsg) {
+    msgReceipt(msg, Int64(payloadId), errMsg);
+  }
+
+  void _onMsgDeleted(cMessage.Message msg, int payloadId, String? errMsg) {
+    msgDeleted(msg, Int64(payloadId), errMsg);
   }
 
   @override
@@ -389,11 +415,13 @@ class _ChatPageState extends State<ChatPage>
         print("这种消息是自动回复的消息，不会计入未读消息");
       }
       MsgItem item = MsgItem();
+      item.msgSourceType = msg.msgSourceType.name;
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
       item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
       item.image = Media();
       item.image?.uri = msg.image.uri;
+
 
       item.file = Urls();
       item.file?.uri = msg.file.uri;
@@ -422,7 +450,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void systemMsg(Result result) {
     print("System Message: ${result.message} Code:${result.code}");
-    Constant.instance.isConnected = false;
+    //Constant.instance.isConnected = false;
     if (result.code == 1002 || result.code == 1010 || result.code == 1005) {
       if (result.code == 1002) {
         //showTip("无效的Token")
@@ -437,7 +465,7 @@ class _ChatPageState extends State<ChatPage>
         Navigator.pop(context);
       }
     } else {
-      _getUnsentMessage();
+     // _getUnsentMessage();
     }
   }
 
@@ -445,9 +473,13 @@ class _ChatPageState extends State<ChatPage>
   void connected(SCHi c) {
     print("Connected with token: ${c.token}");
     xToken = c.token;
-    Constant.instance.isConnected = true;
+    //Constant.instance.isConnected = true;
+    assignWork();
     //_updateUI("连接成功！");
     //c.workerId;
+  }
+
+  void assignWork(){
     SmartDialog.showLoading();
     ArticleRepository.assignWorker(consultId).then((onValue) {
       if (onValue != null) {
@@ -462,6 +494,7 @@ class _ChatPageState extends State<ChatPage>
         store.loadingMsg = onValue?.nick ?? "..";
       } else {
         store.loadingMsg = "分配客服失败";
+        SmartDialog.dismiss(status: SmartStatus.loading);
         SmartDialog.showToast("分配客服失败");
       }
     });
@@ -615,19 +648,28 @@ class _ChatPageState extends State<ChatPage>
       store.workerAvatar = myWorker.avatar ?? "";
     });
     //处理在无网、或断网情况下未发出去的消息
-    _handleUnSent();
+    //_handleUnSent();
     ArticleRepository.markRead(consultId);
   }
 
   @override
   void dispose() {
     print("chat page disposed");
-    Constant.instance.chatLib.disconnect();
-    Constant.instance.isConnected = false;
+    // 清空当前打开的聊天页面ID
+    GlobalChatManager.instance.setCurrentChatConsultId(null);
+
+    // 移除所有监听器
+    GlobalChatManager.instance.removeReceivedMsgListener(_onReceivedMsg);
+    GlobalChatManager.instance.removeSystemMsgListener(_onSystemMsg);
+    GlobalChatManager.instance.removeConnectedListener(_onConnected);
+    GlobalChatManager.instance.removeWorkChangedListener(_onWorkChanged);
+    GlobalChatManager.instance.removeMsgReceiptListener(_onMsgReceipt);
+    GlobalChatManager.instance.removeMsgDeletedListener(_onMsgDeleted);
+
     _timer?.cancel();
     _timer = null;
     SmartDialog.dismiss();
-    _getUnsentMessage();
+    //_getUnsentMessage();
     super.dispose();
   }
 
@@ -651,7 +693,7 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  _getUnsentMessage() {
+ /* _getUnsentMessage() {
     if (_messages.isEmpty) {
       return;
     }
@@ -662,8 +704,8 @@ class _ChatPageState extends State<ChatPage>
     //}
     print("获取到未发送的消息总数${unSentMessage?.length}");
   }
-
-  _handleUnSent() {
+*/
+  /*_handleUnSent() {
     print("处理未发送的消息 ${unSentMessage?.length}");
     if (Constant.instance.isConnected &&
         unSentMessage[consultId] != null &&
@@ -681,7 +723,7 @@ class _ChatPageState extends State<ChatPage>
       }
       unSentMessage[consultId]!.clear();
     }
-  }
+  }*/
 
   Future<types.Message?> composeLocalMsg(MsgItem msgModel,
       {bool isHistory = false,
@@ -749,7 +791,8 @@ class _ChatPageState extends State<ChatPage>
           id: _generateRandomId(),
           name: msgModel.file?.fileName ?? 'no file name',
           size: msgModel.file?.size ?? 0,
-          metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
+          //metadata: {'msgTime': msgTime, 'replyMsg': replyMsg},
+          metadata: msgModel.toJson(),
           status: types.Status.sent,
           remoteId: msgId);
     } else if (imgUri.isNotEmpty) {
@@ -794,7 +837,8 @@ class _ChatPageState extends State<ChatPage>
           metadata: {
             'msgTime': msgTime,
             'tipText': isTipText,
-            'replyMsg': replyMsg
+            'replyMsg': replyMsg,
+            'msgSourceType': msgModel.msgSourceType
           },
           id: _generateRandomId(),
           status: types.Status.sent,
@@ -842,7 +886,8 @@ class _ChatPageState extends State<ChatPage>
       var oriMsg = _messages[index];
       if (oriMsg.type == types.MessageType.text) {
         var txtMsg = (oriMsg as types.TextMessage).text;
-        if (txtMsg.contains("\"color\"")) {
+        var msgSourceType = oriMsg.metadata?["msgSourceType"] ?? "";
+        if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER") {
           final jsonData = jsonDecode(txtMsg);
           var result = TextBody.fromJson(
             jsonData,
@@ -882,7 +927,7 @@ class _ChatPageState extends State<ChatPage>
       switch (oriMsg.msgFmt.toString()) {
         case "MSG_TEXT":
           var txtMsg = oriMsg.content?.data ?? "";
-          if (txtMsg.contains("\"color\"")) {
+          if (oriMsg.msgSourceType == "MST_SYSTEM_WORKER" || oriMsg.msgSourceType == "MST_SYSTEM_CUSTOMER") {
             final jsonData = jsonDecode(txtMsg);
             var result = TextBody.fromJson(
               jsonData,
@@ -993,42 +1038,35 @@ class _ChatPageState extends State<ChatPage>
   }
 
   void startTimer() {
+    print('ChatPage: 启动上传进度定时器');
     const oneSec = const Duration(seconds: 1);
     _timer = new Timer.periodic(
       oneSec,
       (Timer timer) {
         //上传视频的时候，在这里更新上传进度，对接开发人员可以有自己的办法，和聊天sdk无关。
+        print('ChatPage: 定时器触发 uploadProgress=$uploadProgress');
         if (uploadProgress > 0 &&
             (uploadProgress < 67 || uploadProgress >= 70) &&
             uploadProgress < 96) {
           uploadProgress += 1;
+          print('更新进度到 $uploadProgress%');
           this.updateProgress(uploadProgress);
+        } else {
+          print('ChatPage: 不满足更新条件 uploadProgress=$uploadProgress');
         }
-        //每8秒检查一次状态
-        if (_timerCount > 0 && _timerCount % 8 == 0) {
-          //setState(() {
-          print("检查sdk状态${DateTime.now()}");
-          checkSDKStatus();
-          //});
-        }
+
         _timerCount += 1;
-        // else {
-        //   setState(() {
-        //     _timerCount--;
-        //   });
-        // }
       },
     );
   }
 
-  void checkSDKStatus() {
-    if (Constant.instance.isConnected == false) {
-      Constant.instance.chatLib.disconnect();
-      initSDK();
-    }
-  }
-
   void updateProgress(int progress) {
+    print('ChatPage: updateProgress 被调用 progress=$progress, uploadProgress=$uploadProgress');
+    // 当进度为1%时，启动定时器
+    if (progress == 1 && (_timer == null || !_timer!.isActive)) {
+      print('ChatPage: 满足条件，准备启动定时器');
+      startTimer();
+    }
     SmartDialog.showLoading(msg: "正在上传 ${progress}%");
   }
 }

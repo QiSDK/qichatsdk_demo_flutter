@@ -135,7 +135,7 @@ class Constant {
   static Constant get instance => _instance ??= Constant._();
 
   var chatLib = ChatLib();
-  var isConnected = false;
+  //var isConnected = false;
   var chatId = '0';
 
   // Mock of the utility method to convert a Date to the system zone

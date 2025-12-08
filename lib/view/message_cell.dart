@@ -15,6 +15,7 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 import '../util/util.dart';
 import 'dart:io';
@@ -289,9 +290,49 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            autoReplyModel?.autoReplyItem?.title ?? '',
-            style: const TextStyle(fontSize: 16, color: Colors.black),
+           Html(
+              data: autoReplyModel?.autoReplyItem?.title ?? '',
+              style: {
+                "body": Style(
+                  fontSize: FontSize(16),
+                  color: Colors.black,
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                ),
+                "*": Style(
+                  maxLines: null,
+                  textOverflow: TextOverflow.visible,
+                ),
+                "img": Style(
+                  width: Width(widget.messageWidth.toDouble() - 40), // 减去 padding
+                  height: Height.auto(),
+                ),
+              },
+              extensions: [
+                TagExtension(
+                  tagsToExtend: {"img"},
+                  builder: (extensionContext) {
+                    final element = extensionContext.element;
+                    final src = element?.attributes['src'] ?? '';
+
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: widget.messageWidth.toDouble() - 40,
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: src.startsWith('http') ? src : baseUrlImage + src,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Container(
+                          height: 100,
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      ),
+                    );
+                  },
+                ),
+              ],
           ),
           EnhanceExpansionPanelList(
             elevation: 0,
