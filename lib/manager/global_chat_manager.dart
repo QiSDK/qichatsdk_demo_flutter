@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:fixnum/fixnum.dart';
 import '../Constant.dart';
 import 'unread_manager.dart';
