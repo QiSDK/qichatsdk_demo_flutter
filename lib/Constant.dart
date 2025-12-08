@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:qichatsdk_flutter/src/ChatLib.dart';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+import 'package:flutter_qichat_sdk/src/ChatLib.dart';
+import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
 as cmessage;
 import 'package:fixnum/src/int64.dart';
 import 'package:intl/intl.dart';

@@ -1,7 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 
 class Sync {
   Request? request;

@@ -4,11 +4,11 @@ import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
+import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;
 import 'package:fixnum/src/int64.dart';
-import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
+import 'package:flutter_qichat_sdk/src/dartOut/gateway/g_gateway.pb.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../Constant.dart';
 import '../model/MessageItemOperateListener.dart';

@@ -14,7 +14,7 @@ import 'package:qichatsdk_demo_flutter/util/util.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullImageView.dart';
 import 'package:qichatsdk_demo_flutter/vc/FullVideoPlayer.dart';
 import 'package:fixnum/src/int64.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';

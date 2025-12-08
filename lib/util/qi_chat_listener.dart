@@ -1,5 +1,5 @@
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
-//import 'package:qichatsdk_flutter/src/dartOut/gateway/g_gateway.pb.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
+//import 'package:flutter_qichat_sdk/src/dartOut/gateway/g_gateway.pb.dart';
 
 
 class QiChatListener implements TeneasySDKDelegate {

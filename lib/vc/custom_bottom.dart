@@ -10,7 +10,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:qichatsdk_demo_flutter/vc/camera_page.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:file_picker/file_picker.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import 'CameraVC.dart';

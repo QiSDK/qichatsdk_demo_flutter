@@ -24,9 +24,9 @@ import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_images_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
-import 'package:qichatsdk_flutter/qichatsdk_flutter.dart';
+import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'dart:math';
-import 'package:qichatsdk_flutter/src/dartOut/api/common/c_message.pb.dart'
+import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
 import '../Constant.dart';
 import '../article_repository.dart';
