@@ -191,12 +191,16 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (TapDownDetails details) async {
-              if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid) {
+              // Web 平台或桌面平台使用文件选择器
+              if (kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
                 if (isFilePickerShowing) return; // Prevent multiple file pickers
                 isFilePickerShowing = true;
                 try {
                   FilePickerResult? result = await FilePicker.platform
-                      .pickFiles();
+                      .pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi'],
+                      );
                   if (result == null) {
                     result;
                   } else {
@@ -205,12 +209,14 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                   }
                   return;
                 } catch (e) {
-
+                  print('File picker error: $e');
                 } finally {
                   isFilePickerShowing = false; // Reset flag when done
                 }
+                return;
               }
 
+              // 移动平台显示菜单
               final tapPosition = details.globalPosition;
               final RenderBox overlay =
                   Overlay.of(context).context.findRenderObject() as RenderBox;
@@ -342,6 +348,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage(bool isVideo) async {
+    // 移动平台使用 ImagePicker
     if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       List<int>? imageBytes = null;
       var path = "";
@@ -359,9 +366,28 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       }
       Uint8List val = Uint8List.fromList(imageBytes!);
       UploadUtil(this, xToken, baseUrlApi()).upload(val, path);
-    } else if (!kIsWeb && Platform.isIOS) {
-      var files = await picker.pickMultipleMedia(limit: 2);
-      if (files != null) _doUpload(files.first);
+    }
+    // Web 平台和桌面平台使用 FilePicker
+    else {
+      if (isFilePickerShowing) return;
+      isFilePickerShowing = true;
+      try {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: isVideo
+            ? ['mp4', 'mov', 'avi', 'mkv', 'flv']
+            : ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
+        );
+        if (result != null && result.files.isNotEmpty) {
+          XFile photo = result.files.first.xFile;
+          _doUpload(photo);
+        }
+      } catch (e) {
+        print('File picker error: $e');
+        SmartDialog.showToast('选择文件失败: $e');
+      } finally {
+        isFilePickerShowing = false;
+      }
     }
   }
 
@@ -374,7 +400,11 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
     if (photo != null) {
       List<int> imageBytes = await photo.readAsBytes();
       Uint8List val = Uint8List.fromList(imageBytes);
-      UploadUtil(this, xToken, baseUrlApi()).upload(val, photo.path);
+      if (kIsWeb){
+        UploadUtil(this, xToken, baseUrlApi()).upload(val, photo.name);
+      }else {
+        UploadUtil(this, xToken, baseUrlApi()).upload(val, photo.path);
+      }
     }
   }
 
