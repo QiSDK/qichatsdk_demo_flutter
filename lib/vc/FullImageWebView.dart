@@ -1,5 +1,5 @@
 
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';

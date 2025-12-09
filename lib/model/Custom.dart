@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import '../Constant.dart';
 
 class Custom {
@@ -36,6 +38,10 @@ String getCustomParam(String userName, int userLevel) {
 }
 
 int getPlatformCode() {
+  if (kIsWeb) {
+    return 5; // Web platform code
+  }
+
   if (Platform.isWindows){
     return 6;
   }else if(Platform.isMacOS){

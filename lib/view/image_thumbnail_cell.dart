@@ -1,5 +1,7 @@
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:qichatsdk_demo_flutter/article_repository.dart';
@@ -78,7 +80,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
               : Colors.blue.shade100,
           child:
               Row( children: [
-               if(!Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
+               if(!kIsWeb && !Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
                   SmartDialog.showLoading(msg:"正在下载");
                 var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
                   SmartDialog.dismiss();
@@ -103,7 +105,7 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
                                ? Colors.white.withOpacity(0.5)
                                : Colors.grey),
                      ),GestureDetector(
-                       onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                       onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
                            ? () => _toolTipController.showTooltip()
                            : null,
                        onSecondaryTapDown: (details) {

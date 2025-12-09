@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -100,7 +101,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   initCameras() async {
-    if (!Platform.isWindows && !Platform.isMacOS) {
+    if (!kIsWeb && !Platform.isWindows && !Platform.isMacOS) {
       _cameras = await availableCameras();
       onNewCameraSelected(_cameras[0]);
     }

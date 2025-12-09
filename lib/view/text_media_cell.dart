@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -82,11 +84,11 @@ class _text_media_cell extends State<TextMediaCell> {
         controller: _toolTipController,
         child: GestureDetector(
           onLongPress:
-              (Platform.isAndroid || Platform.isIOS) && hasValidRemoteId
+              (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && hasValidRemoteId
                   ? () => _toolTipController.showTooltip()
                   : null,
           onSecondaryTapDown: (details) {
-            if (!Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
+            if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
               _toolTipController.showTooltip();
             }
           },

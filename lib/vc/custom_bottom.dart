@@ -1,3 +1,4 @@
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -190,7 +191,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (TapDownDetails details) async {
-              if (!Platform.isIOS && !Platform.isAndroid) {
+              if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid) {
                 if (isFilePickerShowing) return; // Prevent multiple file pickers
                 isFilePickerShowing = true;
                 try {
@@ -250,7 +251,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                 _pickEmoji();
               },
               icon: const Icon(Icons.emoji_emotions, color: Colors.grey)),
-          if (Platform.isIOS || Platform.isAndroid)
+          if (!kIsWeb && (Platform.isIOS || Platform.isAndroid))
             IconButton(
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
@@ -266,7 +267,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
                   }
                 },
                 icon: const Icon(Icons.photo_camera, color: Colors.grey)),
-          if (Platform.isIOS || Platform.isAndroid)
+          if (!kIsWeb && (Platform.isIOS || Platform.isAndroid))
             IconButton(
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
@@ -341,7 +342,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   _pickImage(bool isVideo) async {
-    if (Platform.isIOS || Platform.isAndroid) {
+    if (!kIsWeb && (Platform.isIOS || Platform.isAndroid)) {
       List<int>? imageBytes = null;
       var path = "";
       if (isVideo) {
@@ -358,7 +359,7 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
       }
       Uint8List val = Uint8List.fromList(imageBytes!);
       UploadUtil(this, xToken, baseUrlApi()).upload(val, path);
-    } else if (Platform.isIOS) {
+    } else if (!kIsWeb && Platform.isIOS) {
       var files = await picker.pickMultipleMedia(limit: 2);
       if (files != null) _doUpload(files.first);
     }

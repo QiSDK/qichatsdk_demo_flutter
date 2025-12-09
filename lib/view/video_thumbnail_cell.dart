@@ -1,6 +1,8 @@
 
 
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,7 +73,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
             color: widget.message.author.id == widget.chatId
                 ? Colors.blueAccent
                 : Colors.blue.shade100, child:   Row( children: [
-        if(!Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
+        if(!kIsWeb && !Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
             SmartDialog.showLoading(msg:"正在下载");
             var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
             SmartDialog.dismiss();
@@ -94,11 +96,11 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                           ? Colors.white.withOpacity(0.5)
                           : Colors.grey),
                 ), GestureDetector(
-                    onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+                    onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
                         ? () => _toolTipController.showTooltip()
                         : null,
                     onSecondaryTapDown: (details) {
-                      if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+                      if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
                     },
                     onTap: ()  {
                       Navigator.push(

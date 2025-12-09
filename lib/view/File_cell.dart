@@ -1,4 +1,6 @@
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -85,7 +87,7 @@ class _FileCellWidget extends State<FileCellWidget> {
                   controller: _toolTipController,
                   child: Row(
                     children: [
-                    if (!Platform.isAndroid && !Platform.isIOS)   IconButton(
+                    if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS)   IconButton(
                           onPressed: () async {
                             SmartDialog.showLoading(msg: "正在下载");
                             var downloaded = await ArticleRepository()
@@ -100,12 +102,13 @@ class _FileCellWidget extends State<FileCellWidget> {
                           icon: const Icon(Icons.save_alt_sharp,
                               color: Colors.black, size: 30)),
                       GestureDetector(
-                        onLongPress: ((Platform.isAndroid || Platform.isIOS) &&
+                        onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) &&
                                 (widget.message.remoteId ?? "").length > 8)
                             ? () => _toolTipController.showTooltip()
                             : null,
                         onSecondaryTapDown: (details) {
-                          if (!Platform.isAndroid &&
+                          if (!kIsWeb &&
+                              !Platform.isAndroid &&
                               !Platform.isIOS &&
                               (widget.message.remoteId ?? "").length > 8)
                             _toolTipController.showTooltip();
@@ -125,13 +128,13 @@ class _FileCellWidget extends State<FileCellWidget> {
                             );
                             return;
                           }
-                          else if (ext.last.toLowerCase() == "csv" && !Platform.isIOS) {
+                          else if (ext.last.toLowerCase() == "csv" && !kIsWeb && !Platform.isIOS) {
                             //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
                             SmartDialog.showToast("暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序");
                             return;
                           }
                           var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=${widget.message.uri}";
-                          if (Platform.isIOS){
+                          if (!kIsWeb && Platform.isIOS){
                             googleDocsUrl = widget.message.uri;
                           }
                           // _launchInWebView(Uri.parse(googleDocsUrl));

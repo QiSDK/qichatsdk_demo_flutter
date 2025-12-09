@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -232,7 +233,7 @@ class ArticleRepository {
       String? savePath = '${downloadDirectory.path}/$fileName';
       //String savePath = '/Users/xuefeng/Downloads/$fileName';
 
-      if (!Platform.isAndroid && !Platform.isIOS)
+      if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS)
       // Let the user choose the save location
        savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save your file',

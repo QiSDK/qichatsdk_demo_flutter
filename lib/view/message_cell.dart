@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
@@ -18,7 +20,8 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 import '../util/util.dart';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 import '../vc/FullImageView.dart';
 import '../vc/FullVideoPlayer.dart';
 import 'common_webview.dart';
@@ -213,11 +216,11 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                     : Colors.grey),
           )),
           GestureDetector(
-              onLongPress: ((Platform.isAndroid || Platform.isIOS) && (widget.message.remoteId ?? "").length > 8)
+              onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
                   ? () => _toolTipController.showTooltip()
                   : null,
               onSecondaryTapDown: (details) {
-                if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+                if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
               },
            child:Container(
               margin: EdgeInsets.fromLTRB(0, 0, 10, 0),

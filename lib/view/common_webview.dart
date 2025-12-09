@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 class CommonWebView extends StatefulWidget {
