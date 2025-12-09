@@ -1,3 +1,4 @@
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -18,33 +19,35 @@ import 'manager/global_chat_manager.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 初始化 WebView 平台
-  if (Platform.isIOS) {
-    WebViewPlatform.instance = WebKitWebViewPlatform();
-  } else if (Platform.isMacOS) {
-    WebViewPlatform.instance = WebKitWebViewPlatform();
+  // 初始化 WebView 平台 - 仅在非 Web 平台上执行
+  if (!kIsWeb) {
+    if (Platform.isIOS) {
+      WebViewPlatform.instance = WebKitWebViewPlatform();
+    } else if (Platform.isMacOS) {
+      WebViewPlatform.instance = WebKitWebViewPlatform();
 
-    // 对于 macOS，我们可能需要使用不同的实现或者禁用 WebView
-    debugPrint('WebView may not be fully supported on macOS');
-  } else {
-    debugPrint('WebView is not supported on this platform');
-  }
+      // 对于 macOS，我们可能需要使用不同的实现或者禁用 WebView
+      debugPrint('WebView may not be fully supported on macOS');
+    } else {
+      debugPrint('WebView is not supported on this platform');
+    }
 
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    // Must add this line.
-    await windowManager.ensureInitialized();
-    WindowOptions windowOptions = WindowOptions(
-      size: Size(900, 675),
-      center: true,
-      fullScreen: false,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal,
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      // Must add this line.
+      await windowManager.ensureInitialized();
+      WindowOptions windowOptions = WindowOptions(
+        size: Size(900, 675),
+        center: true,
+        fullScreen: false,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.normal,
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
   }
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
