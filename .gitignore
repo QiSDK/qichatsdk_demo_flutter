@@ -25,6 +25,9 @@
 .settings/
 .vscode/*
 
+# Claude Code local state
+.claude/
+
 # Flutter repo-specific
 /bin/cache/
 /bin/internal/bootstrap.bat
