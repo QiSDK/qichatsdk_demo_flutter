@@ -396,7 +396,7 @@ class _ChatPageState extends State<ChatPage>
               ),
             ),
           ),
-            errorWidget: (context, url, error) => Image.asset("png/imgloading")
+            errorWidget: (context, url, error) => Image.asset("assets/png/imgloading.png", package: 'qichat_ui_sdk')
           // errorWidget: (context, url, error)
           // {
           //   print("加载 avatar 失败 ${url}");

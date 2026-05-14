@@ -180,6 +180,7 @@ class _text_media_cell extends State<TextMediaCell> {
       // var file = Image.asset("name").image
       return Image.asset(
         'assets/png/video_default.png',
+        package: 'qichat_ui_sdk',
         fit: BoxFit.contain,
         width: 300,
         height: 300,

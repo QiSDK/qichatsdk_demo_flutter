@@ -118,8 +118,10 @@ class _EntrancePageState extends State<EntrancePage> {
                         ),
                       ),
                     ),
-                    errorWidget: (context, url, error) =>
-                        Image.asset(""),
+                    errorWidget: (context, url, error) => Image.asset(
+                      'assets/png/me_avatar.png',
+                      package: 'qichat_ui_sdk',
+                    ),
                   ),
                   const SizedBox(
                     width: 12,

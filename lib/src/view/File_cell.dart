@@ -167,6 +167,7 @@ class _FileCellWidget extends State<FileCellWidget> {
         children: [
           Image.asset(
             Util().displayFileThumbnail(widget.message.uri),
+            package: 'qichat_ui_sdk',
             width: 40,
             height: 40,
           ),

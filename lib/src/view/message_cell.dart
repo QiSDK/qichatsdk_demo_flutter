@@ -484,6 +484,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             Text("回复："),
            if (ext.isNotEmpty) Image.asset(
               Util().displayFileThumbnail(fileName),
+              package: 'qichat_ui_sdk',
               width: 40,
               height: 40,
             ),

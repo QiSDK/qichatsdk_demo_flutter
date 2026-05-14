@@ -204,7 +204,7 @@ class _text_images_cell extends State<TextImagesCell> {
                              //   tag: 'image_$index',
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                    child:  videoTypes.contains(ext) ? Image.asset("assets/png/video_default.png") :  CachedNetworkImage(
+                                    child:  videoTypes.contains(ext) ? Image.asset("assets/png/video_default.png", package: 'qichat_ui_sdk') :  CachedNetworkImage(
                                     imageUrl: mediaUrl,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Container(
