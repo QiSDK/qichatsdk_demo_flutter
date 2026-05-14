@@ -22,6 +22,8 @@ import 'package:qichatsdk_demo_flutter/view/message_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/image_thumbnail_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_images_cell.dart';
 import 'package:qichatsdk_demo_flutter/view/text_media_cell.dart';
+import 'package:qichatsdk_demo_flutter/view/evaluation_dialog.dart';
+import 'package:qichatsdk_demo_flutter/model/Evaluation.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'dart:math';
 import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
@@ -72,6 +74,9 @@ class _ChatPageState extends State<ChatPage>
 
   AutoReply? _autoReplyModel;
 
+  EvaluationConfig? _evaluationConfig;
+  static const Color _evaluationTintColor = Colors.blueAccent;
+
   @override
   void initState() {
     super.initState();
@@ -100,6 +105,7 @@ class _ChatPageState extends State<ChatPage>
     GlobalChatManager.instance.addWorkChangedListener(_onWorkChanged);
     GlobalChatManager.instance.addMsgReceiptListener(_onMsgReceipt);
     GlobalChatManager.instance.addMsgDeletedListener(_onMsgDeleted);
+    _fetchEvaluationConfig();
     Connectivity().onConnectivityChanged.listen((onData) {
       if (onData is List<ConnectivityResult>) {
         if ((onData as List<ConnectivityResult>).first ==
@@ -150,7 +156,43 @@ class _ChatPageState extends State<ChatPage>
       appBar: AppBar(
         title: Text(store.loadingMsg),
       ),
-      body: Chat(
+      body: Stack(children: [
+        _buildChat(),
+        if (_evaluationConfig?.evaluationEnabled == true)
+          Positioned(
+            left: 12,
+            bottom: 60,
+            child: GestureDetector(
+              onTap: _onEvaluationButtonTap,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xEBEBEBEB),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.star,
+                        size: 18, color: _evaluationTintColor),
+                    const SizedBox(width: 4),
+                    const Text('客服评价',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF333333),
+                            fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Widget _buildChat() {
+    return Chat(
         messages: _messages,
         onSendPressed: _handleSendPressed,
         disableImageGallery: false,
@@ -329,8 +371,7 @@ class _ChatPageState extends State<ChatPage>
                 }
               }
             }),
-      ),
-    );
+      );
   }
 
   Widget customAvatarBuilder(String userId) {
@@ -443,8 +484,49 @@ class _ChatPageState extends State<ChatPage>
 
       composeLocalMsg(item);
       print("Received Message: ${msg}");
+
+      if (msg.msgSourceType == MsgSourceType.MST_EVALUATE) {
+        _handleEvaluateTriggerMessage(msg.content.data);
+      }
     }
     _updateUI("info");
+  }
+
+  void _fetchEvaluationConfig() {
+    ArticleRepository.evaluationConfig().then((cfg) {
+      if (!mounted || cfg == null) return;
+      setState(() {
+        _evaluationConfig = cfg;
+      });
+    });
+  }
+
+  void _onEvaluationButtonTap() {
+    _showEvaluationDialog(scene: EvaluationScene.manual);
+  }
+
+  void _showEvaluationDialog({required EvaluationScene scene}) {
+    final cfg = _evaluationConfig;
+    if (cfg == null || cfg.evaluationEnabled != true) return;
+    EvaluationDialog.show(
+      scene: scene,
+      config: cfg,
+      consultId: consultId,
+      tintColor: _evaluationTintColor,
+    );
+  }
+
+  void _handleEvaluateTriggerMessage(String content) {
+    final cfg = _evaluationConfig;
+    if (cfg == null || cfg.evaluationEnabled != true) return;
+    final triggers = cfg.triggerMessages ?? const <String>[];
+    if (!triggers.contains(content)) return;
+    ArticleRepository.evaluationStatus(consultId).then((status) {
+      if (!mounted) return;
+      if (status?.status == 0) {
+        _showEvaluationDialog(scene: EvaluationScene.triggered);
+      }
+    });
   }
 
   @override
@@ -668,6 +750,7 @@ class _ChatPageState extends State<ChatPage>
 
     _timer?.cancel();
     _timer = null;
+    EvaluationDialog.dismiss();
     SmartDialog.dismiss();
     //_getUnsentMessage();
     super.dispose();

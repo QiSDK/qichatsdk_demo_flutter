@@ -12,6 +12,7 @@ import 'package:qichatsdk_demo_flutter/model/Sync.dart';
 import 'package:qichatsdk_demo_flutter/model/Worker.dart';
 import 'api_service.dart';
 import 'model/Entrance.dart';
+import 'model/Evaluation.dart';
 import 'model/ReplyList.dart';
 import 'model/Result.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
@@ -28,6 +29,9 @@ class ArticleRepository {
   static const String markReadPath = '/v1/api/chat/mark-read';
   static const String assignWorkerPath = '/v1/api/assign-worker';
   static const String queryAutoReplyPath = '/v1/api/query-auto-reply';
+  static const String evaluationConfigPath = '/v1/tenant/evaluation/config/info';
+  static const String evaluationStatusPath = '/v1/tenant/evaluation/status/get';
+  static const String evaluationAddPath = '/v1/tenant/evaluation/add';
 
   static Future<dynamic> articleList(int pageNum, {int? thumpCount}) async {
     Resource res = Resource();
@@ -222,6 +226,80 @@ class ArticleRepository {
     }
   }
 
+
+  // MARK: - 客服满意度评价
+
+  /// 获取评价配置
+  static Future<EvaluationConfig?> evaluationConfig() async {
+    Resource res = Resource();
+    res.path = evaluationConfigPath;
+    res.bodyParams = <String, dynamic>{};
+    try {
+      var resp = await Api().post(res);
+      var result = Result<EvaluationConfig>.fromJson(
+        resp,
+        (json) => EvaluationConfig.fromJson(json as Map<String, dynamic>),
+      );
+      if ((result.code ?? -1) == 0) {
+        return result.data;
+      }
+      return null;
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
+  }
+
+  /// 获取当前会话评价状态: 0-未评价 1-已评价 2-已关闭 3-空会话
+  static Future<EvaluationStatus?> evaluationStatus(
+      fixNum.Int64 consultId) async {
+    Resource res = Resource();
+    res.path = evaluationStatusPath;
+    res.bodyParams = {"consultId": consultId.toInt()};
+    try {
+      var resp = await Api().post(res);
+      var result = Result<EvaluationStatus>.fromJson(
+        resp,
+        (json) => EvaluationStatus.fromJson(json as Map<String, dynamic>),
+      );
+      if ((result.code ?? -1) == 0) {
+        return result.data;
+      }
+      return null;
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
+  }
+
+  /// 提交评价 (close=1 表示用户拒绝评价；正常提交时 close=0)
+  /// 返回 (success, errMsg)
+  static Future<(bool, String?)> addEvaluation(
+      fixNum.Int64 consultId, int score, String remark, int close) async {
+    Resource res = Resource();
+    res.path = evaluationAddPath;
+    res.bodyParams = {
+      "consultId": consultId.toInt(),
+      "score": score,
+      "remark": remark,
+      "close": close,
+    };
+    try {
+      var resp = await Api().post(res);
+      if (resp == null) {
+        return (false, '网络请求失败');
+      }
+      var code = resp['code'] as int?;
+      var msg = resp['msg'] as String?;
+      if (code == 0) {
+        return (true, null);
+      }
+      return (false, msg);
+    } catch (e) {
+      log(e.toString());
+      return (false, e.toString());
+    }
+  }
 
   Future<bool> downloadVideo(String url) async {
     try {
