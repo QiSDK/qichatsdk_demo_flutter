@@ -72,21 +72,17 @@ dependencies:
   wechat_assets_picker: ^9.5.1
   pdfrx: ^1.0.94
   flutter_html: ^3.0.0-beta.2
+  # 历史归在 dev_dependencies，但 article_repository / custom_bottom 在运行时
+  # 真的会引用，移到 dependencies 才能在外部消费时传递过来。
+  downloadsfolder: ^1.1.0
+  file_picker: ^8.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^3.0.0
   build_runner: ^2.4.6
   mobx_codegen: ^2.6.0+1
-  downloadsfolder: ^1.1.0
-  file_picker: ^8.0.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
