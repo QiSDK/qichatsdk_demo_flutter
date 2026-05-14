@@ -1,5 +1,6 @@
 
 import 'dart:io' if (dart.library.html) 'dart:html' as html;
+import 'dart:io' show Platform;
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
