@@ -1,66 +1,48 @@
-import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logman/logman.dart';
-import 'package:qichat_ui_sdk/src/util/util.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'BWSettingViewController.dart';
-import 'package:qichat_ui_sdk/src/vc/entrancePage.dart';
-import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-import 'package:qichat_ui_sdk/src/Constant.dart';
-import 'package:qichat_ui_sdk/src/manager/global_chat_manager.dart';
+
+import 'package:qichat_ui_sdk/qichat_ui_sdk.dart';
+
+import 'BWSettingViewController.dart';
+import 'demo_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 初始化 WebView 平台 - 仅在非 Web 平台上执行
-  if (!kIsWeb) {
-    if (Platform.isIOS) {
-      WebViewPlatform.instance = WebKitWebViewPlatform();
-    } else if (Platform.isMacOS) {
-      WebViewPlatform.instance = WebKitWebViewPlatform();
-
-      // 对于 macOS，我们可能需要使用不同的实现或者禁用 WebView
-      debugPrint('WebView may not be fully supported on macOS');
-    } else {
-      debugPrint('WebView is not supported on this platform');
-    }
-
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      // Must add this line.
-      await windowManager.ensureInitialized();
-      WindowOptions windowOptions = WindowOptions(
-        size: Size(900, 675),
-        center: true,
-        fullScreen: false,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
-      );
-      windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.show();
-        await windowManager.focus();
-      });
-    }
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    await windowManager.ensureInitialized();
+    const windowOptions = WindowOptions(
+      size: Size(900, 675),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
   }
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  lines = prefs.getString(PARAM_LINES) ?? lines;
-  cert = prefs.getString('PARAM_CERT') ?? cert;
-  merchantId = (prefs.getInt('PARAM_MERCHANT_ID') ?? merchantId);
-  userId = (prefs.getInt('PARAM_USER_ID') ?? userId);
-  userName = prefs.getString('PARAM_USERNAME') ?? userName;
-  baseUrlImage = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
-  maxSessionMins = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins);
+  // demo 专用：从 SharedPreferences 加载设置页填的配置
+  final cfg = await DemoConfig.load();
 
-  // 初始化全局聊天管理器
-  GlobalChatManager.instance.initialize();
+  await QiChatUISDK.init(
+    cert: cfg.cert,
+    userId: cfg.userId,
+    userName: cfg.userName,
+    merchantId: cfg.merchantId,
+    detectUrls: cfg.detectUrls,
+    baseUrlImage: cfg.baseUrlImage,
+    maxSessionMinutes: cfg.maxSessionMinutes,
+  );
 
   runApp(const MyApp());
 }
@@ -68,22 +50,21 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chat Demo',
+      title: 'QiChat UISDK Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        appBarTheme: AppBarTheme(
-          iconTheme: IconThemeData(size: 15), // Set global icon size for AppBar
+        appBarTheme: const AppBarTheme(
+          iconTheme: IconThemeData(size: 15),
         ),
       ),
       builder: FlutterSmartDialog.init(builder: (context, child) {
         return GestureDetector(
           onTap: () {
-            FocusScopeNode currentFocus = FocusScope.of(context);
+            final currentFocus = FocusScope.of(context);
             if (!currentFocus.hasPrimaryFocus &&
                 currentFocus.focusedChild != null) {
               FocusManager.instance.primaryFocus?.unfocus();
@@ -96,7 +77,7 @@ class MyApp extends StatelessWidget {
           ),
         );
       }),
-      home: const MyHomePage(title: 'Qi Chat Flutter App'),
+      home: const MyHomePage(title: 'QiChat UISDK Demo'),
     );
   }
 }
@@ -104,33 +85,30 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with WidgetsBindingObserver
-    implements LineDetectDelegate {
-  String _textContent = "正在线路检测。。。";
-  String _verionNo = "";
+class _MyHomePageState extends State<MyHomePage> {
+  String _lineStatus = "正在线路检测...";
+  String _versionNo = "";
+  int _unread = 0;
   final Logman _logman = Logman.instance;
 
   @override
   void initState() {
-    WidgetsBinding.instance?.addObserver(this);
     super.initState();
-    loadData();
+
+    QiChatUISDK.lineStatusStream.listen((status) {
+      if (mounted) setState(() => _lineStatus = status);
+    });
+    QiChatUISDK.totalUnreadStream.listen((count) {
+      if (mounted) setState(() => _unread = count);
+    });
+
+    _loadVersion();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (kDebugMode) {
@@ -139,144 +117,94 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      // This is similar to `onResume`
-      print("App has resumed");
-      // 应用恢复时，确保连接
-      GlobalChatManager.instance.connectIfNeeded();
-      // Perform the actions you want when the page is resumed
-      //loadData();
-    } else if (state == AppLifecycleState.paused) {
-      // 应用进入后台
-      print("App paused");
-    } else if (state == AppLifecycleState.detached) {
-      // 应用即将退出
-      print("App detached - disconnecting chat");
-      GlobalChatManager.instance.stop();
-    }
-  }
-
-  Future<void> loadData() async {
-    //if (domain.isEmpty) {
-    print("开始线路检测");
-    var lineDetect = LineDetectLib(lines, tenantId: merchantId);
-    lineDetect.getLine();
-    lineDetect.delegate = this;
-    //}
-
-    _verionNo = await Util().getAppVersion();
-  }
-
-  void _updateUI(String content) {
-    setState(() {
-      _textContent = "${content} \n";
-    });
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _versionNo = info.version);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton(
-                  onPressed: () {
-                    if (domain.isEmpty) {
-                      SmartDialog.showToast("无可用线路");
-                      return;
-                    }
-                    _navigateToPageB();
-                  },
-                  child: const Text('联系客服', style: TextStyle(fontSize: 15))),
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  '$_textContent',
-                  style: Theme.of(context).textTheme.labelSmall,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ElevatedButton(
+                  onPressed: _contactCustomerService,
+                  child:
+                      const Text('联系客服', style: TextStyle(fontSize: 15)),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  '版本号：$_verionNo',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ),
-            ]),
+                if (_unread > 0)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _unread > 99 ? '99+' : '$_unread',
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 11),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(_lineStatus,
+                  style: Theme.of(context).textTheme.labelSmall),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('版本号：$_versionNo',
+                  style: Theme.of(context).textTheme.labelSmall),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToSettings,
+        onPressed: _openSettings,
         tooltip: '设置',
         child: const Icon(Icons.settings),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 
-  Future<void> _navigateToPageB() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EntrancePage()),
-    );
-
-    // Call loadData when returning from Page B
-    loadData();
-  }
-
-  Future<void> _navigateToSettings() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BWSettingViewController()),
-    );
-
-    GlobalChatManager.instance.stop();
-
-    // Call loadData when returning from Page B
-    loadData();
-  }
-
-  @override
-  void lineError(Result error) {
-    if (error.code == 1008) {
-      //无可用线路
-      _updateUI("无可用线路");
-      print("无可用线路");
+  Future<void> _contactCustomerService() async {
+    final ok = await QiChatUISDK.openCustomerService(context);
+    if (!ok && mounted) {
+      SmartDialog.showToast('线路未就绪，请稍后再试');
     }
-    //print(error.message);
   }
 
-  @override
-  void useTheLine(String line) {
-    domain = line;
-    _updateUI("当前线路：${domain}");
-    //initSDK();
-    //getEntrance();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
-    Constant.instance.chatLib.disconnect();
-    super.dispose();
+  Future<void> _openSettings() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => BWSettingViewController()),
+    );
+    // 设置页改完配置后重启 SDK
+    final cfg = await DemoConfig.load();
+    await QiChatUISDK.dispose();
+    await QiChatUISDK.init(
+      cert: cfg.cert,
+      userId: cfg.userId,
+      userName: cfg.userName,
+      merchantId: cfg.merchantId,
+      detectUrls: cfg.detectUrls,
+      baseUrlImage: cfg.baseUrlImage,
+      maxSessionMinutes: cfg.maxSessionMinutes,
+    );
   }
 }

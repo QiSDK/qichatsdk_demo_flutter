@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:fixnum/fixnum.dart';
 import '../Constant.dart';
+import '../config.dart';
 import 'unread_manager.dart';
 import '../model/Custom.dart';
 
 /// 全局聊天管理器（单例模式）
 /// 用于在应用的任何地方监听消息，并管理未读消息数
 /// 参考 Android 版本的 GlobalChatManager
-class GlobalChatManager implements TeneasySDKDelegate {
+class GlobalChatManager
+    with WidgetsBindingObserver
+    implements TeneasySDKDelegate, LineDetectDelegate {
   // 私有构造函数
   GlobalChatManager._();
 
@@ -33,6 +37,18 @@ class GlobalChatManager implements TeneasySDKDelegate {
   // 连接检查间隔（6秒）
   static const Duration _connectionCheckInterval = Duration(seconds: 6);
 
+  // 线路检测
+  LineDetectLib? _lineDetect;
+  final StreamController<String> _lineStatusController =
+      StreamController<String>.broadcast();
+  Completer<bool>? _lineReadyCompleter;
+
+  /// 线路检测状态文本流（'正在检测...' / '当前线路：xxx' / '无可用线路'）。
+  Stream<String> get lineStatusStream => _lineStatusController.stream;
+
+  /// 线路是否已就绪（domain 非空）。
+  bool get isLineReady => QiChatConfig.current.domain.isNotEmpty;
+
   /// 初始化全局聊天管理器
   void initialize() {
     if (_isInitialized) {
@@ -45,8 +61,37 @@ class GlobalChatManager implements TeneasySDKDelegate {
     _isInitialized = true;
     print('GlobalChatManager: 已初始化');
 
+    // 注册应用生命周期观察者（要求 WidgetsFlutterBinding.ensureInitialized 已调用）
+    WidgetsBinding.instance.addObserver(this);
+
     // 开始连接监控
     startConnectionMonitoring();
+  }
+
+  /// 启动线路检测。若已检测过则直接返回。
+  void startLineDetect() {
+    if (isLineReady) {
+      _lineStatusController.add('当前线路：${QiChatConfig.current.domain}');
+      return;
+    }
+    _lineReadyCompleter ??= Completer<bool>();
+    _lineStatusController.add('正在线路检测...');
+    _lineDetect = LineDetectLib(
+      QiChatConfig.current.detectUrls,
+      tenantId: QiChatConfig.current.merchantId,
+    );
+    _lineDetect!.delegate = this;
+    _lineDetect!.getLine();
+  }
+
+  /// 等待线路就绪。超时返回 false。
+  Future<bool> waitLineReady({
+    Duration timeout = const Duration(seconds: 10),
+  }) {
+    if (isLineReady) return Future.value(true);
+    _lineReadyCompleter ??= Completer<bool>();
+    return _lineReadyCompleter!.future
+        .timeout(timeout, onTimeout: () => false);
   }
 
   /// 根据需要建立连接
@@ -113,7 +158,49 @@ class GlobalChatManager implements TeneasySDKDelegate {
     stopConnectionMonitoring();
     Constant.instance.chatLib.disconnect();
     _unreadManager.clearAll();
+    if (_isInitialized) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+    _lineDetect = null;
+    _lineReadyCompleter = null;
+    _isInitialized = false;
     print('GlobalChatManager: 全局ChatLib已停止');
+  }
+
+  // ========== LineDetectDelegate ==========
+
+  @override
+  void useTheLine(String line) {
+    QiChatConfig.current.domain = line;
+    _lineStatusController.add('当前线路：$line');
+    final c = _lineReadyCompleter;
+    if (c != null && !c.isCompleted) c.complete(true);
+    print('GlobalChatManager: 线路检测成功 $line');
+  }
+
+  @override
+  void lineError(Result error) {
+    if (error.code == 1008) {
+      _lineStatusController.add('无可用线路');
+    } else {
+      _lineStatusController.add('线路检测异常：${error.message}');
+    }
+    final c = _lineReadyCompleter;
+    if (c != null && !c.isCompleted) c.complete(false);
+    print('GlobalChatManager: 线路检测失败 ${error.code} ${error.message}');
+  }
+
+  // ========== WidgetsBindingObserver ==========
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print('GlobalChatManager: 应用恢复，检查连接');
+      connectIfNeeded();
+    } else if (state == AppLifecycleState.detached) {
+      print('GlobalChatManager: 应用 detached，断开连接');
+      Constant.instance.chatLib.disconnect();
+    }
   }
 
   /// 设置当前打开的聊天页面的consultId
