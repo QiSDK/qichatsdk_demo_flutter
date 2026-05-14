@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
-import 'package:qichatsdk_demo_flutter/model/AutoReply.dart';
+import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:qichatsdk_demo_flutter/model/ReplyMessageItem.dart';
+import 'package:qichat_ui_sdk/src/model/ReplyMessageItem.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;

@@ -5,7 +5,7 @@ import 'dart:ffi';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:qichatsdk_demo_flutter/Constant.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import '../base/custom_interceptors.dart';

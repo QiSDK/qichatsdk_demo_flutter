@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:qichatsdk_demo_flutter/article_repository.dart';
+import 'package:qichat_ui_sdk/src/article_repository.dart';
 import 'package:fixnum/src/int64.dart';
-import 'package:qichatsdk_demo_flutter/vc/pdf_viewer.dart';
-import 'package:qichatsdk_demo_flutter/view/common_webview.dart';
+import 'package:qichat_ui_sdk/src/vc/pdf_viewer.dart';
+import 'package:qichat_ui_sdk/src/view/common_webview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';

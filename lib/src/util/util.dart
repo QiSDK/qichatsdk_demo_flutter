@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 
-import 'package:qichatsdk_demo_flutter/Constant.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 
 class Util {

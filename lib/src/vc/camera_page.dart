@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qichatsdk_demo_flutter/vc/preview_page.dart';
+import 'package:qichat_ui_sdk/src/vc/preview_page.dart';
 import 'dart:io';
 import 'dart:async';
 

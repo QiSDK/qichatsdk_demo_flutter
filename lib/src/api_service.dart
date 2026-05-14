@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:qichatsdk_demo_flutter/Constant.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'base/custom_interceptors.dart';
 import 'package:dio/dio.dart';
 

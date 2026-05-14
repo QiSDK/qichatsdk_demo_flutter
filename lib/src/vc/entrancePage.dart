@@ -3,9 +3,9 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:qichatsdk_demo_flutter/model/Entrance.dart';
+import 'package:qichat_ui_sdk/src/model/Entrance.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:qichatsdk_demo_flutter/vc/ChatPage.dart';
+import 'package:qichat_ui_sdk/src/vc/ChatPage.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';

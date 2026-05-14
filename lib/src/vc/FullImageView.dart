@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:qichatsdk_demo_flutter/Constant.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class FullImageView extends StatefulWidget {

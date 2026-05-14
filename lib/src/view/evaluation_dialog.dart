@@ -1,8 +1,8 @@
 import 'package:fixnum/fixnum.dart' as fixnum;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:qichatsdk_demo_flutter/article_repository.dart';
-import 'package:qichatsdk_demo_flutter/model/Evaluation.dart';
+import 'package:qichat_ui_sdk/src/article_repository.dart';
+import 'package:qichat_ui_sdk/src/model/Evaluation.dart';
 
 enum EvaluationScene {
   manual,    // 用户主动点 ★ 按钮

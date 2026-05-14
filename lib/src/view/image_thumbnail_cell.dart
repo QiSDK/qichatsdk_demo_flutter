@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:qichatsdk_demo_flutter/article_repository.dart';
+import 'package:qichat_ui_sdk/src/article_repository.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fixnum/src/int64.dart';
 import '../model/MessageItemOperateListener.dart';

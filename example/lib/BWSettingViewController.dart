@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Constant.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
 
 typedef DismissedCallback = void Function();
 

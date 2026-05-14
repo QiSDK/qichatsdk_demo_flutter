@@ -4,17 +4,17 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logman/logman.dart';
-import 'package:qichatsdk_demo_flutter/util/util.dart';
-import 'package:qichatsdk_demo_flutter/vc/BWSettingViewController.dart';
-import 'package:qichatsdk_demo_flutter/vc/entrancePage.dart';
+import 'package:qichat_ui_sdk/src/util/util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'BWSettingViewController.dart';
+import 'package:qichat_ui_sdk/src/vc/entrancePage.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
-import 'Constant.dart';
-import 'manager/global_chat_manager.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart';
+import 'package:qichat_ui_sdk/src/manager/global_chat_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
