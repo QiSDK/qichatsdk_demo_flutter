@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _versionNo = "";
   int _unread = 0;
   final Logman _logman = Logman.instance;
+  final AppChatTheme _theme = AppChatTheme.random();
 
   @override
   void initState() {
@@ -125,57 +126,81 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: _theme.gradientStartColor,
+        foregroundColor: _theme.tintColor,
+        elevation: 0,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ElevatedButton(
-                  onPressed: _contactCustomerService,
-                  child:
-                      const Text('联系客服', style: TextStyle(fontSize: 15)),
-                ),
-                if (_unread > 0)
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Container(
+      body: Container(
+        decoration: BoxDecoration(gradient: _theme.linearGradient),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _theme.tintColor,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
                       ),
-                      child: Text(
-                        _unread > 99 ? '99+' : '$_unread',
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 11),
+                      elevation: 2,
+                    ),
+                    onPressed: _contactCustomerService,
+                    child:
+                        const Text('联系客服', style: TextStyle(fontSize: 15)),
+                  ),
+                  if (_unread > 0)
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _unread > 99 ? '99+' : '$_unread',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 11),
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(_lineStatus,
-                  style: Theme.of(context).textTheme.labelSmall),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('版本号：$_versionNo',
-                  style: Theme.of(context).textTheme.labelSmall),
-            ),
-          ],
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(_lineStatus,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: _theme.leftBubbleTextColor)),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('版本号：$_versionNo',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: _theme.leftBubbleTextColor)),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openSettings,
+        backgroundColor: _theme.tintColor,
+        foregroundColor: Colors.white,
         tooltip: '设置',
         child: const Icon(Icons.settings),
       ),
@@ -183,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _contactCustomerService() async {
-    final ok = await QiChatUISDK.openCustomerService(context);
+    final ok = await QiChatUISDK.openCustomerService(context, theme: _theme);
     if (!ok && mounted) {
       SmartDialog.showToast('线路未就绪，请稍后再试');
     }

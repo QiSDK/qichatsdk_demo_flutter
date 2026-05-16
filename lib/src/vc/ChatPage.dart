@@ -45,7 +45,10 @@ import '../manager/unread_manager.dart';
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
 
-  ChatPage({super.key, required this.consultId});
+  /// 由调用方传入的主题。为空时本页会自己随机一套。
+  final AppChatTheme? theme;
+
+  ChatPage({super.key, required this.consultId, this.theme});
   @override
   _ChatPageState createState() => _ChatPageState();
 }
@@ -76,7 +79,7 @@ class _ChatPageState extends State<ChatPage>
   AutoReply? _autoReplyModel;
 
   EvaluationConfig? _evaluationConfig;
-  final AppChatTheme _theme = AppChatTheme.random();
+  late final AppChatTheme _theme = widget.theme ?? AppChatTheme.random();
   Color get _evaluationTintColor => _theme.tintColor;
 
   @override

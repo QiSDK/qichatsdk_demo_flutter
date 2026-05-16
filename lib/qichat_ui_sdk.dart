@@ -18,3 +18,4 @@
 library qichat_ui_sdk;
 
 export 'src/api/qichat_ui_sdk.dart' show QiChatUISDK;
+export 'src/model/AppChatTheme.dart' show AppChatTheme, AppChatGradientDirection;

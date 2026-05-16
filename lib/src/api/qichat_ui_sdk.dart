@@ -10,6 +10,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../config.dart';
 import '../manager/global_chat_manager.dart';
 import '../manager/unread_manager.dart';
+import '../model/AppChatTheme.dart';
 import '../vc/ChatPage.dart';
 import '../vc/entrancePage.dart';
 
@@ -86,9 +87,13 @@ class QiChatUISDK {
   /// 打开客服列表页（默认入口）。
   ///
   /// 内部会等待线路检测完成（最多 [waitTimeout] 秒）。若未就绪返回 false。
+  ///
+  /// [theme]：宿主可传入一套主题,会一路下传到 [ChatPage]，保证整个会话视觉一致。
+  /// 不传则由 SDK 内部随机一套。
   static Future<bool> openCustomerService(
     BuildContext context, {
     Duration waitTimeout = const Duration(seconds: 10),
+    AppChatTheme? theme,
   }) async {
     if (!_initialized) {
       assert(false, 'QiChatUISDK.openCustomerService 前必须先调用 init()');
@@ -99,7 +104,7 @@ class QiChatUISDK {
     if (!ready) return false;
     if (!context.mounted) return false;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => EntrancePage()),
+      MaterialPageRoute(builder: (_) => EntrancePage(theme: theme)),
     );
     return true;
   }
@@ -109,6 +114,7 @@ class QiChatUISDK {
     BuildContext context,
     Int64 consultId, {
     Duration waitTimeout = const Duration(seconds: 10),
+    AppChatTheme? theme,
   }) async {
     if (!_initialized) {
       assert(false, 'QiChatUISDK.openChat 前必须先调用 init()');
@@ -119,7 +125,8 @@ class QiChatUISDK {
     if (!ready) return false;
     if (!context.mounted) return false;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ChatPage(consultId: consultId)),
+      MaterialPageRoute(
+          builder: (_) => ChatPage(consultId: consultId, theme: theme)),
     );
     return true;
   }

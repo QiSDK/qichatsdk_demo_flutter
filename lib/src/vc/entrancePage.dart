@@ -11,9 +11,13 @@ import '../article_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fixnum/src/int64.dart';
 import '../manager/unread_manager.dart';
+import '../model/AppChatTheme.dart';
 
 class EntrancePage extends StatefulWidget {
-  const EntrancePage({super.key});
+  /// 由调用方传入的主题。为空时本页会自己随机一套。
+  final AppChatTheme? theme;
+
+  const EntrancePage({super.key, this.theme});
 
   @override
   State<EntrancePage> createState() => _EntrancePageState();
@@ -24,6 +28,8 @@ class _EntrancePageState extends State<EntrancePage> {
 
   // 未读消息变化的订阅
   StreamSubscription<Map<int, int>>? _unreadSubscription;
+
+  late final AppChatTheme _theme = widget.theme ?? AppChatTheme.random();
 
   @override
   void initState() {
@@ -43,14 +49,20 @@ class _EntrancePageState extends State<EntrancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xFFf8f8f8),
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text(
             '客服',
             style: TextStyle(fontSize: 18),
           ),
+          backgroundColor: _theme.gradientStartColor,
+          foregroundColor: _theme.tintColor,
+          elevation: 0,
         ),
-        body: _initBody());
+        body: Container(
+          decoration: BoxDecoration(gradient: _theme.linearGradient),
+          child: _initBody(),
+        ));
   }
 
   _initBody() {
@@ -97,7 +109,7 @@ class _EntrancePageState extends State<EntrancePage> {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-          color: const Color.fromRGBO(255, 255, 255, 1),
+          color: _theme.leftBubbleColor,
           borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,8 +139,10 @@ class _EntrancePageState extends State<EntrancePage> {
                     width: 12,
                   ),
                   Text('${model.name}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _theme.leftBubbleTextColor)),
                   const Spacer(),
                   if (unread > 0)
                     Container(
@@ -161,7 +175,9 @@ class _EntrancePageState extends State<EntrancePage> {
    Future<void> _navigateToChatPage(Consults model) async {
      await Navigator.push(
        context,
-       MaterialPageRoute( builder: (context) => ChatPage(consultId: Int64(model.consultId ?? 0))));
+       MaterialPageRoute(
+           builder: (context) => ChatPage(
+               consultId: Int64(model.consultId ?? 0), theme: _theme)));
      ArticleRepository.markRead(Int64(model.consultId ?? 0));
      delayExecution(1, () => {
        // Call loadData when returning from Page B
