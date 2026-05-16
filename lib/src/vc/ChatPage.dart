@@ -30,6 +30,7 @@ import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
 import '../Constant.dart';
 import '../article_repository.dart';
+import '../model/AppChatTheme.dart';
 import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -75,7 +76,8 @@ class _ChatPageState extends State<ChatPage>
   AutoReply? _autoReplyModel;
 
   EvaluationConfig? _evaluationConfig;
-  static const Color _evaluationTintColor = Colors.blueAccent;
+  final AppChatTheme _theme = AppChatTheme.random();
+  Color get _evaluationTintColor => _theme.tintColor;
 
   @override
   void initState() {
@@ -153,10 +155,16 @@ class _ChatPageState extends State<ChatPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(store.loadingMsg),
+        backgroundColor: _theme.gradientStartColor,
+        foregroundColor: _theme.tintColor,
+        elevation: 0,
       ),
-      body: Stack(children: [
+      body: Container(
+        decoration: BoxDecoration(gradient: _theme.linearGradient),
+        child: Stack(children: [
         _buildChat(),
         if (_evaluationConfig?.evaluationEnabled == true)
           Positioned(
@@ -188,6 +196,7 @@ class _ChatPageState extends State<ChatPage>
             ),
           ),
       ]),
+      ),
     );
   }
 
@@ -203,10 +212,22 @@ class _ChatPageState extends State<ChatPage>
         // },
         showUserAvatars: true,
         showUserNames: true,
-        theme: const DefaultChatTheme(
-            inputBackgroundColor: Colors.lightBlue,
-            primaryColor: Colors.blueAccent,
-            inputTextColor: Colors.black),
+        theme: DefaultChatTheme(
+            backgroundColor: Colors.transparent,
+            primaryColor: _theme.rightBubbleColor,
+            secondaryColor: _theme.leftBubbleColor,
+            inputBackgroundColor: _theme.tintColor,
+            inputTextColor: Colors.white,
+            sentMessageBodyTextStyle: TextStyle(
+                color: _theme.rightBubbleTextColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                height: 1.5),
+            receivedMessageBodyTextStyle: TextStyle(
+                color: _theme.leftBubbleTextColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                height: 1.5)),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           var msgSourceType = message.metadata?["msgSourceType"] ?? "";
             if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER" || message.text.contains("\"imgs\"")) {
