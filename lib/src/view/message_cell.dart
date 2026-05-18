@@ -294,7 +294,14 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
            Html(
-              data: autoReplyModel?.autoReplyItem?.title ?? '',
+              data: autoReplyModel?.autoReplyItem?.title?.trim() ?? '',
+              onLinkTap: (url, attributes, element) async {
+                if (url == null) return;
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
               style: {
                 "body": Style(
                   fontSize: FontSize(16),
