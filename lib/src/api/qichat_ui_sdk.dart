@@ -25,6 +25,9 @@ class QiChatUISDK {
 
   /// 应用启动后调用一次。要求宿主已先执行 [WidgetsFlutterBinding.ensureInitialized]。
   ///
+  /// 内部会同步完成：线路检测 → 用拿到的 domain 建立 wss 连接 → 启动保活监控。
+  /// 返回 true 表示线路就绪且连接已发起；false 表示线路检测超时（[lineDetectTimeout]）。
+  ///
   /// 参数：
   /// - [cert]：租户证书；
   /// - [userId]：用户 ID；
@@ -33,8 +36,9 @@ class QiChatUISDK {
   /// - [detectUrls]：逗号分隔的线路检测 URL（如 'https://csapi.hfxg.xyz,https://backup'）；
   /// - [baseUrlImage]：图片资源 CDN 域名；
   /// - [maxSessionMinutes]：会话最大分钟数（默认 300）；
-  /// - [userType]：用户类型（默认 2）。
-  static Future<void> init({
+  /// - [userType]：用户类型（默认 2）；
+  /// - [lineDetectTimeout]：线路检测超时（默认 10 秒）。
+  static Future<bool> init({
     required String cert,
     required int userId,
     required String userName,
@@ -43,20 +47,11 @@ class QiChatUISDK {
     required String baseUrlImage,
     int maxSessionMinutes = 300,
     int userType = 2,
+    Duration lineDetectTimeout = const Duration(seconds: 10),
   }) async {
+    // 重复 init：身份/商户可能变了，旧 domain/连接不可复用 → 先清干净再重走
     if (_initialized) {
-      // 允许重复 init 更新身份（多账号切换场景）
-      QiChatConfig.initialize(
-        cert: cert,
-        userId: userId,
-        userName: userName,
-        merchantId: merchantId,
-        detectUrls: detectUrls,
-        baseUrlImage: baseUrlImage,
-        maxSessionMinutes: maxSessionMinutes,
-        userType: userType,
-      );
-      return;
+      await dispose();
     }
 
     QiChatConfig.initialize(
@@ -74,7 +69,15 @@ class QiChatUISDK {
     GlobalChatManager.instance.initialize();
     GlobalChatManager.instance.startLineDetect();
 
+    final ready = await GlobalChatManager.instance
+        .waitLineReady(timeout: lineDetectTimeout);
+    if (!ready) return false;
+
+    GlobalChatManager.instance.connectIfNeeded();
+    GlobalChatManager.instance.startConnectionMonitoring();
+
     _initialized = true;
+    return true;
   }
 
   static void _initWebViewPlatform() {
@@ -86,22 +89,18 @@ class QiChatUISDK {
 
   /// 打开客服列表页（默认入口）。
   ///
-  /// 内部会等待线路检测完成（最多 [waitTimeout] 秒）。若未就绪返回 false。
+  /// 调用前必须先 [init] 成功（init 已保证线路就绪并发起连接）。
   ///
   /// [theme]：宿主可传入一套主题,会一路下传到 [ChatPage]，保证整个会话视觉一致。
   /// 不传则由 SDK 内部随机一套。
   static Future<bool> openCustomerService(
     BuildContext context, {
-    Duration waitTimeout = const Duration(seconds: 10),
     AppChatTheme? theme,
   }) async {
     if (!_initialized) {
       assert(false, 'QiChatUISDK.openCustomerService 前必须先调用 init()');
       return false;
     }
-    final ready =
-        await GlobalChatManager.instance.waitLineReady(timeout: waitTimeout);
-    if (!ready) return false;
     if (!context.mounted) return false;
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => EntrancePage(theme: theme)),
@@ -113,16 +112,12 @@ class QiChatUISDK {
   static Future<bool> openChat(
     BuildContext context,
     Int64 consultId, {
-    Duration waitTimeout = const Duration(seconds: 10),
     AppChatTheme? theme,
   }) async {
     if (!_initialized) {
       assert(false, 'QiChatUISDK.openChat 前必须先调用 init()');
       return false;
     }
-    final ready =
-        await GlobalChatManager.instance.waitLineReady(timeout: waitTimeout);
-    if (!ready) return false;
     if (!context.mounted) return false;
     await Navigator.of(context).push(
       MaterialPageRoute(

@@ -18,6 +18,7 @@ dependencies:
   webview_flutter_wkwebview: ^3.14.0
   logman: ^0.0.16
   package_info_plus: ^7.0.0
+  url_launcher: ^6.2.0
 
   qichat_ui_sdk:
     path: ../

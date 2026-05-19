@@ -22,6 +22,7 @@ class DemoConfig {
   static const String defaultBaseUrlImage = 'https://imagesacc.hfxg.xyz';
   static const int defaultMaxSessionMinutes = 300;
   static const int defaultUserType = 2;
+  static const String defaultBackupWebUrl = '';
 
   final String cert;
   final int userId;
@@ -31,6 +32,7 @@ class DemoConfig {
   final String baseUrlImage;
   final int maxSessionMinutes;
   final int userType;
+  final String backupWebUrl;
 
   DemoConfig({
     required this.cert,
@@ -41,6 +43,7 @@ class DemoConfig {
     required this.baseUrlImage,
     required this.maxSessionMinutes,
     required this.userType,
+    required this.backupWebUrl,
   });
 
   static Future<DemoConfig> load() async {
@@ -56,6 +59,8 @@ class DemoConfig {
       maxSessionMinutes:
           prefs.getInt('PARAM_MAXSESSIONMINS') ?? defaultMaxSessionMinutes,
       userType: (prefs.getInt(PARAM_USERTYPE) ?? defaultUserType - 1) + 1,
+      backupWebUrl:
+          prefs.getString('PARAM_BACKUP_WEB_URL') ?? defaultBackupWebUrl,
     );
   }
 

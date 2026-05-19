@@ -6,9 +6,11 @@ import 'package:logman/logman.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:qichat_ui_sdk/qichat_ui_sdk.dart';
+import 'package:qichat_ui_sdk/src/Constant.dart' show PARAM_XTOKEN;
 
 import 'BWSettingViewController.dart';
 import 'demo_config.dart';
@@ -177,6 +179,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                 ],
               ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _theme.tintColor,
+                  side: BorderSide(color: _theme.tintColor, width: 1.5),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                ),
+                onPressed: _openBackupCustomerService,
+                child: const Text('备用客服', style: TextStyle(fontSize: 15)),
+              ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(_lineStatus,
@@ -211,6 +227,58 @@ class _MyHomePageState extends State<MyHomePage> {
     final ok = await QiChatUISDK.openCustomerService(context, theme: _theme);
     if (!ok && mounted) {
       SmartDialog.showToast('线路未就绪，请稍后再试');
+    }
+  }
+
+  Future<void> _openBackupCustomerService() async {
+    final cfg = await DemoConfig.load();
+    final prefs = await SharedPreferences.getInstance();
+    final xToken = prefs.getString(PARAM_XTOKEN) ?? '';
+
+    final params = <String, String>{
+      'cert': cfg.cert,
+      //临时写死一个 cert，方便测试。实际使用时请从安全的地方获取 cert，切勿硬编码在 App 里。
+      'userId': '${cfg.userId}',
+      'merchantId': '${cfg.merchantId}',
+      'userName': cfg.userName,
+      'userType': '${cfg.userType}',
+      if (xToken.isNotEmpty) 'xToken': xToken,
+    };
+
+    final deepLink = Uri(
+      scheme: 'juhekefu',
+      host: 'open',
+      queryParameters: params,
+    );
+
+    bool deepLinkOk = false;
+    try {
+      deepLinkOk =
+          await launchUrl(deepLink, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      deepLinkOk = false;
+    }
+    if (deepLinkOk || !mounted) return;
+
+    // 未安装客服中心 App，退到外部网页
+    final webUrl = cfg.backupWebUrl.trim();
+    if (webUrl.isEmpty) {
+      SmartDialog.showToast('未安装客服中心 App，且未配置备用网页');
+      return;
+    }
+
+    final base = Uri.parse(webUrl);
+    final webUri = base.replace(queryParameters: {
+      ...base.queryParameters,
+      ...params,
+    });
+
+    try {
+      final ok =
+          await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) SmartDialog.showToast('打开备用网页失败');
+    } catch (_) {
+      if (mounted) SmartDialog.showToast('打开备用网页失败');
     }
   }
 

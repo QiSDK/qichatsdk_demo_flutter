@@ -63,9 +63,7 @@ class GlobalChatManager
 
     // 注册应用生命周期观察者（要求 WidgetsFlutterBinding.ensureInitialized 已调用）
     WidgetsBinding.instance.addObserver(this);
-
-    // 开始连接监控
-    startConnectionMonitoring();
+    // 连接监控由 QiChatUISDK.init 在线路就绪后再启动，避免 domain 为空时空跑
   }
 
   /// 启动线路检测。若已检测过则直接返回。
@@ -76,6 +74,7 @@ class GlobalChatManager
     }
     _lineReadyCompleter ??= Completer<bool>();
     _lineStatusController.add('正在线路检测...');
+    print("GlobalChatManager: 启动线路检测 ${QiChatConfig.current.detectUrls} 。。。");
     _lineDetect = LineDetectLib(
       QiChatConfig.current.detectUrls,
       tenantId: QiChatConfig.current.merchantId,
@@ -101,8 +100,9 @@ class GlobalChatManager
       return;
     }
 
-    // 确保domain已设置
-    if (domain.isEmpty) {
+    // 确保domain已设置（使用线路检测得到的 domain）
+    final line = QiChatConfig.current.domain;
+    if (line.isEmpty) {
       print('GlobalChatManager: domain为空，无法连接');
       return;
     }
@@ -110,7 +110,8 @@ class GlobalChatManager
     // 检查是否需要初始化SDK
     if (Constant.instance.chatLib.payloadId == 0) {
       print('GlobalChatManager: 初始化SDK连接 ${DateTime.now()}');
-      final wssUrl = "wss://$domain/v1/gateway/h5";
+      final wssUrl = "wss://$line/v1/gateway/h5";
+      print('GlobalChatManager: wssUrl=$wssUrl');
 
       Constant.instance.chatLib.initialize(
         userId: userId,
