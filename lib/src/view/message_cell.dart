@@ -191,11 +191,6 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   buildNormalMessage() {
-    var textStyle = TextStyle(
-        fontSize: 14,
-        color: widget.message.author.id == widget.chatId
-            ? Colors.white
-            : Colors.black);
     return   Container(
       color: widget.message.author.id == widget.chatId
           ? Colors.blue
@@ -224,9 +219,32 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               },
            child:Container(
               margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-              child:Text(
-                content,
-                style: textStyle,
+              child: Html(
+                data: _convertContentToHtml(content),
+                shrinkWrap: true,
+                onLinkTap: (url, attributes, element) async {
+                  if (url == null) return;
+                  final uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(14),
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white
+                        : Colors.black,
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                  ),
+                  "a": Style(
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white
+                        : Colors.blue.shade800,
+                    textDecoration: TextDecoration.underline,
+                  ),
+                },
               ))),  replyItem == null
               ? const SizedBox()
               : _buildFileCell()
@@ -567,4 +585,86 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
       throw Exception('Could not launch $url');
     }
   }
+
+  String _convertContentToHtml(String text) {
+    String escapeHtml(String s) => s
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+
+    /*const tlds = 'com|cn|net|org|io|co|me|app|ai|dev|info|biz|top|xyz|vip|'
+        'club|site|online|store|tech|work|ltd|group|live|tv|cc|gov|edu|'
+        'hk|tw|jp|kr|sg|us|uk|de|fr|ru|in|br|au|ca|mx|es|it|nl|se|no|fi|'
+        'dk|pl|cz|tr|pt|be|ch|at|ie|nz|za|ae|sa|il|th|vn|my|id|ph|'
+        'name|pro|mobi|asia|shop|fun|space|world|life|news|today|cloud';*/
+    const tlds = 'com|cn|net|org';
+
+    final emailRegex =
+        RegExp(r'[\w.+-]+@[\w-]+(\.[\w-]+)+', caseSensitive: false);
+    final urlRegex = RegExp(
+      r'(https?:\/\/[^\s<>"]+|www\.[\w-]+(\.[\w-]+)+[^\s<>"]*)',
+      caseSensitive: false,
+    );
+    final bareDomainRegex = RegExp(
+      r'(?<![@\w.])([a-z0-9-]+\.)+(' + tlds + r')\b(\/[^\s<>"]*)?',
+      caseSensitive: false,
+    );
+    final phoneRegex = RegExp(
+      r'(?<!\d)(1\d{10}|\d{3,4}[-\s]\d{7,8}|\+\d{1,3}[-\s]?\d{4,14})(?!\d)',
+    );
+
+    final matches = <_LinkMatch>[];
+    bool overlaps(int s, int e) =>
+        matches.any((m) => !(e <= m.start || s >= m.end));
+
+    for (final m in emailRegex.allMatches(text)) {
+      matches.add(_LinkMatch(m.start, m.end, m.group(0)!, 'email'));
+    }
+    for (final m in urlRegex.allMatches(text)) {
+      if (overlaps(m.start, m.end)) continue;
+      matches.add(_LinkMatch(m.start, m.end, m.group(0)!, 'url'));
+    }
+    for (final m in bareDomainRegex.allMatches(text)) {
+      if (overlaps(m.start, m.end)) continue;
+      matches.add(_LinkMatch(m.start, m.end, m.group(0)!, 'url'));
+    }
+    for (final m in phoneRegex.allMatches(text)) {
+      if (overlaps(m.start, m.end)) continue;
+      matches.add(_LinkMatch(m.start, m.end, m.group(0)!, 'phone'));
+    }
+    matches.sort((a, b) => a.start.compareTo(b.start));
+
+    final buf = StringBuffer();
+    int last = 0;
+    for (final m in matches) {
+      if (m.start < last) continue;
+      buf.write(escapeHtml(text.substring(last, m.start)));
+      String href;
+      switch (m.type) {
+        case 'email':
+          href = 'mailto:${m.value}';
+          break;
+        case 'phone':
+          href = 'tel:${m.value.replaceAll(RegExp(r'[\s-]'), '')}';
+          break;
+        default:
+          href = m.value.toLowerCase().startsWith('http')
+              ? m.value
+              : 'https://${m.value}';
+      }
+      buf.write('<a href="${escapeHtml(href)}">${escapeHtml(m.value)}</a>');
+      last = m.end;
+    }
+    buf.write(escapeHtml(text.substring(last)));
+    return buf.toString().replaceAll('\n', '<br/>');
+  }
+}
+
+class _LinkMatch {
+  final int start;
+  final int end;
+  final String value;
+  final String type;
+  _LinkMatch(this.start, this.end, this.value, this.type);
 }
