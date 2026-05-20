@@ -45,7 +45,7 @@ class _text_images_cell extends State<TextImagesCell> {
   types.Status? get state => widget.message.status;
 
   String get content => widget.message.text;
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   List<String> mediaUrls = [];
   final _toolTipController = SuperTooltipController();
   bool isVideo = false;
@@ -90,146 +90,153 @@ class _text_images_cell extends State<TextImagesCell> {
       }
     }
 
-    return Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: BoxDecoration(
-              color: isCurrentUser ? Colors.blueAccent : Colors.blue.shade100,
-              borderRadius: BorderRadius.circular(8),
+    return Column(
+      crossAxisAlignment:
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            msgTime,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部时间和标题
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Column(
-                    crossAxisAlignment: isCurrentUser
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        msgTime,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isCurrentUser
-                              ? Colors.white.withOpacity(0.5)
-                              : Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      SuperTooltip(
-                        content: buildToolAction(),
-                        controller: _toolTipController,
-                        popupDirection: TooltipDirection.up,
-                        minimumOutsideMargin: 20.0,
-                        arrowLength: 10.0,
-                        arrowBaseWidth: 15.0,
-                        borderRadius: 8.0,
-                        constraints: const BoxConstraints(
-                          minHeight: 0.0,
-                          maxHeight: 50.0,
-                          minWidth: 0.0,
-                          maxWidth: 50.0,
-                        ),
-                        child: GestureDetector(
-                          onLongPress:
-                          (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && hasValidRemoteId
-                              ? () => _toolTipController.showTooltip()
-                              : null,
-                          onSecondaryTapDown: (details) {
-                            if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
-                              _toolTipController.showTooltip();
-                            }
-                          },
-                          child: Text(
-                            msgTxt,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isCurrentUser ? Colors.white : Colors.black,
-                            ),
-                            maxLines: 10,
-                            overflow: TextOverflow.ellipsis,
-                      )
-                        ),
-                      ),
-                    ],
-                  ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          decoration: BoxDecoration(
+            color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+            borderRadius: BorderRadius.only(
+              topLeft:
+                  isCurrentUser ? const Radius.circular(16) : Radius.zero,
+              topRight:
+                  isCurrentUser ? Radius.zero : const Radius.circular(16),
+              bottomLeft: const Radius.circular(16),
+              bottomRight: const Radius.circular(16),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SuperTooltip(
+                content: buildToolAction(),
+                controller: _toolTipController,
+                popupDirection: TooltipDirection.up,
+                minimumOutsideMargin: 20.0,
+                arrowLength: 10.0,
+                arrowBaseWidth: 15.0,
+                borderRadius: 8.0,
+                constraints: const BoxConstraints(
+                  minHeight: 0.0,
+                  maxHeight: 50.0,
+                  minWidth: 0.0,
+                  maxWidth: 50.0,
                 ),
-                const SizedBox(height: 8),
-                // 图片网格显示
-                mediaUrls.isEmpty
-                    ? Container()
-                    : Container(
-                        constraints: BoxConstraints(
-                          maxWidth: widget.messageWidth.toDouble() * 0.8,
+                child: GestureDetector(
+                    onLongPress:
+                        (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) &&
+                                hasValidRemoteId
+                            ? () => _toolTipController.showTooltip()
+                            : null,
+                    onSecondaryTapDown: (details) {
+                      if (!kIsWeb &&
+                          !Platform.isAndroid &&
+                          !Platform.isIOS &&
+                          hasValidRemoteId) {
+                        _toolTipController.showTooltip();
+                      }
+                    },
+                    child: Text(
+                      msgTxt,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isCurrentUser ? Colors.white : Colors.black,
+                      ),
+                      maxLines: 10,
+                      overflow: TextOverflow.ellipsis,
+                    )),
+              ),
+              const SizedBox(height: 8),
+              // 图片网格显示
+              mediaUrls.isEmpty
+                  ? Container()
+                  : Container(
+                      constraints: BoxConstraints(
+                        maxWidth: widget.messageWidth.toDouble() * 0.8,
+                      ),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: mediaUrls.length > 6 ? 3 : 2,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: 1.0,
                         ),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: mediaUrls.length > 6 ? 3 : 2,
-                            crossAxisSpacing: 4,
-                            mainAxisSpacing: 4,
-
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: mediaUrls.length,
-                          itemBuilder: (context, index) {
-                            var ext = mediaUrls[index].split(".").last.toLowerCase();
-                            var mediaUrl = baseUrlImage + mediaUrls[index];
-                            if (mediaUrls[index].contains("http")){
-                              mediaUrl = mediaUrls[index];
-                            }
-                            return GestureDetector(
-                              onTap: () {
-                                if (videoTypes.contains(ext)){
-                                  Navigator.push(
+                        itemCount: mediaUrls.length,
+                        itemBuilder: (context, index) {
+                          var ext =
+                              mediaUrls[index].split(".").last.toLowerCase();
+                          var mediaUrl = baseUrlImage + mediaUrls[index];
+                          if (mediaUrls[index].contains("http")) {
+                            mediaUrl = mediaUrls[index];
+                          }
+                          return GestureDetector(
+                            onTap: () {
+                              if (videoTypes.contains(ext)) {
+                                Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Fullvideoplayer(
-                                          videoUrl: mediaUrl))
-                                  );
-                                }else { // 点击图片查看大图
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            FullImageView(
-                                              url: mediaUrl,
-                                            ),
-                                      ));
-                                }
-                              },
-                             // child: Hero(
-                             //   tag: 'image_$index',
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                    child:  videoTypes.contains(ext) ? Image.asset("assets/png/video_default.png", package: 'qichat_ui_sdk') :  CachedNetworkImage(
-                                    imageUrl: mediaUrl,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: CircularProgressIndicator(),
+                                        builder: (context) => Fullvideoplayer(
+                                            videoUrl: mediaUrl)));
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FullImageView(
+                                        url: mediaUrl,
+                                      ),
+                                    ));
+                              }
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: videoTypes.contains(ext)
+                                  ? Image.asset(
+                                      "assets/png/video_default.png",
+                                      package: 'qichat_ui_sdk')
+                                  : CachedNetworkImage(
+                                      imageUrl: mediaUrl,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.error,
+                                          color: Colors.red,
+                                        ),
                                       ),
                                     ),
-                                    errorWidget: (context, url, error) => Container(
-                                      color: Colors.grey[300],
-                                      child: const Icon(
-                                        Icons.error,
-                                        color: Colors.red,
-                                      ),
-                                    ),
-                                  ),
-                               // ),
-                              ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-              ],
-            ),
-        );
+                    ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   buildToolAction() {

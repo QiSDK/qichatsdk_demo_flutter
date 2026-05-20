@@ -41,7 +41,7 @@ class _text_media_cell extends State<TextMediaCell> {
   types.Status? get state => widget.message.status;
 
   String get content => widget.message.text;
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   String mediaUrl = '';
   final _toolTipController = SuperTooltipController();
   bool isVideo = false;
@@ -79,100 +79,105 @@ class _text_media_cell extends State<TextMediaCell> {
       }
     }
 
-    return SuperTooltip(
-        content: buildToolAction(),
-        controller: _toolTipController,
-        child: GestureDetector(
-          onLongPress:
-              (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && hasValidRemoteId
-                  ? () => _toolTipController.showTooltip()
-                  : null,
-          onSecondaryTapDown: (details) {
-            if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
-              _toolTipController.showTooltip();
-            }
-          },
-          onTap: () {
-            if (isVideo)
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Fullvideoplayer(
-                    videoUrl: mediaUrl,
-                  ),
-                ),
-              );
-            else {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FullImageView(
-                      url: mediaUrl,
-                    ),
-                  ));
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: BoxDecoration(
-              color: isCurrentUser ? Colors.blueAccent : Colors.blue.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部时间和标题
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Column(
-                    crossAxisAlignment: isCurrentUser
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        msgTime,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isCurrentUser
-                              ? Colors.white.withOpacity(0.5)
-                              : Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        msgTxt,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isCurrentUser ? Colors.white : Colors.black,
-                        ),
-                        maxLines: 10,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // 视频缩略图和图标
-                mediaUrl.isEmpty
-                    ? Container()
-                    : Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          _remoteImag(), // 你应定义该函数返回 Widget
-                          isVideo
-                              ? Icon(
-                                  Icons.slow_motion_video_outlined,
-                                  size: 50.0,
-                                  color: Colors.white.withOpacity(0.8),
-                                )
-                              : Container(),
-                        ],
-                      ),
-                //),
-              ],
+    return Column(
+      crossAxisAlignment:
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            msgTime,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
             ),
           ),
-        ));
+        ),
+        SuperTooltip(
+          content: buildToolAction(),
+          controller: _toolTipController,
+          child: GestureDetector(
+            onLongPress:
+                (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && hasValidRemoteId
+                    ? () => _toolTipController.showTooltip()
+                    : null,
+            onSecondaryTapDown: (details) {
+              if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && hasValidRemoteId) {
+                _toolTipController.showTooltip();
+              }
+            },
+            onTap: () {
+              if (isVideo)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Fullvideoplayer(
+                      videoUrl: mediaUrl,
+                    ),
+                  ),
+                );
+              else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullImageView(
+                        url: mediaUrl,
+                      ),
+                    ));
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              decoration: BoxDecoration(
+                color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+                borderRadius: BorderRadius.only(
+                  topLeft: isCurrentUser
+                      ? const Radius.circular(16)
+                      : Radius.zero,
+                  topRight: isCurrentUser
+                      ? Radius.zero
+                      : const Radius.circular(16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    msgTxt,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: isCurrentUser ? Colors.white : Colors.black,
+                    ),
+                    maxLines: 10,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // 视频缩略图和图标
+                  mediaUrl.isEmpty
+                      ? Container()
+                      : Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            _remoteImag(),
+                            isVideo
+                                ? Icon(
+                                    Icons.slow_motion_video_outlined,
+                                    size: 50.0,
+                                    color: Colors.white.withOpacity(0.8),
+                                  )
+                                : Container(),
+                          ],
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   _remoteImag() {

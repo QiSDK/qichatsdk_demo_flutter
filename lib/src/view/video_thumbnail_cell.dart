@@ -40,7 +40,7 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   types.Status? get state => widget.message.status;
 
   String content = "";
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   String get thumbnailUri => widget.message.metadata?['thumbnailUri'] ?? '';
   final _toolTipController = SuperTooltipController();
 
@@ -65,61 +65,93 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    return SuperTooltip(
-        content: buildToolAction(),
-        controller: _toolTipController,
-        child: Container(
+    final isCurrentUser = widget.message.author.id == widget.chatId;
+    final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
+    return Column(
+      crossAxisAlignment:
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            msgTime,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        SuperTooltip(
+          content: buildToolAction(),
+          controller: _toolTipController,
+          child: Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            color: widget.message.author.id == widget.chatId
-                ? Colors.blueAccent
-                : Colors.blue.shade100, child:   Row( children: [
-        if(!kIsWeb && !Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
-            SmartDialog.showLoading(msg:"正在下载");
-            var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
-            SmartDialog.dismiss();
-            if (downloaded){
-              SmartDialog.showToast("下载成功");
-            }else{
-              SmartDialog.showToast("下载失败");
-            }
-          }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
-          Column(
-              crossAxisAlignment: CrossAxisAlignment.start, //
-              mainAxisAlignment: MainAxisAlignment.start,
+            decoration: BoxDecoration(
+              color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+              borderRadius: BorderRadius.only(
+                topLeft:
+                    isCurrentUser ? const Radius.circular(16) : Radius.zero,
+                topRight:
+                    isCurrentUser ? Radius.zero : const Radius.circular(16),
+                bottomLeft: const Radius.circular(16),
+                bottomRight: const Radius.circular(16),
+              ),
+            ),
+            child: Row(
               children: [
-                Text(
-                  "   " +  msgTime,
-                  textAlign: TextAlign.right, // Aligns text to the right
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: widget.message.author.id == widget.chatId
-                          ? Colors.white.withOpacity(0.5)
-                          : Colors.grey),
-                ), GestureDetector(
-                    onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
+                if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid)
+                  IconButton(
+                      onPressed: () async {
+                        SmartDialog.showLoading(msg: "正在下载");
+                        var downloaded = await ArticleRepository()
+                            .downloadVideo(widget.message.uri.replaceFirst(
+                                "master.m3u8", "index.mp4"));
+                        SmartDialog.dismiss();
+                        if (downloaded) {
+                          SmartDialog.showToast("下载成功");
+                        } else {
+                          SmartDialog.showToast("下载失败");
+                        }
+                      },
+                      icon: const Icon(Icons.save_alt_sharp,
+                          color: Colors.black, size: 30)),
+                GestureDetector(
+                    onLongPress: (!kIsWeb &&
+                                (Platform.isAndroid || Platform.isIOS)) &&
+                            hasValidRemoteId
                         ? () => _toolTipController.showTooltip()
                         : null,
                     onSecondaryTapDown: (details) {
-                      if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
+                      if (!kIsWeb &&
+                          !Platform.isAndroid &&
+                          !Platform.isIOS &&
+                          hasValidRemoteId) {
+                        _toolTipController.showTooltip();
+                      }
                     },
-                    onTap: ()  {
+                    onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message as types.VideoMessage)));
+                          MaterialPageRoute(
+                              builder: (context) => Fullvideoplayer(
+                                  message:
+                                      widget.message as types.VideoMessage)));
                     },
-                    child:
-                    Stack(
+                    child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          //_localImage(),
                           _remoteImag(),
                           Icon(Icons.slow_motion_video_outlined,
                               size: 50.0,
                               color: Colors.white.withOpacity(0.8))
-                        ]
-                    )
-                ),
-              ])])));
+                        ])),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   buildToolAction() {

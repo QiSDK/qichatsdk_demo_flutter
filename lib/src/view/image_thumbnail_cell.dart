@@ -11,6 +11,7 @@ import '../model/MessageItemOperateListener.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
+import '../util/util.dart';
 import '../vc/FullImageView.dart';
 
 class ImageThumbnailCellWidget extends StatefulWidget {
@@ -32,7 +33,7 @@ class ImageThumbnailCellWidget extends StatefulWidget {
 class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
   types.Status? get state => widget.message.status;
 
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   final _toolTipController = SuperTooltipController();
   Uint8List? thumbnail;
 
@@ -69,58 +70,85 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
   }
 
   buildMessage(BuildContext context) {
-    return SuperTooltip(
-      content: buildToolAction(),
-      controller: _toolTipController,
-      child:
-      Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          color: widget.message.author.id == widget.chatId
-              ? Colors.blue
-              : Colors.blue.shade100,
-          child:
-              Row( children: [
-               if(!kIsWeb && !Platform.isIOS && !Platform.isAndroid)  IconButton(onPressed: () async {
-                  SmartDialog.showLoading(msg:"正在下载");
-                var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
-                  SmartDialog.dismiss();
-                if (downloaded){
-                  SmartDialog.showToast("下载成功");
-                }else{
-                  SmartDialog.showToast("下载失败");
-                }
-                }, icon: Icon(Icons.save_alt_sharp, color: Colors.black, size: 30)),
-
-               Expanded(child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   mainAxisAlignment: MainAxisAlignment.start,
-                   children: [
-                     Text(
-                       textAlign: TextAlign.left, // Aligns text to the right
-                       "   " + msgTime,
-                       style: TextStyle(
-                           fontSize: 12,
-
-                           color: widget.message.author.id == widget.chatId
-                               ? Colors.white.withOpacity(0.5)
-                               : Colors.grey),
-                     ),GestureDetector(
-                       onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
-                           ? () => _toolTipController.showTooltip()
-                           : null,
-                       onSecondaryTapDown: (details) {
-                         if (!Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
-                       },
-                       onTap: ()  {
-                         Navigator.push(
-                             context,
-                             MaterialPageRoute( builder: (context) => FullImageView(message: widget.message)));
-                       },
-                       child: _remoteImag(),
-                     ),
-                   ]))
-              ],)
-        ));
+    final isCurrentUser = widget.message.author.id == widget.chatId;
+    final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
+    return Column(
+      crossAxisAlignment:
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            msgTime,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        SuperTooltip(
+          content: buildToolAction(),
+          controller: _toolTipController,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: BoxDecoration(
+              color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+              borderRadius: BorderRadius.only(
+                topLeft:
+                    isCurrentUser ? const Radius.circular(16) : Radius.zero,
+                topRight:
+                    isCurrentUser ? Radius.zero : const Radius.circular(16),
+                bottomLeft: const Radius.circular(16),
+                bottomRight: const Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid)
+                  IconButton(
+                      onPressed: () async {
+                        SmartDialog.showLoading(msg: "正在下载");
+                        var downloaded = await ArticleRepository()
+                            .downloadVideo(widget.message.uri);
+                        SmartDialog.dismiss();
+                        if (downloaded) {
+                          SmartDialog.showToast("下载成功");
+                        } else {
+                          SmartDialog.showToast("下载失败");
+                        }
+                      },
+                      icon: const Icon(Icons.save_alt_sharp,
+                          color: Colors.black, size: 30)),
+                GestureDetector(
+                  onLongPress: (!kIsWeb &&
+                              (Platform.isAndroid || Platform.isIOS)) &&
+                          hasValidRemoteId
+                      ? () => _toolTipController.showTooltip()
+                      : null,
+                  onSecondaryTapDown: (details) {
+                    if (!kIsWeb &&
+                        !Platform.isAndroid &&
+                        !Platform.isIOS &&
+                        hasValidRemoteId) {
+                      _toolTipController.showTooltip();
+                    }
+                  },
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                FullImageView(message: widget.message)));
+                  },
+                  child: _remoteImag(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   buildToolAction() {

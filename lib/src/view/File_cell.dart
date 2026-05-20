@@ -36,7 +36,7 @@ class FileCellWidget extends StatefulWidget {
 class _FileCellWidget extends State<FileCellWidget> {
   types.Status? get state => widget.message.status;
   final _macosWebviewKitPlugin = MacosWebviewKit();
-  String get msgTime => widget.message.metadata?['msgTime'] ?? '';
+  String get msgTime => Util().formatTimestamp(widget.message.createdAt ?? 0);
   final _toolTipController = SuperTooltipController();
   Uint8List? thumbnail;
 
@@ -63,101 +63,110 @@ class _FileCellWidget extends State<FileCellWidget> {
   }
 
   buildGptMessage(BuildContext context) {
-    return Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-        color: widget.message.author.id == widget.chatId
-            ? Colors.blue
-            : Colors.blue.shade100,
-        //child: _buildFileCell(),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, //
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                textAlign: TextAlign.start, // Aligns text to the right
-                "   " + msgTime,
-                style: TextStyle(
-                    fontSize: 12,
-                    color: widget.message.author.id == widget.chatId
-                        ? Colors.white.withOpacity(0.5)
-                        : Colors.grey),
-              ),
-              SuperTooltip(
-                  content: buildToolAction(),
-                  controller: _toolTipController,
-                  child: Row(
-                    children: [
-                    if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS)   IconButton(
-                          onPressed: () async {
-                            SmartDialog.showLoading(msg: "正在下载");
-                            var downloaded = await ArticleRepository()
-                                .downloadVideo(widget.message.uri);
-                            SmartDialog.dismiss();
-                            if (downloaded) {
-                              SmartDialog.showToast("下载成功");
-                            } else {
-                              SmartDialog.showToast("下载失败");
-                            }
-                          },
-                          icon: const Icon(Icons.save_alt_sharp,
-                              color: Colors.black, size: 30)),
-                      GestureDetector(
-                        onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) &&
-                                (widget.message.remoteId ?? "").length > 8)
-                            ? () => _toolTipController.showTooltip()
-                            : null,
-                        onSecondaryTapDown: (details) {
-                          if (!kIsWeb &&
-                              !Platform.isAndroid &&
-                              !Platform.isIOS &&
-                              (widget.message.remoteId ?? "").length > 8)
-                            _toolTipController.showTooltip();
+    final isCurrentUser = widget.message.author.id == widget.chatId;
+    final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
+    return Column(
+      crossAxisAlignment:
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            msgTime,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          decoration: BoxDecoration(
+            color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+            borderRadius: BorderRadius.only(
+              topLeft:
+                  isCurrentUser ? const Radius.circular(16) : Radius.zero,
+              topRight:
+                  isCurrentUser ? Radius.zero : const Radius.circular(16),
+              bottomLeft: const Radius.circular(16),
+              bottomRight: const Radius.circular(16),
+            ),
+          ),
+          child: SuperTooltip(
+              content: buildToolAction(),
+              controller: _toolTipController,
+              child: Row(
+                children: [
+                  if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS)
+                    IconButton(
+                        onPressed: () async {
+                          SmartDialog.showLoading(msg: "正在下载");
+                          var downloaded = await ArticleRepository()
+                              .downloadVideo(widget.message.uri);
+                          SmartDialog.dismiss();
+                          if (downloaded) {
+                            SmartDialog.showToast("下载成功");
+                          } else {
+                            SmartDialog.showToast("下载失败");
+                          }
                         },
-                        onTap: () async {
-                          //var googleDocsUrl =
-                            //  "https://docs.google.com/gview?embedded=true&url=${widget.message.uri}";
-                          var ext = (widget.message.uri).split(".");
-                          if (ext.last.toLowerCase() == "pdf"){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MyPdfViewer(
-                                    fileUrl: widget.message.uri
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          else if (ext.last.toLowerCase() == "csv" && !kIsWeb && !Platform.isIOS) {
-                            //googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$imageUrl"
-                            SmartDialog.showToast("暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序");
-                            return;
-                          }
-                          var googleDocsUrl = "https://view.officeapps.live.com/op/view.aspx?src=${widget.message.uri}";
-                          if (!kIsWeb && Platform.isIOS){
-                            googleDocsUrl = widget.message.uri;
-                          }
-                          // _launchInWebView(Uri.parse(googleDocsUrl));
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CommonWebView(
-                                url: googleDocsUrl,
-                                title: widget.message.name,
-                              ),
-                            ),
-                          );
-
-                          //_launchUrl(widget.message.uri);
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute( builder: (context) => FullImageWebView(message: widget.message)));
-                        },
-                        child: _buildFileCell(),
-                      ),
-                    ],
-                  )),
-            ]));
+                        icon: const Icon(Icons.save_alt_sharp,
+                            color: Colors.black, size: 30)),
+                  GestureDetector(
+                    onLongPress: (!kIsWeb &&
+                                (Platform.isAndroid || Platform.isIOS)) &&
+                            hasValidRemoteId
+                        ? () => _toolTipController.showTooltip()
+                        : null,
+                    onSecondaryTapDown: (details) {
+                      if (!kIsWeb &&
+                          !Platform.isAndroid &&
+                          !Platform.isIOS &&
+                          hasValidRemoteId) {
+                        _toolTipController.showTooltip();
+                      }
+                    },
+                    onTap: () async {
+                      var ext = (widget.message.uri).split(".");
+                      if (ext.last.toLowerCase() == "pdf") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MyPdfViewer(fileUrl: widget.message.uri),
+                          ),
+                        );
+                        return;
+                      } else if (ext.last.toLowerCase() == "csv" &&
+                          !kIsWeb &&
+                          !Platform.isIOS) {
+                        SmartDialog.showToast(
+                            "暂不支持在线查看PDF和CSV文件，但您可以下载后再浏览，也确保您的设备里有查看PDF和CSV文件的应用程序");
+                        return;
+                      }
+                      var googleDocsUrl =
+                          "https://view.officeapps.live.com/op/view.aspx?src=${widget.message.uri}";
+                      if (!kIsWeb && Platform.isIOS) {
+                        googleDocsUrl = widget.message.uri;
+                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommonWebView(
+                            url: googleDocsUrl,
+                            title: widget.message.name,
+                          ),
+                        ),
+                      );
+                    },
+                    child: _buildFileCell(),
+                  ),
+                ],
+              )),
+        ),
+      ],
+    );
   }
 
   _buildFileCell() {
