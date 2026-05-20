@@ -94,7 +94,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _lineStatus = "正在线路检测...";
+  //String _lineStatus = "正在线路检测...";
+  String _lineStatus = "";
   String _versionNo = "";
   int _unread = 0;
   final Logman _logman = Logman.instance;
@@ -104,7 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
+    print("main 线路检测");
     QiChatUISDK.lineStatusStream.listen((status) {
+      print('[Main] lineStatusStream: $status');
       if (mounted) setState(() => _lineStatus = status);
     });
     QiChatUISDK.totalUnreadStream.listen((count) {
