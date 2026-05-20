@@ -179,7 +179,7 @@ class _ChatPageState extends State<ChatPage>
             MediaQuery.of(context).viewInsets.bottom == 0)
           Positioned(
             left: 12,
-            bottom: 60,
+            bottom: 56 + MediaQuery.of(context).padding.bottom + 8,
             child: GestureDetector(
               onTap: _onEvaluationButtonTap,
               child: Container(
