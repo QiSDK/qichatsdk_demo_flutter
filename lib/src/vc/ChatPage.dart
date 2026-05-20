@@ -82,6 +82,11 @@ class _ChatPageState extends State<ChatPage>
   late final AppChatTheme _theme = widget.theme ?? AppChatTheme.random();
   Color get _evaluationTintColor => _theme.tintColor;
 
+  /// 底部任一面板（emoji / 功能 / 回复条）是否展开。由 ChatCustomBottom 通过
+  /// onExpandedChanged 回调推上来，配合键盘弹起状态决定是否隐藏「客服评价」悬浮按钮，
+  /// 避免遮挡。
+  bool _bottomExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -169,7 +174,9 @@ class _ChatPageState extends State<ChatPage>
         decoration: BoxDecoration(gradient: _theme.linearGradient),
         child: Stack(children: [
         _buildChat(),
-        if (_evaluationConfig?.evaluationEnabled == true)
+        if (_evaluationConfig?.evaluationEnabled == true &&
+            !_bottomExpanded &&
+            MediaQuery.of(context).viewInsets.bottom == 0)
           Positioned(
             left: 12,
             bottom: 60,
@@ -302,6 +309,11 @@ class _ChatPageState extends State<ChatPage>
         // },
         customBottomWidget: ChatCustomBottom(
             key: _sendViewKey,
+            onExpandedChanged: (expanded) {
+              if (!mounted) return;
+              if (_bottomExpanded == expanded) return;
+              setState(() => _bottomExpanded = expanded);
+            },
             onSubmitted: (value) {
               final trimmedText = value.trim();
               if (trimmedText.isEmpty) {

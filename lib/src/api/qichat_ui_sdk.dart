@@ -12,6 +12,7 @@ import '../manager/global_chat_manager.dart';
 import '../manager/unread_manager.dart';
 import '../model/AppChatTheme.dart';
 import '../vc/ChatPage.dart';
+import '../vc/device_info_page.dart';
 import '../vc/entrancePage.dart';
 
 /// QiChat UISDK 公共 API。
@@ -124,6 +125,20 @@ class QiChatUISDK {
           builder: (_) => ChatPage(consultId: consultId, theme: theme)),
     );
     return true;
+  }
+
+  /// 打开设备信息页。展示当前设备 / 应用 / 线路状态，支持保存为图片。
+  ///
+  /// iOS 上需要宿主自行在 Info.plist 添加 `NSPhotoLibraryAddUsageDescription`，
+  /// 否则「保存为图片」会被系统直接拒绝。
+  static Future<void> openDeviceInfo(
+    BuildContext context, {
+    AppChatTheme? theme,
+  }) async {
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => DeviceInfoPage(theme: theme)),
+    );
   }
 
   /// 线路检测状态文本流。宿主可订阅它在 UI 中显示线路状态。

@@ -76,6 +76,8 @@ dependencies:
   # 真的会引用，移到 dependencies 才能在外部消费时传递过来。
   downloadsfolder: ^1.1.0
   file_picker: ^8.0.0
+  device_info_plus: ^10.1.2
+  gal: ^2.3.1
 
 dev_dependencies:
   flutter_test:
@@ -97,6 +99,7 @@ flutter:
   assets:
     - assets/
     - assets/png/
+    - assets/svg/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
