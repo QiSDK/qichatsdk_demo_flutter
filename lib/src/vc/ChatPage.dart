@@ -213,8 +213,9 @@ class _ChatPageState extends State<ChatPage>
         // customMessageBuilder: (message, {messageWidth = 200}) {
         //   return TipMessage(message: message);
         // },
-        showUserAvatars: true,
+        showUserAvatars: false,
         showUserNames: true,
+        bubbleBuilder: (child, {required message, required nextMessageInGroup}) => child,
         theme: DefaultChatTheme(
             backgroundColor: Colors.transparent,
             primaryColor: _theme.rightBubbleColor,

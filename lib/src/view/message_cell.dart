@@ -191,65 +191,90 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   buildNormalMessage() {
-    return   Container(
-      color: widget.message.author.id == widget.chatId
-          ? Colors.blue
-          : Colors.blue.shade100,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, //
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-      SuperTooltip(
-        content: buildToolAction(),
-        controller: _toolTipController,child: Text(
+    final isMe = widget.message.author.id == widget.chatId;
+    return Column(
+      crossAxisAlignment:
+          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
             msgTime,
-            style: TextStyle(
-                fontSize: 12,
-                color: widget.message.author.id == widget.chatId
-                    ? Colors.white.withOpacity(0.5)
-                    : Colors.grey),
-          )),
-          GestureDetector(
-              onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
-                  ? () => _toolTipController.showTooltip()
-                  : null,
-              onSecondaryTapDown: (details) {
-                if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8)  _toolTipController.showTooltip();
-              },
-           child:Container(
-              margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-              child: Html(
-                data: _convertContentToHtml(content),
-                shrinkWrap: true,
-                onLinkTap: (url, attributes, element) async {
-                  if (url == null) return;
-                  final uri = Uri.parse(url);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                },
-                style: {
-                  "body": Style(
-                    fontSize: FontSize(14),
-                    color: widget.message.author.id == widget.chatId
-                        ? Colors.white
-                        : Colors.black,
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: widget.message.author.id == widget.chatId
+                ? Colors.blue
+                : Colors.blue.shade100,
+            borderRadius: BorderRadius.only(
+              topLeft: widget.message.author.id == widget.chatId
+                  ? const Radius.circular(16)
+                  : Radius.zero,
+              topRight: widget.message.author.id == widget.chatId
+                  ? Radius.zero
+                  : const Radius.circular(16),
+              bottomLeft: const Radius.circular(16),
+              bottomRight: const Radius.circular(16),
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SuperTooltip(
+                content: buildToolAction(),
+                controller: _toolTipController,
+                child: GestureDetector(
+                  onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
+                      ? () => _toolTipController.showTooltip()
+                      : null,
+                  onSecondaryTapDown: (details) {
+                    if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8) _toolTipController.showTooltip();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                    child: Html(
+                      data: _convertContentToHtml(content),
+                      shrinkWrap: true,
+                      onLinkTap: (url, attributes, element) async {
+                        if (url == null) return;
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      style: {
+                        "body": Style(
+                          fontSize: FontSize(14),
+                          color: widget.message.author.id == widget.chatId
+                              ? Colors.white
+                              : Colors.black,
+                          margin: Margins.zero,
+                          padding: HtmlPaddings.zero,
+                        ),
+                        "a": Style(
+                          color: widget.message.author.id == widget.chatId
+                              ? Colors.white
+                              : Colors.blue.shade800,
+                          textDecoration: TextDecoration.underline,
+                        ),
+                      },
+                    ),
                   ),
-                  "a": Style(
-                    color: widget.message.author.id == widget.chatId
-                        ? Colors.white
-                        : Colors.blue.shade800,
-                    textDecoration: TextDecoration.underline,
-                  ),
-                },
-              ))),  replyItem == null
-              ? const SizedBox()
-              : _buildFileCell()
-        ],
-      ),
+                ),
+              ),
+              replyItem == null ? const SizedBox() : _buildFileCell()
+            ],
+          ),
+        ),
+      ],
     );
   }
 
