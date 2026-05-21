@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
   String _versionNo = "";
   int _unread = 0;
   final Logman _logman = Logman.instance;
-  final AppChatTheme _theme = AppChatTheme.random();
+  late final int _themeIndex = AppChatTheme.presets.isEmpty
+      ? 0
+      : Random().nextInt(AppChatTheme.presets.length);
+  late final AppChatTheme _theme = AppChatTheme.presets.isEmpty
+      ? AppChatTheme.defaultTheme
+      : AppChatTheme.presets[_themeIndex];
 
   @override
   void initState() {
@@ -245,6 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'merchantId': '${cfg.merchantId}',
       'userName': cfg.userName,
       'userType': '${cfg.userType}',
+      'themeIndex': '$_themeIndex',
       if (xToken.isNotEmpty) 'xToken': xToken,
     };
 

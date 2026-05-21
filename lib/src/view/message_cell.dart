@@ -513,7 +513,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           }else if(videoTypes.contains(ext)){
             Navigator.push(
                 context,
-                MaterialPageRoute( builder: (context) => Fullvideoplayer(message: widget.message.repliedMessage as types.VideoMessage)));
+                MaterialPageRoute( builder: (context) => Fullvideoplayer(videoUrl: url)));
           }else if(fileTypes.contains(ext)){
             var googleDocsUrl =
                 "https://docs.google.com/gview?embedded=true&url=${url}";

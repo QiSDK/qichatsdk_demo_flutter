@@ -40,6 +40,9 @@ set userName(String v) => QiChatConfig.current.userName = v;
 int get merchantId => QiChatConfig.current.merchantId;
 set merchantId(int v) => QiChatConfig.current.merchantId = v;
 
+String get tenantName => QiChatConfig.current.tenantName;
+set tenantName(String v) => QiChatConfig.current.tenantName = v;
+
 String get lines => QiChatConfig.current.detectUrls;
 set lines(String v) => QiChatConfig.current.detectUrls = v;
 

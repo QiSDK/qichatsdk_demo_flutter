@@ -16,6 +16,7 @@ class QiChatConfig {
   int userId;
   String userName;
   int merchantId;
+  String tenantName;
   String detectUrls;
   String baseUrlImage;
   int maxSessionMinutes;
@@ -42,6 +43,7 @@ class QiChatConfig {
     required this.userId,
     required this.userName,
     required this.merchantId,
+    required this.tenantName,
     required this.detectUrls,
     required this.baseUrlImage,
     required this.maxSessionMinutes,
@@ -58,6 +60,7 @@ class QiChatConfig {
       userId: 0,
       userName: '',
       merchantId: 0,
+      tenantName: '',
       detectUrls: '',
       baseUrlImage: '',
       maxSessionMinutes: 300,
@@ -75,6 +78,7 @@ class QiChatConfig {
     required int merchantId,
     required String detectUrls,
     required String baseUrlImage,
+    String tenantName = '',
     int maxSessionMinutes = 300,
     int userType = 2,
   }) {
@@ -83,6 +87,7 @@ class QiChatConfig {
       ..userId = userId
       ..userName = userName
       ..merchantId = merchantId
+      ..tenantName = tenantName
       ..detectUrls = detectUrls
       ..baseUrlImage = baseUrlImage
       ..maxSessionMinutes = maxSessionMinutes

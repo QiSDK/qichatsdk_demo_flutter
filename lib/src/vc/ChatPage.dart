@@ -169,6 +169,22 @@ class _ChatPageState extends State<ChatPage>
         backgroundColor: _theme.gradientStartColor,
         foregroundColor: _theme.tintColor,
         elevation: 0,
+        actions: [
+          if (tenantName.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: Text(
+                  tenantName,
+                  style: TextStyle(
+                    color: _theme.tintColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(gradient: _theme.linearGradient),
