@@ -43,8 +43,8 @@ class EvaluationDialog extends StatefulWidget {
     );
   }
 
-  static void dismiss() {
-    SmartDialog.dismiss(tag: 'evaluation_dialog');
+  static Future<void> dismiss() async {
+    await SmartDialog.dismiss(tag: 'evaluation_dialog');
   }
 
   @override
@@ -75,21 +75,22 @@ class _EvaluationDialogState extends State<EvaluationDialog> {
   Future<void> _onSubmit() async {
     if (_selectedScore <= 0 || _submitting) return;
     setState(() => _submitting = true);
-    var (success, errMsg) = await ArticleRepository.addEvaluation(
+    final success = await ArticleRepository.addEvaluation(
         widget.consultId, _selectedScore, _remarkCtrl.text, 0);
     if (!mounted) return;
     if (success) {
-      EvaluationDialog.dismiss();
-      // 匹配 score 找到 feedback 文案
+      // 匹配 score 找到 feedback 文案；没有就用默认「评价成功」
       final cfg = widget.config.configs
           ?.where((c) => c.score == _selectedScore)
           .firstOrNull;
-      if (cfg != null && cfg.status == 1 && (cfg.feedback ?? '').isNotEmpty) {
-        SmartDialog.showToast(cfg.feedback!);
-      }
+      final feedback = (cfg?.status == 1) ? (cfg?.feedback ?? '') : '';
+      final toastText = feedback.isNotEmpty ? feedback : '评价成功';
+      //final feedback = (cfg?.feedback ?? '').isEmpty ?  '评价成功' : cfg!.feedback!;
+      await EvaluationDialog.dismiss();
+      SmartDialog.showToast(toastText);
     } else {
+      // 失败时 toast 已由 repository 弹出
       setState(() => _submitting = false);
-      SmartDialog.showToast(errMsg ?? '评价提交失败');
     }
   }
 

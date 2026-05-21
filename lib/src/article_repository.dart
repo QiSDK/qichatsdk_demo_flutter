@@ -243,6 +243,7 @@ class ArticleRepository {
       if ((result.code ?? -1) == 0) {
         return result.data;
       }
+      _toastEvaluationError(result.msg);
       return null;
     } catch (e) {
       log(e.toString());
@@ -265,6 +266,7 @@ class ArticleRepository {
       if ((result.code ?? -1) == 0) {
         return result.data;
       }
+      _toastEvaluationError(result.msg);
       return null;
     } catch (e) {
       log(e.toString());
@@ -273,8 +275,7 @@ class ArticleRepository {
   }
 
   /// 提交评价 (close=1 表示用户拒绝评价；正常提交时 close=0)
-  /// 返回 (success, errMsg)
-  static Future<(bool, String?)> addEvaluation(
+  static Future<bool> addEvaluation(
       fixNum.Int64 consultId, int score, String remark, int close) async {
     Resource res = Resource();
     res.path = evaluationAddPath;
@@ -286,19 +287,22 @@ class ArticleRepository {
     };
     try {
       var resp = await Api().post(res);
-      if (resp == null) {
-        return (false, '网络请求失败');
+      var result = Result<dynamic>.fromJson(resp, (json) => json);
+      if ((result.code ?? -1) == 0) {
+        return true;
       }
-      var code = resp['code'] as int?;
-      var msg = resp['msg'] as String?;
-      if (code == 0) {
-        return (true, null);
-      }
-      return (false, msg);
+      _toastEvaluationError(result.msg);
+      return false;
     } catch (e) {
       log(e.toString());
-      return (false, e.toString());
+      return false;
     }
+  }
+
+  static void _toastEvaluationError(String? msg) {
+    final text = (msg ?? '').trim();
+    if (text.isEmpty) return;
+    SmartDialog.showToast(text);
   }
 
   Future<bool> downloadVideo(String url) async {
