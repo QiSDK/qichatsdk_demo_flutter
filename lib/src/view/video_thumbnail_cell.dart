@@ -44,9 +44,42 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
   String get thumbnailUri => widget.message.metadata?['thumbnailUri'] ?? '';
   final _toolTipController = SuperTooltipController();
 
+  bool? _isLandscape;
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageStreamListener;
+
   @override
-   void initState() {
+  void initState() {
     super.initState();
+    _resolveOrientation();
+  }
+
+  @override
+  void dispose() {
+    if (_imageStream != null && _imageStreamListener != null) {
+      _imageStream!.removeListener(_imageStreamListener!);
+    }
+    super.dispose();
+  }
+
+  void _resolveOrientation() {
+    if (thumbnailUri.isEmpty) return;
+    final provider = CachedNetworkImageProvider(thumbnailUri);
+    final stream = provider.resolve(const ImageConfiguration());
+    final listener = ImageStreamListener((info, _) {
+      final w = info.image.width;
+      final h = info.image.height;
+      debugPrint('[VideoCell] id=${widget.message.remoteId} '
+          'resolved ${w}x$h');
+      if (mounted) {
+        setState(() => _isLandscape = w >= h);
+      }
+    }, onError: (e, _) {
+      debugPrint('[VideoCell] resolve error: $e');
+    });
+    stream.addListener(listener);
+    _imageStream = stream;
+    _imageStreamListener = listener;
   }
 
   @override
@@ -54,13 +87,24 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
     return buildGptMessage(context);
   }
 
+  Size _calculateSize() {
+    const landscape = Size(214, 120);
+    const portrait = Size(120, 214);
+    if (_isLandscape == null) return landscape;
+    return _isLandscape! ? landscape : portrait;
+  }
+
   _remoteImag(){
-    return CachedNetworkImage(
-      key: Key(widget.message.remoteId.toString()),
-      width: 260,
-      height: 260,
-      fit: BoxFit.contain,
-      imageUrl: thumbnailUri,
+    final size = _calculateSize();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImage(
+        key: Key(widget.message.remoteId.toString()),
+        width: size.width,
+        height: size.height,
+        fit: BoxFit.cover,
+        imageUrl: thumbnailUri,
+      ),
     );
   }
 
@@ -85,70 +129,43 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
         SuperTooltip(
           content: buildToolAction(),
           controller: _toolTipController,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: BoxDecoration(
-              color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
-              borderRadius: BorderRadius.only(
-                topLeft:
-                    isCurrentUser ? const Radius.circular(16) : Radius.zero,
-                topRight:
-                    isCurrentUser ? Radius.zero : const Radius.circular(16),
-                bottomLeft: const Radius.circular(16),
-                bottomRight: const Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              children: [
-                if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid)
-                  IconButton(
-                      onPressed: () async {
-                        SmartDialog.showLoading(msg: "正在下载");
-                        var downloaded = await ArticleRepository()
-                            .downloadVideo(widget.message.uri.replaceFirst(
-                                "master.m3u8", "index.mp4"));
-                        SmartDialog.dismiss();
-                        if (downloaded) {
-                          SmartDialog.showToast("下载成功");
-                        } else {
-                          SmartDialog.showToast("下载失败");
-                        }
-                      },
-                      icon: const Icon(Icons.save_alt_sharp,
-                          color: Colors.black, size: 30)),
-                GestureDetector(
-                    onLongPress: (!kIsWeb &&
-                                (Platform.isAndroid || Platform.isIOS)) &&
-                            hasValidRemoteId
-                        ? () => _toolTipController.showTooltip()
-                        : null,
-                    onSecondaryTapDown: (details) {
-                      if (!kIsWeb &&
-                          !Platform.isAndroid &&
-                          !Platform.isIOS &&
-                          hasValidRemoteId) {
-                        _toolTipController.showTooltip();
-                      }
-                    },
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Fullvideoplayer(
-                                  message:
-                                      widget.message as types.VideoMessage)));
-                    },
-                    child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          _remoteImag(),
-                          Icon(Icons.slow_motion_video_outlined,
-                              size: 50.0,
-                              color: Colors.white.withOpacity(0.8))
-                        ])),
-              ],
-            ),
-          ),
+          child: GestureDetector(
+              onLongPress: (!kIsWeb &&
+                          (Platform.isAndroid || Platform.isIOS)) &&
+                      hasValidRemoteId
+                  ? () => _toolTipController.showTooltip()
+                  : null,
+              onSecondaryTapDown: (details) {
+                if (!kIsWeb &&
+                    !Platform.isAndroid &&
+                    !Platform.isIOS &&
+                    hasValidRemoteId) {
+                  _toolTipController.showTooltip();
+                }
+              },
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Fullvideoplayer(
+                            message:
+                                widget.message as types.VideoMessage)));
+              },
+              child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    _remoteImag(),
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.35),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.play_arrow,
+                          size: 36, color: Colors.white),
+                    ),
+                  ])),
         ),
       ],
     );

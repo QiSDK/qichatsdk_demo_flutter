@@ -37,9 +37,41 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
   final _toolTipController = SuperTooltipController();
   Uint8List? thumbnail;
 
+  bool? _isLandscape;
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageStreamListener;
+
   @override
-   void initState() {
+  void initState() {
     super.initState();
+    _resolveOrientation();
+  }
+
+  @override
+  void dispose() {
+    if (_imageStream != null && _imageStreamListener != null) {
+      _imageStream!.removeListener(_imageStreamListener!);
+    }
+    super.dispose();
+  }
+
+  void _resolveOrientation() {
+    final provider = CachedNetworkImageProvider(widget.message.uri);
+    final stream = provider.resolve(const ImageConfiguration());
+    final listener = ImageStreamListener((info, _) {
+      final w = info.image.width;
+      final h = info.image.height;
+      debugPrint('[ImageCell] id=${widget.message.remoteId} '
+          'resolved ${w}x$h');
+      if (mounted) {
+        setState(() => _isLandscape = w >= h);
+      }
+    }, onError: (e, _) {
+      debugPrint('[ImageCell] resolve error: $e');
+    });
+    stream.addListener(listener);
+    _imageStream = stream;
+    _imageStreamListener = listener;
   }
 
   @override
@@ -47,13 +79,24 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
     return buildMessage(context);
   }
 
+  Size _calculateSize() {
+    const landscape = Size(214, 120);
+    const portrait = Size(120, 214);
+    if (_isLandscape == null) return landscape;
+    return _isLandscape! ? landscape : portrait;
+  }
+
   _remoteImag(){
-    return CachedNetworkImage(
-      key: Key(widget.message.remoteId.toString()),
-      fit: BoxFit.contain,
-      width: 300,
-      height: 300,
-      imageUrl: widget.message.uri,
+    final size = _calculateSize();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: CachedNetworkImage(
+        key: Key(widget.message.remoteId.toString()),
+        fit: BoxFit.cover,
+        width: size.width,
+        height: size.height,
+        imageUrl: widget.message.uri,
+      ),
     );
   }
 
@@ -90,61 +133,28 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
         SuperTooltip(
           content: buildToolAction(),
           controller: _toolTipController,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            decoration: BoxDecoration(
-              color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
-              borderRadius: BorderRadius.only(
-                topLeft:
-                    isCurrentUser ? const Radius.circular(16) : Radius.zero,
-                topRight:
-                    isCurrentUser ? Radius.zero : const Radius.circular(16),
-                bottomLeft: const Radius.circular(16),
-                bottomRight: const Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              children: [
-                if (!kIsWeb && !Platform.isIOS && !Platform.isAndroid)
-                  IconButton(
-                      onPressed: () async {
-                        SmartDialog.showLoading(msg: "正在下载");
-                        var downloaded = await ArticleRepository()
-                            .downloadVideo(widget.message.uri);
-                        SmartDialog.dismiss();
-                        if (downloaded) {
-                          SmartDialog.showToast("下载成功");
-                        } else {
-                          SmartDialog.showToast("下载失败");
-                        }
-                      },
-                      icon: const Icon(Icons.save_alt_sharp,
-                          color: Colors.black, size: 30)),
-                GestureDetector(
-                  onLongPress: (!kIsWeb &&
-                              (Platform.isAndroid || Platform.isIOS)) &&
-                          hasValidRemoteId
-                      ? () => _toolTipController.showTooltip()
-                      : null,
-                  onSecondaryTapDown: (details) {
-                    if (!kIsWeb &&
-                        !Platform.isAndroid &&
-                        !Platform.isIOS &&
-                        hasValidRemoteId) {
-                      _toolTipController.showTooltip();
-                    }
-                  },
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                FullImageView(message: widget.message)));
-                  },
-                  child: _remoteImag(),
-                ),
-              ],
-            ),
+          child: GestureDetector(
+            onLongPress: (!kIsWeb &&
+                        (Platform.isAndroid || Platform.isIOS)) &&
+                    hasValidRemoteId
+                ? () => _toolTipController.showTooltip()
+                : null,
+            onSecondaryTapDown: (details) {
+              if (!kIsWeb &&
+                  !Platform.isAndroid &&
+                  !Platform.isIOS &&
+                  hasValidRemoteId) {
+                _toolTipController.showTooltip();
+              }
+            },
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          FullImageView(message: widget.message)));
+            },
+            child: _remoteImag(),
           ),
         ),
       ],
