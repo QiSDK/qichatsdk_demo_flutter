@@ -224,56 +224,51 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
             ),
           ),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SuperTooltip(
-                content: buildToolAction(),
-                controller: _toolTipController,
-                child: GestureDetector(
-                  onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
-                      ? () => _toolTipController.showTooltip()
-                      : null,
-                  onSecondaryTapDown: (details) {
-                    if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8) _toolTipController.showTooltip();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                    child: Html(
-                      data: _convertContentToHtml(content),
-                      shrinkWrap: true,
-                      onLinkTap: (url, attributes, element) async {
-                        if (url == null) return;
-                        final uri = Uri.parse(url);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                      style: {
-                        "body": Style(
-                          fontSize: FontSize(14),
-                          color: widget.message.author.id == widget.chatId
-                              ? Colors.white
-                              : Colors.black,
-                          margin: Margins.zero,
-                          padding: HtmlPaddings.zero,
-                        ),
-                        "a": Style(
-                          color: widget.message.author.id == widget.chatId
-                              ? Colors.white
-                              : Colors.blue.shade800,
-                          textDecoration: TextDecoration.underline,
-                        ),
-                      },
-                    ),
+          child: SuperTooltip(
+            content: buildToolAction(),
+            controller: _toolTipController,
+            child: GestureDetector(
+              onLongPress: ((!kIsWeb && (Platform.isAndroid || Platform.isIOS)) && (widget.message.remoteId ?? "").length > 8)
+                  ? () => _toolTipController.showTooltip()
+                  : null,
+              onSecondaryTapDown: (details) {
+                if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS && (widget.message.remoteId ?? "").length > 8) _toolTipController.showTooltip();
+              },
+              child: Html(
+                data: _convertContentToHtml(content),
+                shrinkWrap: true,
+                onLinkTap: (url, attributes, element) async {
+                  if (url == null) return;
+                  final uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(14),
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white
+                        : Colors.black,
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
                   ),
-                ),
+                  "a": Style(
+                    color: widget.message.author.id == widget.chatId
+                        ? Colors.white
+                        : Colors.blue.shade800,
+                    textDecoration: TextDecoration.underline,
+                  ),
+                },
               ),
-              replyItem == null ? const SizedBox() : _buildFileCell()
-            ],
+            ),
           ),
         ),
+        if (replyItem != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: _buildFileCell(),
+          ),
       ],
     );
   }
@@ -501,54 +496,90 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
     if (!url.contains("http")) {
       url = baseUrlImage + url;
     }
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: GestureDetector(
-        onTap: () async {
-          var ext = fileName.split(".").last.toLowerCase();
-          if (imageTypes.contains(ext)){
-            Navigator.push(
-                context,
-                MaterialPageRoute( builder: (context) => FullImageView(message: null, url: url,)));
-          }else if(videoTypes.contains(ext)){
-            Navigator.push(
-                context,
-                MaterialPageRoute( builder: (context) => Fullvideoplayer(videoUrl: url)));
-          }else if(fileTypes.contains(ext)){
-            var googleDocsUrl =
-                "https://docs.google.com/gview?embedded=true&url=${url}";
-            //_launchInWebView(Uri.parse(googleDocsUrl));
-            Navigator.push(
+    final hasFile = ext.isNotEmpty &&
+        (fileTypes.contains(ext) ||
+            imageTypes.contains(ext) ||
+            videoTypes.contains(ext));
+    return GestureDetector(
+      onTap: () async {
+        var ext = fileName.split(".").last.toLowerCase();
+        if (imageTypes.contains(ext)) {
+          Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => CommonWebView(
-                  url: googleDocsUrl,
-                  title: "文件",
-                ),
+                  builder: (context) =>
+                      FullImageView(message: null, url: url)));
+        } else if (videoTypes.contains(ext)) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Fullvideoplayer(videoUrl: url)));
+        } else if (fileTypes.contains(ext)) {
+          var googleDocsUrl =
+              "https://docs.google.com/gview?embedded=true&url=${url}";
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CommonWebView(
+                url: googleDocsUrl,
+                title: "文件",
               ),
-            );
-          }
-        },
-        child: Row(
-          children: [
-            Text("回复："),
-           if (ext.isNotEmpty) Image.asset(
-              Util().displayFileThumbnail(fileName),
-              package: 'qichat_ui_sdk',
-              width: 40,
-              height: 40,
             ),
-            Expanded(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(fileName),
-                // 转kb或者M
-                if (fileSize != null) Text(Util().formatFileSize(fileSize)),
-              ],
-            )
-            )
-          ],
+          );
+        }
+      },
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: widget.messageWidth.toDouble()),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5E5E5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: hasFile
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "回复：",
+                      style: TextStyle(fontSize: 13, color: Colors.black54),
+                    ),
+                    Image.asset(
+                      Util().displayFileThumbnail(fileName),
+                      package: 'qichat_ui_sdk',
+                      width: 32,
+                      height: 32,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fileName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54),
+                          ),
+                          if (fileSize != null)
+                            Text(
+                              Util().formatFileSize(fileSize),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black38),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  "回复：$fileName",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                ),
         ),
       ),
     );
