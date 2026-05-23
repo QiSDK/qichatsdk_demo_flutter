@@ -703,12 +703,12 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;');
 
-    /*const tlds = 'com|cn|net|org|io|co|me|app|ai|dev|info|biz|top|xyz|vip|'
+    const tlds = 'com|cn|net|org|io|co|me|app|ai|dev|info|biz|top|xyz|vip|'
         'club|site|online|store|tech|work|ltd|group|live|tv|cc|gov|edu|'
         'hk|tw|jp|kr|sg|us|uk|de|fr|ru|in|br|au|ca|mx|es|it|nl|se|no|fi|'
         'dk|pl|cz|tr|pt|be|ch|at|ie|nz|za|ae|sa|il|th|vn|my|id|ph|'
-        'name|pro|mobi|asia|shop|fun|space|world|life|news|today|cloud';*/
-    const tlds = 'com|cn|net|org';
+        'name|pro|mobi|asia|shop|fun|space|world|life|news|today|cloud';
+    //const tlds = 'com|cn|net|org';
 
     final emailRegex =
         RegExp(r'[\w.+-]+@[\w-]+(\.[\w-]+)+', caseSensitive: false);
