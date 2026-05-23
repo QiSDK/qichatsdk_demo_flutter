@@ -526,6 +526,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               ),
             ),
           );
+        } else {
+          _showReplyContentDialog(replyItem?.content ?? "");
         }
       },
       child: ConstrainedBox(
@@ -634,6 +636,58 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         widget.listener.onSendLocalMsg(a?.content?.data ?? "", false);
       }
     }
+  }
+
+  void _showReplyContentDialog(String text) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (ctx) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Center(
+                    child: Text(
+                      "回复内容",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _launchInWebView(Uri url) async {
