@@ -16,6 +16,20 @@ allprojects {
     }
 }
 
+// Shim: Flutter 3.24.5 doesn't inject the `flutter` extension into plugin/library
+// subprojects, but some plugins (e.g. gal 2.3.x) reference `flutter.compileSdkVersion`
+// in their android block. Expose a project-level `flutter` map for those subprojects.
+subprojects {
+    if (project.name != 'app') {
+        project.ext.flutter = [
+            compileSdkVersion: 35,
+            targetSdkVersion : 35,
+            minSdkVersion    : 24,
+            ndkVersion       : "27.0.12077973"
+        ]
+    }
+}
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

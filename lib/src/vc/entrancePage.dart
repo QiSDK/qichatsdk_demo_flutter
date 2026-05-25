@@ -69,7 +69,20 @@ class _EntrancePageState extends State<EntrancePage> {
     return entrance?.consults == null
         ? Container()
         : Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (tenantName.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 16, 4),
+            child: Text(
+              tenantName,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF4A90E2),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         Expanded(
             child: ListView.builder(
                 itemCount: entrance!.consults!.length,
