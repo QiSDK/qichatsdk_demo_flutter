@@ -22,7 +22,8 @@ class DemoConfig {
   static const String defaultBaseUrlImage = 'https://imagesacc.hfxg.xyz';
   static const int defaultMaxSessionMinutes = 300;
   static const int defaultUserType = 2;
-  static const String defaultBackupWebUrl = '';
+  static const String defaultBackupWebUrl = 'https://www.baidu.com';
+  static const String defaultPlatformName = '测试平台';
 
   final String cert;
   final int userId;
@@ -33,6 +34,7 @@ class DemoConfig {
   final int maxSessionMinutes;
   final int userType;
   final String backupWebUrl;
+  final String platformName;
 
   DemoConfig({
     required this.cert,
@@ -44,6 +46,7 @@ class DemoConfig {
     required this.maxSessionMinutes,
     required this.userType,
     required this.backupWebUrl,
+    required this.platformName,
   });
 
   static Future<DemoConfig> load() async {
@@ -61,6 +64,8 @@ class DemoConfig {
       userType: (prefs.getInt(PARAM_USERTYPE) ?? defaultUserType - 1) + 1,
       backupWebUrl:
           prefs.getString('PARAM_BACKUP_WEB_URL') ?? defaultBackupWebUrl,
+      platformName:
+          prefs.getString('PARAM_PLATFORM_NAME') ?? defaultPlatformName,
     );
   }
 

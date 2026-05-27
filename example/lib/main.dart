@@ -251,6 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'merchantId': '${cfg.merchantId}',
       'userName': cfg.userName,
       'userType': '${cfg.userType}',
+      'platformName': cfg.platformName,
       'themeIndex': '$_themeIndex',
       if (xToken.isNotEmpty) 'xToken': xToken,
     };

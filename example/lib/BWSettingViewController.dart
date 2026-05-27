@@ -26,9 +26,10 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     'Image Base URL',
     'Max Session Mins',
     'Backup Web URL',
+    'Platform Name',
     'User Type'
   ];
-  final List<TextEditingController> controllers = List.generate(8, (index) => TextEditingController());
+  final List<TextEditingController> controllers = List.generate(9, (index) => TextEditingController());
   
   int selectedUserType = 0;
   final Map<int, String> userTypeMap = {
@@ -62,6 +63,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     controllers[5].text = prefs.getString('PARAM_ImageBaseURL') ?? baseUrlImage;
     controllers[6].text = (prefs.getInt('PARAM_MAXSESSIONMINS') ?? maxSessionMins).toString();
     controllers[7].text = prefs.getString('PARAM_BACKUP_WEB_URL') ?? '';
+    controllers[8].text = prefs.getString('PARAM_PLATFORM_NAME') ?? '';
 
     setState(() {
       int savedUserType = prefs.getInt(PARAM_USERTYPE) ?? usertype - 1;
@@ -95,6 +97,7 @@ class _BWSettingViewControllerState extends State<BWSettingViewController> {
     await prefs.setString('PARAM_USERNAME', userName);
     await prefs.setInt('PARAM_MAXSESSIONMINS', maxSessionMins);
     await prefs.setString('PARAM_BACKUP_WEB_URL', controllers[7].text.trim());
+    await prefs.setString('PARAM_PLATFORM_NAME', controllers[8].text.trim());
     await prefs.setInt(PARAM_USERTYPE, selectedUserType);
     usertype = selectedUserType + 1;
 

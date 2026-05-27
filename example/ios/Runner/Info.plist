@@ -36,6 +36,8 @@
 	<string>录视频的时候需要使用到您的麦克风</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>能访问图片库，上传图片或视频</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>保存图片或视频到相册</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

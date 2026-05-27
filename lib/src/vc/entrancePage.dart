@@ -71,15 +71,15 @@ class _EntrancePageState extends State<EntrancePage> {
         : Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (tenantName.isNotEmpty)
+        if (platformName.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 16, 4),
             child: Text(
-              tenantName,
+              platformName,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 color: Color(0xFF4A90E2),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -137,9 +137,10 @@ class _EntrancePageState extends State<EntrancePage> {
                       child: SizedBox(
                         width: 30,
                         height: 30,
+                        //006DD40, 110, 212
                         child: CircularProgressIndicator(
                           value: downloadProgress.progress,
-                          color: Colors.blue,
+                          color: Color.fromARGB(1, 40, 110, 212),
                         ),
                       ),
                     ),
@@ -153,7 +154,7 @@ class _EntrancePageState extends State<EntrancePage> {
                   ),
                   Text('${model.name}',
                       style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: _theme.leftBubbleTextColor)),
                   const Spacer(),
@@ -201,7 +202,7 @@ class _EntrancePageState extends State<EntrancePage> {
   loadData() async {
     print("调用queryEntrance ${DateTime.now()}");
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    xToken = await prefs.getString(PARAM_XTOKEN) ?? cert;
+    xToken = await prefs.getString(tokenStorageKey()) ?? cert;
     // 获取线路之后，获取咨询类型列表
     /* 获取咨询列表有3个接口：
                     1. 普通咨询列表 + 隐藏咨询列表, 使用接口：v1/api/query-entrance-hidden

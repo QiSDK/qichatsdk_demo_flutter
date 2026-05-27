@@ -170,12 +170,12 @@ class _ChatPageState extends State<ChatPage>
         foregroundColor: _theme.tintColor,
         elevation: 0,
         actions: [
-          if (tenantName.isNotEmpty)
+          if (platformName.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Center(
                 child: Text(
-                  tenantName,
+                  platformName,
                   style: TextStyle(
                     color: _theme.tintColor,
                     fontSize: 14,
@@ -726,7 +726,7 @@ class _ChatPageState extends State<ChatPage>
 
   Future<void> getChatData(Worker myWorker, bool workerChanged) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(PARAM_XTOKEN, xToken);
+    await prefs.setString(tokenStorageKey(), xToken);
     _messages.clear();
     //SmartDialog.showLoading();
     //聊天记录

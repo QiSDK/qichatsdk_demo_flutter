@@ -34,7 +34,7 @@ class QiChatUISDK {
   /// - [userId]：用户 ID；
   /// - [userName]：用户名（用于客服端显示）；
   /// - [merchantId]：商户 ID；
-  /// - [tenantName]：商户名（用于聊天页 AppBar 右侧展示）；
+  /// - [platformName]：商户名（用于聊天页 AppBar 右侧展示）；
   /// - [detectUrls]：逗号分隔的线路检测 URL（如 'https://csapi.hfxg.xyz,https://backup'）；
   /// - [baseUrlImage]：图片资源 CDN 域名；
   /// - [maxSessionMinutes]：会话最大分钟数（默认 300）；
@@ -47,7 +47,7 @@ class QiChatUISDK {
     required int merchantId,
     required String detectUrls,
     required String baseUrlImage,
-    String tenantName = '',
+    String platformName = '',
     int maxSessionMinutes = 300,
     int userType = 2,
     Duration lineDetectTimeout = const Duration(seconds: 10),
@@ -62,7 +62,7 @@ class QiChatUISDK {
       userId: userId,
       userName: userName,
       merchantId: merchantId,
-      tenantName: tenantName,
+      platformName: platformName,
       detectUrls: detectUrls,
       baseUrlImage: baseUrlImage,
       maxSessionMinutes: maxSessionMinutes,

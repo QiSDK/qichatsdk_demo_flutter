@@ -18,6 +18,7 @@ import 'model/Result.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:fixnum/src/int64.dart' as fixNum;
 import 'package:file_picker/file_picker.dart';
+import 'package:gal/gal.dart';
 
 class ArticleRepository {
   static const String publishPath = '/api/PublishWork';
@@ -305,43 +306,80 @@ class ArticleRepository {
     SmartDialog.showToast(text);
   }
 
+  static const _galleryImageExts = [
+    'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'jfif', 'heic'
+  ];
+  static const _galleryVideoExts = [
+    'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm3u8'
+  ];
+
   Future<bool> downloadVideo(String url) async {
     try {
-      // Initialize Dio
       Dio dio = Dio();
-      var fileName = url.split("/").last;
-      // Get the app's document directory to save the file
+      var fileName = url.split('?').first.split('/').last;
+      var ext = fileName.split('.').last.toLowerCase();
+      final isImage = _galleryImageExts.contains(ext);
+      final isVideo = _galleryVideoExts.contains(ext);
+
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS) && (isImage || isVideo)) {
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = '${tempDir.path}/$fileName';
+
+        await dio.download(
+          url,
+          tempPath,
+          onReceiveProgress: (received, total) {
+            if (total != -1) {
+              print('Download Progress: ${(received / total * 100).toStringAsFixed(0)}%');
+            }
+          },
+        );
+
+        Future<void> saveToGallery() =>
+            isVideo ? Gal.putVideo(tempPath) : Gal.putImage(tempPath);
+
+        try {
+          await saveToGallery();
+        } on GalException catch (_) {
+          final granted = await Gal.requestAccess();
+          if (!granted) {
+            try { await File(tempPath).delete(); } catch (_) {}
+            return false;
+          }
+          await saveToGallery();
+        }
+
+        try { await File(tempPath).delete(); } catch (_) {}
+        return true;
+      }
+
+      // 非图片/视频或桌面端：保留原逻辑（桌面让用户选位置，其它先落到临时目录）
       Directory downloadDirectory = await getTemporaryDirectory();
       String? savePath = '${downloadDirectory.path}/$fileName';
-      //String savePath = '/Users/xuefeng/Downloads/$fileName';
 
-      if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS)
-      // Let the user choose the save location
-       savePath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save your file',
-        fileName: fileName,
-      );
+      if (!kIsWeb && !Platform.isAndroid && !Platform.isIOS) {
+        savePath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save your file',
+          fileName: fileName,
+        );
+      }
       if (savePath == null) {
         print('Download cancelled by user');
         return false;
       }
-      SmartDialog.showLoading();
-      // Start downloading
       await dio.download(
         url,
         savePath,
         onReceiveProgress: (received, total) {
           if (total != -1) {
-            // Print download progress
             print('Download Progress: ${(received / total * 100).toStringAsFixed(0)}%');
           }
         },
       );
       return true;
-      print('File saved to $savePath');
     } catch (e) {
-      return false;
       print('Error downloading file: $e');
+      return false;
     }
   }
 

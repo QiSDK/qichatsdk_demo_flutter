@@ -20,6 +20,10 @@ const String PARAM_ImageBaseURL = "IMAGEURL";
 const String PARAM_USERTYPE = "USERTYPE";
 const String PARAM_XTOKEN = "HTTPTOKEN";
 
+// xToken 按 (merchantId, userId) 维度缓存：同 app 内多商户、单商户多账号都要独立 session，
+// 否则切换后会读到上一个身份的 token 调用接口。
+String tokenStorageKey() => '${PARAM_XTOKEN}_${merchantId}_$userId';
+
 // ===========================================================================
 // 顶层兼容访问器：转发到 QiChatConfig.current。
 //
@@ -40,8 +44,8 @@ set userName(String v) => QiChatConfig.current.userName = v;
 int get merchantId => QiChatConfig.current.merchantId;
 set merchantId(int v) => QiChatConfig.current.merchantId = v;
 
-String get tenantName => QiChatConfig.current.tenantName;
-set tenantName(String v) => QiChatConfig.current.tenantName = v;
+String get platformName => QiChatConfig.current.platformName;
+set platformName(String v) => QiChatConfig.current.platformName = v;
 
 String get lines => QiChatConfig.current.detectUrls;
 set lines(String v) => QiChatConfig.current.detectUrls = v;
