@@ -188,7 +188,8 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
           var downloaded = await ArticleRepository().downloadVideo(widget.message.uri.replaceFirst("master.m3u8", "index.mp4"));
           SmartDialog.dismiss();
           if (downloaded){
-            SmartDialog.showToast("下载成功");
+            final onMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+            SmartDialog.showToast(onMobile ? "已保存到相册" : "下载成功");
           }else{
             SmartDialog.showToast("下载失败");
           }

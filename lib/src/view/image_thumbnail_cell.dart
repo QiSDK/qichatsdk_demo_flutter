@@ -180,7 +180,8 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
               var downloaded = await ArticleRepository().downloadVideo(widget.message.uri);
               SmartDialog.dismiss();
               if (downloaded){
-                SmartDialog.showToast("下载成功");
+                final onMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+                SmartDialog.showToast(onMobile ? "已保存到相册" : "下载成功");
               }else{
                 SmartDialog.showToast("下载失败");
               }

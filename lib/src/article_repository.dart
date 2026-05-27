@@ -72,6 +72,7 @@ class ArticleRepository {
       if ((result.code ?? -1) == 0) {
         return result.data;
       } else {
+        _toastEvaluationError(result.msg);
         return null;
       }
     } catch (e) {
