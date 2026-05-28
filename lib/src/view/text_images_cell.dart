@@ -220,7 +220,7 @@ class _text_images_cell extends State<TextImagesCell> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: mediaUrls.length > 6 ? 3 : 2,
+                              crossAxisCount: mediaUrls.length == 1 ? 1 : (mediaUrls.length <= 4 ? 2 : 3),
                           crossAxisSpacing: 4,
                           mainAxisSpacing: 4,
                           childAspectRatio: 1.0,
