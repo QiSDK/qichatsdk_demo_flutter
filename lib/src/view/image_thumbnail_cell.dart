@@ -12,7 +12,7 @@ import 'package:super_tooltip/super_tooltip.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'dart:typed_data';
 import '../util/util.dart';
-import '../vc/FullImageView.dart';
+import '../vc/MediaPagerView.dart';
 
 class ImageThumbnailCellWidget extends StatefulWidget {
   types.ImageMessage message;
@@ -151,8 +151,9 @@ class _ImageThumbnailCellWidget extends State<ImageThumbnailCellWidget> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          FullImageView(message: widget.message)));
+                      builder: (context) => MediaPagerView(
+                            startUrl: widget.message.uri,
+                          )));
             },
             child: _remoteImag(),
           ),

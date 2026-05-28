@@ -11,8 +11,7 @@ import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichat_ui_sdk/src/model/TextBody.dart';
 import 'package:qichat_ui_sdk/src/util/util.dart';
-import 'package:qichat_ui_sdk/src/vc/FullImageView.dart';
-import 'package:qichat_ui_sdk/src/vc/FullVideoPlayer.dart';
+import 'package:qichat_ui_sdk/src/vc/MediaPagerView.dart';
 import 'package:fixnum/src/int64.dart';
 import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
@@ -108,24 +107,12 @@ class _text_media_cell extends State<TextMediaCell> {
               }
             },
             onTap: () {
-              if (isVideo)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Fullvideoplayer(
-                      videoUrl: mediaUrl,
-                    ),
-                  ),
-                );
-              else {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullImageView(
-                        url: mediaUrl,
-                      ),
-                    ));
-              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MediaPagerView(startUrl: mediaUrl),
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),

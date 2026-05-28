@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichat_ui_sdk/src/util/util.dart';
-import 'package:qichat_ui_sdk/src/vc/FullVideoPlayer.dart';
+import 'package:qichat_ui_sdk/src/vc/MediaPagerView.dart';
 import 'package:fixnum/src/int64.dart';
 import '../article_repository.dart';
 import '../model/MessageItemOperateListener.dart';
@@ -147,9 +147,9 @@ class _VideoThumbnailCellWidget extends State<VideoThumbnailCellWidget> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => Fullvideoplayer(
-                            message:
-                                widget.message as types.VideoMessage)));
+                        builder: (context) => MediaPagerView(
+                              startUrl: widget.message.uri,
+                            )));
               },
               child: Stack(
                   alignment: Alignment.center,

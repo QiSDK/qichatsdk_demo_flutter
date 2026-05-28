@@ -22,8 +22,7 @@ import 'package:flutter_html/flutter_html.dart';
 import '../util/util.dart';
 import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'package:flutter/foundation.dart';
-import '../vc/FullImageView.dart';
-import '../vc/FullVideoPlayer.dart';
+import '../vc/MediaPagerView.dart';
 import 'common_webview.dart';
 import 'enhance_expansion_panel/enhance_expansion_panel.dart';
 
@@ -507,13 +506,12 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      FullImageView(message: null, url: url)));
+                  builder: (context) => MediaPagerView(startUrl: url)));
         } else if (videoTypes.contains(ext)) {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => Fullvideoplayer(videoUrl: url)));
+                  builder: (context) => MediaPagerView(startUrl: url)));
         } else if (fileTypes.contains(ext)) {
           var googleDocsUrl =
               "https://docs.google.com/gview?embedded=true&url=${url}";

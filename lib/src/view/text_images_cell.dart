@@ -14,8 +14,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:qichat_ui_sdk/src/model/TextBody.dart';
 import 'package:qichat_ui_sdk/src/util/util.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:qichat_ui_sdk/src/vc/FullImageView.dart';
-import 'package:qichat_ui_sdk/src/vc/FullVideoPlayer.dart';
+import 'package:qichat_ui_sdk/src/vc/MediaPagerView.dart';
 import 'package:fixnum/src/int64.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import '../article_repository.dart';
@@ -235,21 +234,12 @@ class _text_images_cell extends State<TextImagesCell> {
                           }
                           return GestureDetector(
                             onTap: () {
-                              if (videoTypes.contains(ext)) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Fullvideoplayer(
-                                            videoUrl: mediaUrl)));
-                              } else {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => FullImageView(
-                                        url: mediaUrl,
-                                      ),
-                                    ));
-                              }
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MediaPagerView(
+                                            startUrl: mediaUrl,
+                                          )));
                             },
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),

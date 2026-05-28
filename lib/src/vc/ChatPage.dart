@@ -41,6 +41,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import '../view/video_thumbnail_cell.dart';
 import '../manager/global_chat_manager.dart';
 import '../manager/unread_manager.dart';
+import '../model/MediaItem.dart';
 
 class ChatPage extends StatefulWidget {
   Int64 consultId = Int64.ZERO;
@@ -51,10 +52,82 @@ class ChatPage extends StatefulWidget {
   ChatPage({super.key, required this.consultId, this.theme});
   @override
   _ChatPageState createState() => _ChatPageState();
+
+  /// 当前会话内所有图片/视频的有序列表（按时间正序）。
+  /// 供 [MediaPagerView] 在打开时收集兄弟媒体，实现左右滑动浏览。
+  static List<MediaItem> currentMediaItems() =>
+      _ChatPageState.currentMediaItems();
 }
 
 class _ChatPageState extends State<ChatPage>
     implements TeneasySDKDelegate, MessageItemOperateListener {
+  static _ChatPageState? _current;
+
+  static const List<String> _imageExts = [
+    "jpg", "jpeg", "png", "webp", "gif", "bmp", "jfif", "heic"
+  ];
+  static const List<String> _videoExts = [
+    "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm"
+  ];
+
+  static String _absUrl(String url) {
+    if (url.isEmpty) return url;
+    if (url.contains("http")) return url;
+    return baseUrlImage + url;
+  }
+
+  static List<MediaItem> currentMediaItems() {
+    final state = _current;
+    if (state == null) return const [];
+    final result = <MediaItem>[];
+    // _messages 是按倒序插入（新消息在 index 0），翻转后得到时间正序。
+    for (final msg in state._messages.reversed) {
+      if (msg is types.ImageMessage) {
+        result.add(MediaItem(url: _absUrl(msg.uri), isVideo: false));
+      } else if (msg is types.VideoMessage) {
+        result.add(MediaItem(url: _absUrl(msg.uri), isVideo: true));
+      } else if (msg is types.FileMessage) {
+        final ext = msg.name.split('.').last.toLowerCase();
+        if (_imageExts.contains(ext)) {
+          result.add(MediaItem(url: _absUrl(msg.uri), isVideo: false));
+        } else if (_videoExts.contains(ext)) {
+          result.add(MediaItem(url: _absUrl(msg.uri), isVideo: true));
+        }
+      } else if (msg is types.TextMessage) {
+        final text = msg.text;
+        if (text.isEmpty) continue;
+        // 多图消息: TextMessage 内容 JSON 含 "imgs" 数组。
+        if (text.contains('"imgs"')) {
+          try {
+            final ti = TextImages.fromJson(jsonDecode(text));
+            for (final u in ti.imgs) {
+              final ext = u.split('.').last.toLowerCase();
+              result.add(MediaItem(
+                  url: _absUrl(u), isVideo: _videoExts.contains(ext)));
+            }
+          } catch (_) {}
+          continue;
+        }
+        // 系统下发的图文/视频消息: TextBody 带 image 或 video 字段。
+        final src = msg.metadata?['msgSourceType'];
+        if (src == 'MST_SYSTEM_CUSTOMER' || src == 'MST_SYSTEM_WORKER') {
+          try {
+            final tb = TextBody.fromJson(jsonDecode(text));
+            final img = (tb.image ?? '').trim();
+            final vid = (tb.video ?? '').trim();
+            if (img.isNotEmpty) {
+              result.add(MediaItem(url: _absUrl(img), isVideo: false));
+            }
+            if (vid.isNotEmpty) {
+              result.add(MediaItem(url: _absUrl(vid), isVideo: true));
+            }
+          } catch (_) {}
+        }
+      }
+    }
+    return result;
+  }
+
   final List<types.Message> _messages = [];
   var _me = const types.User(
     id: 'user',
@@ -97,6 +170,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void initState() {
     super.initState();
+    _current = this;
     consultId = widget.consultId;
 
     // 清零当前会话的未读数
@@ -826,6 +900,7 @@ class _ChatPageState extends State<ChatPage>
   @override
   void dispose() {
     print("chat page disposed");
+    if (_current == this) _current = null;
     // 清空当前打开的聊天页面ID
     GlobalChatManager.instance.setCurrentChatConsultId(null);
 

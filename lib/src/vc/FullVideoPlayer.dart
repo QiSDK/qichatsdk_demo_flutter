@@ -11,21 +11,38 @@ import 'package:video_player/video_player.dart';
 class Fullvideoplayer extends StatefulWidget {
   final types.VideoMessage? message;
   final String? videoUrl;
-  const Fullvideoplayer({super.key,  this.message, this.videoUrl});
+  const Fullvideoplayer({super.key, this.message, this.videoUrl});
 
   @override
   State<Fullvideoplayer> createState() => _FullvideoplayerState();
 }
 
-class _FullvideoplayerState extends State<Fullvideoplayer> {
-
+class _FullvideoplayerState extends State<Fullvideoplayer>
+    with SingleTickerProviderStateMixin {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
   bool urlError = false;
 
+  double _dragOffset = 0;
+  late AnimationController _resetController;
+  Animation<double>? _resetAnimation;
+
+  static const double _dismissThreshold = 120;
+  static const double _fadeDistance = 400;
+
   @override
   void initState() {
     super.initState();
+
+    _resetController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..addListener(() {
+        setState(() {
+          _dragOffset = _resetAnimation?.value ?? 0;
+        });
+      });
+
     init();
   }
 
@@ -59,23 +76,56 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
     }
   }
 
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _dragOffset =
+          (_dragOffset + details.delta.dy).clamp(0.0, double.infinity);
+    });
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    if (_dragOffset > _dismissThreshold) {
+      Navigator.of(context).pop();
+    } else {
+      _resetAnimation = Tween<double>(begin: _dragOffset, end: 0).animate(
+          CurvedAnimation(parent: _resetController, curve: Curves.easeOut));
+      _resetController.forward(from: 0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bgOpacity = (1 - (_dragOffset / _fadeDistance)).clamp(0.0, 1.0);
     return Scaffold(
-        backgroundColor: const Color(0xFFf8f8f8),
+        backgroundColor: Colors.black.withOpacity(bgOpacity),
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
           title: const Text(
             '客服',
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(fontSize: 18, color: Colors.white),
           ),
         ),
-        body: _initBody());
+        body: GestureDetector(
+          onVerticalDragUpdate: _onVerticalDragUpdate,
+          onVerticalDragEnd: _onVerticalDragEnd,
+          behavior: HitTestBehavior.translucent,
+          child: Transform.translate(
+            offset: Offset(0, _dragOffset),
+            child: _initBody(),
+          ),
+        ));
   }
 
    _initBody(){
     return urlError
-        ? Container(
-      child: Text('视频加载失败~'),
+        ? Center(
+      child: Text(
+        '视频加载失败~',
+        style: TextStyle(color: Colors.white),
+      ),
     )
         : Container(
       padding: EdgeInsets.all(8.0),
@@ -95,6 +145,7 @@ class _FullvideoplayerState extends State<Fullvideoplayer> {
 
   @override
   void dispose() {
+    _resetController.dispose();
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
     super.dispose();
