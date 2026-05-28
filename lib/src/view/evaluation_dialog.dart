@@ -14,6 +14,8 @@ class EvaluationDialog extends StatefulWidget {
   final EvaluationConfig config;
   final fixnum.Int64 consultId;
   final Color tintColor;
+  /// 评价状态变化时回调（1=已评价, 2=已关闭）
+  final ValueChanged<int>? onStatusChanged;
 
   const EvaluationDialog({
     super.key,
@@ -21,6 +23,7 @@ class EvaluationDialog extends StatefulWidget {
     required this.config,
     required this.consultId,
     required this.tintColor,
+    this.onStatusChanged,
   });
 
   /// 静态入口：展示评价弹窗
@@ -29,6 +32,7 @@ class EvaluationDialog extends StatefulWidget {
     required EvaluationConfig config,
     required fixnum.Int64 consultId,
     required Color tintColor,
+    ValueChanged<int>? onStatusChanged,
   }) {
     SmartDialog.show(
       tag: 'evaluation_dialog',
@@ -39,6 +43,7 @@ class EvaluationDialog extends StatefulWidget {
         config: config,
         consultId: consultId,
         tintColor: tintColor,
+        onStatusChanged: onStatusChanged,
       ),
     );
   }
@@ -68,6 +73,7 @@ class _EvaluationDialogState extends State<EvaluationDialog> {
       // 触发场景下关闭 = 告诉后端不再弹出
       // 这是 fire-and-forget，不等待结果
       ArticleRepository.addEvaluation(widget.consultId, 0, '', 1);
+      widget.onStatusChanged?.call(2);
     }
     EvaluationDialog.dismiss();
   }
@@ -86,6 +92,7 @@ class _EvaluationDialogState extends State<EvaluationDialog> {
       final feedback = (cfg?.status == 1) ? (cfg?.feedback ?? '') : '';
       final toastText = feedback.isNotEmpty ? feedback : '评价成功';
       //final feedback = (cfg?.feedback ?? '').isEmpty ?  '评价成功' : cfg!.feedback!;
+      widget.onStatusChanged?.call(1);
       await EvaluationDialog.dismiss();
       SmartDialog.showToast(toastText);
     } else {

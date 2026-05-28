@@ -79,8 +79,11 @@ class _ChatPageState extends State<ChatPage>
   AutoReply? _autoReplyModel;
 
   EvaluationConfig? _evaluationConfig;
+  EvaluationStatus? _evaluationStatus;
   late final AppChatTheme _theme = widget.theme ?? AppChatTheme.random();
   Color get _evaluationTintColor => _theme.tintColor;
+  bool get _evaluationDone =>
+      _evaluationStatus?.status == 1 || _evaluationStatus?.status == 2;
 
   /// 底部任一面板（emoji / 功能 / 回复条）是否展开。由 ChatCustomBottom 通过
   /// onExpandedChanged 回调推上来，配合键盘弹起状态决定是否隐藏「客服评价」悬浮按钮，
@@ -197,7 +200,7 @@ class _ChatPageState extends State<ChatPage>
             left: 12,
             bottom: 56 + MediaQuery.of(context).padding.bottom + 8,
             child: GestureDetector(
-              onTap: _onEvaluationButtonTap,
+              onTap: _evaluationDone ? null : _onEvaluationButtonTap,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -209,12 +212,17 @@ class _ChatPageState extends State<ChatPage>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.star,
-                        size: 18, color: _evaluationTintColor),
+                        size: 18,
+                        color: _evaluationDone
+                            ? const Color(0xFFC7C7C7)
+                            : _evaluationTintColor),
                     const SizedBox(width: 4),
-                    const Text('客服评价',
+                    Text('客服评价',
                         style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF333333),
+                            color: _evaluationDone
+                                ? const Color(0xFF999999)
+                                : const Color(0xFF333333),
                             fontWeight: FontWeight.w500)),
                   ],
                 ),
@@ -551,21 +559,41 @@ class _ChatPageState extends State<ChatPage>
       setState(() {
         _evaluationConfig = cfg;
       });
+      if (cfg.evaluationEnabled == true) {
+        _fetchEvaluationStatus();
+      }
+    });
+  }
+
+  void _fetchEvaluationStatus() {
+    ArticleRepository.evaluationStatus(consultId).then((status) {
+      if (!mounted || status == null) return;
+      setState(() {
+        _evaluationStatus = status;
+      });
     });
   }
 
   void _onEvaluationButtonTap() {
+    if (_evaluationDone) return;
     _showEvaluationDialog(scene: EvaluationScene.manual);
   }
 
   void _showEvaluationDialog({required EvaluationScene scene}) {
     final cfg = _evaluationConfig;
     if (cfg == null || cfg.evaluationEnabled != true) return;
+    if (_evaluationDone) return;
     EvaluationDialog.show(
       scene: scene,
       config: cfg,
       consultId: consultId,
       tintColor: _evaluationTintColor,
+      onStatusChanged: (newStatus) {
+        if (!mounted) return;
+        setState(() {
+          _evaluationStatus = EvaluationStatus(status: newStatus);
+        });
+      },
     );
   }
 
@@ -675,6 +703,7 @@ class _ChatPageState extends State<ChatPage>
       // model.msgTime = msg.msgTime.toDateTime();
 
       MsgItem item = MsgItem();
+      item.content = sy.Content();
       item.content?.data = '对方撤回了1条消息';
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
