@@ -70,6 +70,8 @@ class QiChatUISDK {
     );
 
     _initWebViewPlatform();
+    // 首次使用时把历史未读从本地读回内存（已加载会跳过）
+    await UnreadManager.instance.init();
     GlobalChatManager.instance.initialize();
     GlobalChatManager.instance.startLineDetect();
 
@@ -157,6 +159,24 @@ class QiChatUISDK {
 
   /// 当前未读总数（同步读取）。
   static int get totalUnread => UnreadManager.instance.getTotalUnread();
+
+  /// 冷启动后、未调用 [init] 之前，把上次落盘的未读读回内存。
+  /// 宿主在"商户列表"这类不依赖具体商户身份的页面，可以提前调用让红点立刻可见。
+  /// 重复调用会跳过。
+  static Future<void> preloadUnread() => UnreadManager.instance.init();
+
+  /// 按 consultId 维度的未读流。宿主在"商户列表"等聚合页可基于自己的 consultIds
+  /// 求交集得到每个商户的未读数。
+  static Stream<Map<int, int>> get unreadMapStream =>
+      UnreadManager.instance.unreadStream;
+
+  /// 按 consultId 维度的未读快照（同步读取）。
+  static Map<int, int> get unreadMap => UnreadManager.instance.getAllUnread();
+
+  /// 用户进入某个 consult 的 ChatPage 时触发，emit 该 consultId。
+  /// 宿主可借此把"用户实际用过的 consultId"持久化到自己的商户记录里。
+  static Stream<int> get consultEnteredStream =>
+      GlobalChatManager.instance.consultEnteredStream;
 
   /// 宿主登出时调用，断开连接、清理监听。
   static Future<void> dispose() async {

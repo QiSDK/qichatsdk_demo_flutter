@@ -43,8 +43,16 @@ class GlobalChatManager
       StreamController<String>.broadcast();
   Completer<bool>? _lineReadyCompleter;
 
+  /// 用户进入某个 consult 的 ChatPage 时 emit consultId
+  /// 宿主可借此把"用户用过的 consult"持久化到自己的商户表里
+  final StreamController<int> _consultEnteredController =
+      StreamController<int>.broadcast();
+
   /// 线路检测状态文本流（'正在检测...' / '当前线路：xxx' / '无可用线路'）。
   Stream<String> get lineStatusStream => _lineStatusController.stream;
+
+  /// 用户进入聊天页（非空 consultId）时触发的事件流
+  Stream<int> get consultEnteredStream => _consultEnteredController.stream;
 
   /// 线路是否已就绪（domain 非空）。
   bool get isLineReady => QiChatConfig.current.domain.isNotEmpty;
@@ -155,10 +163,11 @@ class GlobalChatManager
   }
 
   /// 停止全局聊天管理器
+  /// 注意：故意不清空 UnreadManager，让多商户切换时其它商户的未读保留下来；
+  /// 真正的"已读"清零由 ChatPage 进入时 [UnreadManager.clearUnread] 触发。
   void stop() {
     stopConnectionMonitoring();
     Constant.instance.chatLib.disconnect();
-    _unreadManager.clearAll();
     if (_isInitialized) {
       WidgetsBinding.instance.removeObserver(this);
     }
@@ -209,6 +218,9 @@ class GlobalChatManager
   void setCurrentChatConsultId(int? consultId) {
     _currentChatConsultId = consultId;
     print('GlobalChatManager: 当前聊天consultId=$consultId');
+    if (consultId != null && !_consultEnteredController.isClosed) {
+      _consultEnteredController.add(consultId);
+    }
   }
 
   /// 获取当前打开的聊天页面的consultId
