@@ -10,8 +10,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:qichat_ui_sdk/src/model/TextBody.dart';
 import 'package:qichat_ui_sdk/src/util/util.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:qichat_ui_sdk/src/vc/FullImageView.dart';
 import 'package:qichat_ui_sdk/src/vc/FullVideoPlayer.dart';
 import 'package:fixnum/src/int64.dart';
@@ -50,6 +52,21 @@ class _text_images_cell extends State<TextImagesCell> {
   final _toolTipController = SuperTooltipController();
   bool isVideo = false;
   String msgTxt = '';
+  Color? textColor;
+
+  Color? _parseHexColor(String? hex) {
+    if (hex == null || hex.isEmpty) return null;
+    if (hex == "red") return Colors.red;
+    if (hex == "blue") return Colors.blue;
+    if (hex == "yellow") return Colors.yellow;
+    if (hex == "green") return Colors.green;
+    if (hex == "purple") return Colors.purple;
+    var h = hex.trim().replaceFirst('#', '').replaceFirst('0x', '');
+    if (h.length == 6) h = 'FF$h';
+    if (h.length != 8) return null;
+    final v = int.tryParse(h, radix: 16);
+    return v == null ? null : Color(v);
+  }
 
   @override
   void initState() {
@@ -65,6 +82,7 @@ class _text_images_cell extends State<TextImagesCell> {
     final isCurrentUser = widget.message.author.id == widget.chatId;
     final hasValidRemoteId = (widget.message.remoteId ?? "").length > 8;
     msgTxt = content;
+    textColor = null;
     var msgSourceType = widget.message.metadata?["msgSourceType"] ?? "";
     if (content.contains("\"imgs\"")) {
       final jsonData = jsonDecode(content);
@@ -76,17 +94,24 @@ class _text_images_cell extends State<TextImagesCell> {
       }
         mediaUrls = result.imgs;
     } else if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER") {
-      final jsonData = jsonDecode(content);
-      var result = TextBody.fromJson(
-        jsonData,
-      );
-      if ((result.content ?? "").isNotEmpty) {
-        msgTxt = result.content ?? "";
-      }
-      if ((result.image ?? "").isNotEmpty) {
-        mediaUrls = (result.image ?? "").split(";");
-      }else if ((result.video ?? "").isNotEmpty) {
-        mediaUrls = (result.video ?? "").split(";");
+      try {
+        final jsonData = jsonDecode(content);
+        if (jsonData is Map<String, dynamic>) {
+          var result = TextBody.fromJson(jsonData);
+          if ((result.content ?? "").isNotEmpty) {
+            msgTxt = result.content ?? "";
+          }
+          if ((result.image ?? "").isNotEmpty) {
+            mediaUrls = (result.image ?? "").split(";");
+          } else if ((result.video ?? "").isNotEmpty) {
+            mediaUrls = (result.video ?? "").split(";");
+          }
+          textColor = _parseHexColor(result.color);
+        } else {
+          msgTxt = content;
+        }
+      } catch (_) {
+        msgTxt = content;
       }
     }
 
@@ -106,6 +131,9 @@ class _text_images_cell extends State<TextImagesCell> {
           ),
         ),
         Container(
+          constraints: BoxConstraints(
+            maxWidth: widget.messageWidth.toDouble() * 0.8,
+          ),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           decoration: BoxDecoration(
             color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
@@ -118,55 +146,75 @@ class _text_images_cell extends State<TextImagesCell> {
               bottomRight: const Radius.circular(16),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SuperTooltip(
-                content: buildToolAction(),
-                controller: _toolTipController,
-                popupDirection: TooltipDirection.up,
-                minimumOutsideMargin: 20.0,
-                arrowLength: 10.0,
-                arrowBaseWidth: 15.0,
-                borderRadius: 8.0,
-                constraints: const BoxConstraints(
-                  minHeight: 0.0,
-                  maxHeight: 50.0,
-                  minWidth: 0.0,
-                  maxWidth: 50.0,
+          child: IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SuperTooltip(
+                  content: buildToolAction(),
+                  controller: _toolTipController,
+                  popupDirection: TooltipDirection.up,
+                  minimumOutsideMargin: 20.0,
+                  arrowLength: 10.0,
+                  arrowBaseWidth: 15.0,
+                  borderRadius: 8.0,
+                  constraints: const BoxConstraints(
+                    minHeight: 0.0,
+                    maxHeight: 50.0,
+                    minWidth: 0.0,
+                    maxWidth: 50.0,
+                  ),
+                  child: GestureDetector(
+                      onLongPress:
+                          (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) &&
+                                  hasValidRemoteId
+                              ? () => _toolTipController.showTooltip()
+                              : null,
+                      onSecondaryTapDown: (details) {
+                        if (!kIsWeb &&
+                            !Platform.isAndroid &&
+                            !Platform.isIOS &&
+                            hasValidRemoteId) {
+                          _toolTipController.showTooltip();
+                        }
+                      },
+                      child: Html(
+                        data: msgTxt,
+                        shrinkWrap: true,
+                        onLinkTap: (url, attributes, element) async {
+                          if (url == null) return;
+                          final uri = Uri.parse(url);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        style: {
+                          "body": Style(
+                            fontSize: FontSize(14),
+                            color: textColor ??
+                                (isCurrentUser ? Colors.white : Colors.black),
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                          ),
+                          "a": Style(
+                            color: isCurrentUser
+                                ? Colors.white
+                                : Colors.blue.shade800,
+                            textDecoration: TextDecoration.underline,
+                          ),
+                        },
+                      )),
                 ),
-                child: GestureDetector(
-                    onLongPress:
-                        (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) &&
-                                hasValidRemoteId
-                            ? () => _toolTipController.showTooltip()
-                            : null,
-                    onSecondaryTapDown: (details) {
-                      if (!kIsWeb &&
-                          !Platform.isAndroid &&
-                          !Platform.isIOS &&
-                          hasValidRemoteId) {
-                        _toolTipController.showTooltip();
-                      }
-                    },
-                    child: Text(
-                      msgTxt,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: isCurrentUser ? Colors.white : Colors.black,
-                      ),
-                      maxLines: 10,
-                      overflow: TextOverflow.ellipsis,
-                    )),
-              ),
-              const SizedBox(height: 8),
-              // 图片网格显示
-              mediaUrls.isEmpty
-                  ? Container()
-                  : Container(
-                      constraints: BoxConstraints(
-                        maxWidth: widget.messageWidth.toDouble() * 0.8,
-                      ),
+                if (mediaUrls.isNotEmpty) const SizedBox(height: 8),
+                // 图片网格显示
+                mediaUrls.isEmpty
+                    ? Container()
+                    : Container(
+                        constraints: BoxConstraints(
+                          maxWidth: widget.messageWidth.toDouble() * 0.8,
+                        ),
                       child: GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -235,6 +283,7 @@ class _text_images_cell extends State<TextImagesCell> {
             ],
           ),
         ),
+      ),
       ],
     );
   }
