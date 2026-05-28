@@ -85,6 +85,10 @@ class _ChatPageState extends State<ChatPage>
   bool get _evaluationDone =>
       _evaluationStatus?.status == 1 || _evaluationStatus?.status == 2;
 
+  /// 仅统计本次会话内用户新发出的消息（不含历史记录），
+  /// 用于控制「客服评价」按钮的显示。
+  bool _hasSentInSession = false;
+
   /// 底部任一面板（emoji / 功能 / 回复条）是否展开。由 ChatCustomBottom 通过
   /// onExpandedChanged 回调推上来，配合键盘弹起状态决定是否隐藏「客服评价」悬浮按钮，
   /// 避免遮挡。
@@ -160,6 +164,7 @@ class _ChatPageState extends State<ChatPage>
         status: types.Status.sending);
     setState(() {
       _messages.insert(0, textMessage);
+      _hasSentInSession = true;
     });
   }
 
@@ -194,6 +199,7 @@ class _ChatPageState extends State<ChatPage>
         child: Stack(children: [
         _buildChat(),
         if (_evaluationConfig?.evaluationEnabled == true &&
+            _hasSentInSession &&
             !_bottomExpanded &&
             MediaQuery.of(context).viewInsets.bottom == 0)
           Positioned(
@@ -362,6 +368,7 @@ class _ChatPageState extends State<ChatPage>
                 SmartDialog.showToast("上传错误，返回路径为空！");
                 return;
               }
+              _hasSentInSession = true;
               var ext = (urls.uri ?? "").split(".").lastOrNull ?? "#";
 
               debugPrint('上传成功 URL:${baseUrlImage + (urls.uri ?? "")}');
