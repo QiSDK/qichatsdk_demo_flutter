@@ -271,47 +271,65 @@ class ChatCustomBottomState extends State<ChatCustomBottom>
   }
 
   Widget _buildEmojiPicker() {
-    return EmojiPicker(
-      onEmojiSelected: (category, Emoji emoji) {
-        setState(() {
-          inputController.text = inputController.text + emoji.emoji;
-        });
-      },
-      onBackspacePressed: () {
-        setState(() {
-          final text = inputController.text;
-          if (text.isEmpty) return;
-          if (text.length > 1 &&
-              text.codeUnitAt(text.length - 1) > 0xd7ff) {
-            inputController.text = text.substring(0, text.length - 2);
-          } else {
-            inputController.text = text.substring(0, text.length - 1);
-          }
-          inputController.selection = TextSelection.fromPosition(
-            TextPosition(offset: inputController.text.length),
-          );
-        });
-      },
-      textEditingController: _emojiEditingController,
-      config: Config(
-        height: 256,
-        checkPlatformCompatibility: true,
-        emojiViewConfig: EmojiViewConfig(
-          emojiSizeMax: 28 *
-              (foundation.defaultTargetPlatform == TargetPlatform.iOS
-                  ? 1.20
-                  : 1.0),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EmojiPicker(
+          onEmojiSelected: (category, Emoji emoji) {
+            setState(() {
+              inputController.text = inputController.text + emoji.emoji;
+            });
+          },
+          textEditingController: _emojiEditingController,
+          config: Config(
+            height: 210,
+            checkPlatformCompatibility: true,
+            emojiViewConfig: EmojiViewConfig(
+              emojiSizeMax: 28 *
+                  (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                      ? 1.20
+                      : 1.0),
+            ),
+            swapCategoryAndBottomBar: false,
+            skinToneConfig: const SkinToneConfig(),
+            categoryViewConfig: const CategoryViewConfig(),
+            bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+          ),
         ),
-        swapCategoryAndBottomBar: false,
-        skinToneConfig: const SkinToneConfig(),
-        categoryViewConfig: const CategoryViewConfig(),
-        bottomActionBarConfig: BottomActionBarConfig(
-          showSearchViewButton: false,
-          backgroundColor: Colors.grey.shade300,
-          buttonIconColor: Colors.black,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 4, 12, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _EmojiBackspaceButton(
+                controller: inputController,
+                onTap: _emojiBackspace,
+              ),
+              const SizedBox(width: 10),
+              _EmojiSendButton(
+                controller: inputController,
+                onTap: _submit,
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
+  }
+
+  void _emojiBackspace() {
+    setState(() {
+      final text = inputController.text;
+      if (text.isEmpty) return;
+      if (text.length > 1 && text.codeUnitAt(text.length - 1) > 0xd7ff) {
+        inputController.text = text.substring(0, text.length - 2);
+      } else {
+        inputController.text = text.substring(0, text.length - 1);
+      }
+      inputController.selection = TextSelection.fromPosition(
+        TextPosition(offset: inputController.text.length),
+      );
+    });
   }
 
   Future<void> _onPickImageTap() async {
@@ -450,6 +468,79 @@ class _IconBtn extends StatelessWidget {
           height: 26,
         ),
       ),
+    );
+  }
+}
+
+class _EmojiBackspaceButton extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onTap;
+
+  const _EmojiBackspaceButton({required this.controller, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (_, value, __) {
+        final enabled = value.text.isNotEmpty;
+        return Material(
+          color: const Color(0xFFE8E8E8),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: enabled ? onTap : null,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                Icons.backspace_outlined,
+                color: enabled
+                    ? const Color(0xFF333333)
+                    : const Color(0xFFBFBFBF),
+                size: 20,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _EmojiSendButton extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onTap;
+
+  const _EmojiSendButton({required this.controller, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (_, value, __) {
+        final enabled = value.text.trim().isNotEmpty;
+        const Color enabledColor = Color(0xFF3A8DFF);
+        const Color disabledColor = Color(0xFFBFBFBF);
+        return Material(
+          color: enabled ? enabledColor : disabledColor,
+          shape: const CircleBorder(),
+          elevation: enabled ? 2 : 0,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: enabled ? onTap : null,
+            child: const SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

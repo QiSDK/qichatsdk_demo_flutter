@@ -99,6 +99,17 @@ class UnreadManager {
     print('UnreadManager: consultId=$consultId 未读数+1, 当前未读数=${_unreadMap[consultId]}');
   }
 
+  /// 仅当本地没有该 consult 的非零未读时，用 [count] 兜底写入。
+  /// 用于宿主从服务端 entrance 接口拉到"快照未读"后回填：本地 WS 实时
+  /// 累加值优先，避免服务端慢一拍的快照覆盖刚到达的新消息。
+  void setUnreadIfAbsent(int consultId, int count) {
+    if (count <= 0) return;
+    if ((_unreadMap[consultId] ?? 0) > 0) return;
+    _unreadMap[consultId] = count;
+    _notifyListeners();
+    _schedulePersist();
+  }
+
   /// 清零指定会话的未读数
   void clearUnread(int consultId) {
     if (_unreadMap.containsKey(consultId)) {

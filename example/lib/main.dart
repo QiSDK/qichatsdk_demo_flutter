@@ -246,7 +246,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final params = <String, String>{
       'cert': cfg.cert,
-      //临时写死一个 cert，方便测试。实际使用时请从安全的地方获取 cert，切勿硬编码在 App 里。
       'userId': '${cfg.userId}',
       'merchantId': '${cfg.merchantId}',
       'userName': cfg.userName,

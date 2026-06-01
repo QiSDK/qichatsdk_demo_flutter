@@ -105,7 +105,10 @@ class _EvaluationDialogState extends State<EvaluationDialog> {
   Widget build(BuildContext context) {
     const disabledColor = Color(0xFFD2D2D2);
     const starUnselected = Color(0xFFC7C7C7);
-    return Material(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Material(
       color: Colors.black.withOpacity(0.5),
       child: Center(
         child: Container(
@@ -232,6 +235,7 @@ class _EvaluationDialogState extends State<EvaluationDialog> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

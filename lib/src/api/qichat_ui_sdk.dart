@@ -14,6 +14,7 @@ import '../model/AppChatTheme.dart';
 import '../vc/ChatPage.dart';
 import '../vc/device_info_page.dart';
 import '../vc/entrancePage.dart';
+import 'unread_query.dart';
 
 /// QiChat UISDK 公共 API。
 ///
@@ -164,6 +165,32 @@ class QiChatUISDK {
   /// 宿主在"商户列表"这类不依赖具体商户身份的页面，可以提前调用让红点立刻可见。
   /// 重复调用会跳过。
   static Future<void> preloadUnread() => UnreadManager.instance.init();
+
+  /// 仅当本地没有该 consult 的非零未读时，用 [count] 兜底写入并广播。
+  /// 配合 [queryUnreadFor] 使用：服务端快照不覆盖 WS 实时累加的本地值。
+  static void setUnreadIfAbsent(int consultId, int count) =>
+      UnreadManager.instance.setUnreadIfAbsent(consultId, count);
+
+  /// Stateless 拉取某个商户的服务端快照未读 `consultId -> unread`。
+  ///
+  /// 完全不触碰 [QiChatConfig.current]，因此宿主可以在"商户列表"页对多个商户
+  /// 并行调用，不会干扰当前已 [init] 的那个商户的 WS 连接或全局 cert / domain。
+  ///
+  /// 失败（线检超时 / HTTP 错误）返回空 Map，由宿主决定如何合并到本地
+  /// [UnreadManager]——推荐用 [UnreadManager.setUnreadIfAbsent]，保留 WS
+  /// 实时累加值优先于服务端快照。
+  static Future<Map<int, int>> queryUnreadFor({
+    required String cert,
+    required int merchantId,
+    required String detectUrls,
+    Duration timeout = const Duration(seconds: 10),
+  }) =>
+      UnreadQuery.fetch(
+        cert: cert,
+        merchantId: merchantId,
+        detectUrls: detectUrls,
+        timeout: timeout,
+      );
 
   /// 按 consultId 维度的未读流。宿主在"商户列表"等聚合页可基于自己的 consultIds
   /// 求交集得到每个商户的未读数。

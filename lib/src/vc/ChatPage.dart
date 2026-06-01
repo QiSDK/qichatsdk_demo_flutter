@@ -580,14 +580,19 @@ class _ChatPageState extends State<ChatPage>
       var index =
           _messages.indexWhere((p) => p.remoteId == msg.msgId.toString());
       if (index >= 0) {
-        var metaData = _messages[index].metadata;
+        var oldMsg = _messages[index];
+        var metaData = Map<String, dynamic>.from(oldMsg.metadata ?? {});
+        // 若该 msgId 之前是「对方撤回了一条消息」灰条，编辑后要恢复成普通消息样式
+        metaData['tipText'] = false;
+        // 标记为已编辑，渲染层可据此显示「已编辑」徽标
+        metaData['editedAt'] = DateTime.now().millisecondsSinceEpoch;
         _messages.removeAt(index);
         _messages.insert(
             index,
             types.TextMessage(
-                author: types.User(id: msg.sender.toString()),
+                author: oldMsg.author,
                 text: msg.content.data,
-                createdAt: DateTime.now().millisecondsSinceEpoch,
+                createdAt: oldMsg.createdAt,
                 metadata: metaData,
                 id: _generateRandomId(),
                 status: types.Status.sent,
@@ -785,7 +790,7 @@ class _ChatPageState extends State<ChatPage>
 
       MsgItem item = MsgItem();
       item.content = sy.Content();
-      item.content?.data = '对方撤回了1条消息';
+      item.content?.data = '对方撤回了一条消息';
       item.sender = msg.sender.toString();
       item.msgId = msg.msgId.toString();
       item.msgTime = Util.convertDateToString(msg.msgTime.toDateTime());
@@ -928,6 +933,13 @@ class _ChatPageState extends State<ChatPage>
     Iterable<MsgItem> msgItems = h.list!;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {
+        MsgItem tipItem = MsgItem();
+        tipItem.content = sy.Content();
+        tipItem.content?.data = '对方撤回了一条消息';
+        tipItem.sender = msg.sender;
+        tipItem.msgId = msg.msgId;
+        tipItem.msgTime = msg.msgTime;
+        composeLocalMsg(tipItem, isHistory: true, isTipText: true);
         continue;
       }
 
