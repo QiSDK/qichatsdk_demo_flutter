@@ -1107,9 +1107,15 @@ class _ChatPageState extends State<ChatPage>
     }
 
     if (msg != null && !onlyCompose) {
+      // 防重：同一条服务器消息可能因「历史拉取(HTTP)」与「实时推送(WS)」竞态各进一次。
+      // 例如用户退出后客服发消息，再次进入时 queryHistory 已含该条，WS 又推一遍。
+      // remoteId=='0' 是本地待回执的发送中占位，不参与去重。
+      if (msgId.isNotEmpty &&
+          msgId != '0' &&
+          _messages.any((m) => m.remoteId == msgId)) {
+        return msg;
+      }
       isHistory ? _messages.add(msg) : _messages.insert(0, msg);
-      //_messages.add(msg);
-      //_messages.insert(0, msg)  ;
     }
     return msg;
   }
