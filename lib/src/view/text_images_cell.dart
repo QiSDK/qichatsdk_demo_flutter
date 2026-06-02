@@ -9,6 +9,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:path_provider/path_provider.dart';
 import 'package:qichat_ui_sdk/src/Constant.dart';
 import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
+import 'package:qichat_ui_sdk/src/model/AppChatTheme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:qichat_ui_sdk/src/model/TextBody.dart';
@@ -31,12 +32,14 @@ class TextImagesCell extends StatefulWidget {
   int messageWidth;
   String chatId;
   MessageItemOperateListener listener;
+  AppChatTheme? theme;
   TextImagesCell(
       {super.key,
       required this.chatId,
       required this.message,
       required this.messageWidth,
-      required this.listener});
+      required this.listener,
+      this.theme});
 
   @override
   State<TextImagesCell> createState() => _text_images_cell();
@@ -135,7 +138,9 @@ class _text_images_cell extends State<TextImagesCell> {
           ),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           decoration: BoxDecoration(
-            color: isCurrentUser ? Colors.blue : Colors.blue.shade100,
+            color: isCurrentUser
+                ? (widget.theme?.rightBubbleColor ?? Colors.blue)
+                : (widget.theme?.leftBubbleColor ?? Colors.blue.shade100),
             borderRadius: BorderRadius.only(
               topLeft:
                   isCurrentUser ? const Radius.circular(16) : Radius.zero,
@@ -193,14 +198,20 @@ class _text_images_cell extends State<TextImagesCell> {
                           "body": Style(
                             fontSize: FontSize(14),
                             color: textColor ??
-                                (isCurrentUser ? Colors.white : Colors.black),
+                                (isCurrentUser
+                                    ? (widget.theme?.rightBubbleTextColor ??
+                                        Colors.white)
+                                    : (widget.theme?.leftBubbleTextColor ??
+                                        Colors.black)),
                             margin: Margins.zero,
                             padding: HtmlPaddings.zero,
                           ),
                           "a": Style(
                             color: isCurrentUser
-                                ? Colors.white
-                                : Colors.blue.shade800,
+                                ? (widget.theme?.rightBubbleTextColor ??
+                                    Colors.white)
+                                : (widget.theme?.leftBubbleTextColor ??
+                                    Colors.blue.shade800),
                             textDecoration: TextDecoration.underline,
                           ),
                         },

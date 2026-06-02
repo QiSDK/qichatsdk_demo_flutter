@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_types/flutter_chat_types.dart';
 import 'package:qichat_ui_sdk/src/model/AutoReply.dart';
+import 'package:qichat_ui_sdk/src/model/AppChatTheme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:qichat_ui_sdk/src/model/ReplyMessageItem.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
@@ -33,6 +34,7 @@ class TextMessageWidget extends StatefulWidget {
   AutoReply? autoReply;
   MessageItemOperateListener listener;
   Function(int, bool) onExpandAction;
+  AppChatTheme? theme;
   TextMessageWidget(
       {super.key,
       required this.chatId,
@@ -40,6 +42,7 @@ class TextMessageWidget extends StatefulWidget {
       required this.messageWidth,
       required this.listener,
       this.autoReply,
+      this.theme,
       required this.onExpandAction});
 
   @override
@@ -209,8 +212,8 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
         Container(
           decoration: BoxDecoration(
             color: widget.message.author.id == widget.chatId
-                ? Colors.blue
-                : Colors.blue.shade100,
+                ? (widget.theme?.rightBubbleColor ?? Colors.blue)
+                : (widget.theme?.leftBubbleColor ?? Colors.blue.shade100),
             borderRadius: BorderRadius.only(
               topLeft: widget.message.author.id == widget.chatId
                   ? const Radius.circular(16)
@@ -247,15 +250,15 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                   "body": Style(
                     fontSize: FontSize(14),
                     color: widget.message.author.id == widget.chatId
-                        ? Colors.white
-                        : Colors.black,
+                        ? (widget.theme?.rightBubbleTextColor ?? Colors.white)
+                        : (widget.theme?.leftBubbleTextColor ?? Colors.black),
                     margin: Margins.zero,
                     padding: HtmlPaddings.zero,
                   ),
                   "a": Style(
                     color: widget.message.author.id == widget.chatId
-                        ? Colors.white
-                        : Colors.blue.shade800,
+                        ? (widget.theme?.rightBubbleTextColor ?? Colors.white)
+                        : (widget.theme?.leftBubbleTextColor ?? Colors.blue.shade800),
                     textDecoration: TextDecoration.underline,
                   ),
                 },
@@ -322,7 +325,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
   }
 
   initAutoReplay() {
-    var bgColor = Colors.blue.shade100;
+    var bgColor = widget.theme?.leftBubbleColor ?? Colors.blue.shade100;
     return Container(
       color: bgColor,
       padding: const EdgeInsets.all(10),
@@ -342,7 +345,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
               style: {
                 "body": Style(
                   fontSize: FontSize(16),
-                  color: Colors.black,
+                  color: widget.theme?.leftBubbleTextColor ?? Colors.black,
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,
                 ),
@@ -433,7 +436,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                               style: TextStyle(
                                   color: qa.isClicked == true
                                       ? Colors.black26
-                                      : Colors.black)),
+                                      : Colors.blue)),
                         ),
                       ),
                     );
@@ -455,7 +458,7 @@ class _TextMessageWidgetState extends State<TextMessageWidget> {
                                 style: TextStyle(
                                     color: qa.isClicked == true
                                         ? Colors.grey
-                                        : Colors.black)),
+                                        : Colors.blue)),
                           ),
                         );
                       }),

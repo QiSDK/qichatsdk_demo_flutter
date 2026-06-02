@@ -21,7 +21,6 @@ import 'package:qichat_ui_sdk/src/view/File_cell.dart';
 import 'package:qichat_ui_sdk/src/view/message_cell.dart';
 import 'package:qichat_ui_sdk/src/view/image_thumbnail_cell.dart';
 import 'package:qichat_ui_sdk/src/view/text_images_cell.dart';
-import 'package:qichat_ui_sdk/src/view/text_media_cell.dart';
 import 'package:qichat_ui_sdk/src/view/evaluation_dialog.dart';
 import 'package:qichat_ui_sdk/src/model/Evaluation.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
@@ -351,6 +350,7 @@ class _ChatPageState extends State<ChatPage>
               chatId: _me.id,
               listener: this,
               messageWidth: messageWidth ?? 0,
+              theme: _theme,
             );
           } else {
             return TextMessageWidget(
@@ -359,6 +359,7 @@ class _ChatPageState extends State<ChatPage>
               chatId: _me.id,
               listener: this,
               messageWidth: messageWidth ?? 0,
+              theme: _theme,
               onExpandAction: (index, val) {
                 setState(() {
                   if (val) {
