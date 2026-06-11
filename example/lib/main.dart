@@ -239,11 +239,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // 带参数打开客服中心 App，如果App没有安装，打开一个网址链接
   Future<void> _openBackupCustomerService() async {
     final cfg = await DemoConfig.load();
     final prefs = await SharedPreferences.getInstance();
     final xToken = prefs.getString(PARAM_XTOKEN) ?? '';
 
+    // _themeIndex: 0-晴空蓝, 1-薄暮紫, 2-蜜桃粉, 3-抹茶绿, 4-日落橙, 5-星空靛, 6-暗夜紫, 7-极简灰, 8-幻夜紫, 9-晨雾白
     final params = <String, String>{
       'cert': cfg.cert,
       'userId': '${cfg.userId}',

@@ -4,7 +4,7 @@ Future<void> _openBackupCustomerService() async {
   final prefs = await SharedPreferences.getInstance();
   final xToken = prefs.getString(PARAM_XTOKEN) ?? '';
 
-  // _themeIndex: 0-晴空蓝, 1-薄暮紫, 2-蜜桃粉, 3-抹茶绿, 4-日落橙, 5-星空靛, 6-暗夜紫, 7-极简灰, 8-幻夜紫, 9-晨雾白
+  // _themeIndex: 0-晨雾白 → 1-暗夜神殿 → 蜜桃粉 → 抹茶绿 → 日落橙 → 星空靛 → 暗夜紫 → 极简灰 → 幻夜紫 → 晴空蓝 → 11-薄暮紫
   final params = <String, String>{
     'cert': cfg.cert,
     'userId': '${cfg.userId}',
