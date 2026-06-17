@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 import 'config.dart';
 import 'model/Entrance.dart';
+import 'model/ServiceKeyword.dart';
 
 // SharedPreferences 持久化键。仅 example demo 使用——SDK 通过 init() 直接传值。
 const String PARAM_USER_ID = "USER_ID";
@@ -75,6 +76,11 @@ set withAutoReplyBuilder(cmessage.WithAutoReply? v) =>
 
 Map<Int64, List<types.Message>> get unSentMessage =>
     QiChatConfig.current.unSentMessage;
+
+List<ServiceKeyword> get serviceKeywords =>
+    QiChatConfig.current.serviceKeywords;
+set serviceKeywords(List<ServiceKeyword> v) =>
+    QiChatConfig.current.serviceKeywords = v;
 
 ReportRequest get reportRequest => QiChatConfig.current.reportRequest;
 

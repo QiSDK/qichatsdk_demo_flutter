@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:logman/logman.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -47,7 +49,28 @@ Future<void> main() async {
     maxSessionMinutes: cfg.maxSessionMinutes,
   );
 
+  // demo：模拟「宿主调自己接口拿到 service_keyword 配置后喂进 SDK」。
+  // 真实接入时，这里换成宿主自己的 HTTP 请求结果。
+  await _loadAutoCardKeywords();
+
   runApp(const MyApp());
+}
+
+/// 从内置示例 JSON 读取 `result[0].service_keyword` 并设置到 UISDK。
+Future<void> _loadAutoCardKeywords() async {
+  try {
+    final raw = await rootBundle.loadString(
+        'packages/qichat_ui_sdk/assets/json/mst_card_msg_match_list.json');
+    final data = jsonDecode(raw) as Map<String, dynamic>;
+    final result = data['result'] as List?;
+    if (result == null || result.isEmpty) return;
+    final list = (result.first['service_keyword'] as List?)
+            ?.cast<Map<String, dynamic>>() ??
+        const <Map<String, dynamic>>[];
+    QiChatUISDK.setAutoCardKeywords(list);
+  } catch (e) {
+    debugPrint('加载自动卡片关键词失败: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {

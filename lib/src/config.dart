@@ -5,6 +5,7 @@ import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cmessage;
 
 import 'model/Entrance.dart';
+import 'model/ServiceKeyword.dart';
 
 /// SDK 运行时单例配置。
 ///
@@ -28,6 +29,10 @@ class QiChatConfig {
   Entrance? entrance;
   cmessage.WithAutoReply? withAutoReplyBuilder;
   final Map<Int64, List<types.Message>> unSentMessage = {Int64(0): []};
+
+  /// 宿主通过 [QiChatUISDK.setAutoCardKeywords] 传入的关键词卡片配置。
+  /// 用户输入命中其中任一 keyword 时，自动发送 MST_AUTO_CARD 卡片消息。
+  List<ServiceKeyword> serviceKeywords = [];
 
   // SDK 协议层单例（整个生命周期共用一个 ChatLib）
   final ChatLib chatLib = ChatLib();

@@ -8,6 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../config.dart';
+import '../model/ServiceKeyword.dart';
 import '../manager/global_chat_manager.dart';
 import '../manager/unread_manager.dart';
 import '../model/AppChatTheme.dart';
@@ -85,6 +86,18 @@ class QiChatUISDK {
 
     _initialized = true;
     return true;
+  }
+
+  /// 设置「关键词自动卡片」配置。
+  ///
+  /// 宿主调用自己的接口拿到 `service_keyword` 数组（每条含 `subject` / `content` /
+  /// `keywords` / `weight` 等），原样传入即可。可在 [init] 之后任意时机重复调用覆盖。
+  ///
+  /// 之后当用户在聊天页输入的文本包含某条的任一 keyword 时，UISDK 会自动以
+  /// `msgSourceType = MST_AUTO_CARD` 追加发送一条卡片消息。
+  static void setAutoCardKeywords(List<Map<String, dynamic>> serviceKeywords) {
+    QiChatConfig.current.serviceKeywords =
+        serviceKeywords.map((e) => ServiceKeyword.fromJson(e)).toList();
   }
 
   static void _initWebViewPlatform() {

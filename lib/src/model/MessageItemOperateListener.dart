@@ -10,4 +10,7 @@ abstract class MessageItemOperateListener {
   void onPlayVideo(String url);
   void onPlayImage(String url);
   void onReply(String val, Int64 replyId);
+
+  /// 点击自动卡片（MST_AUTO_CARD）上的选项时回调：把 [text] 当作普通文本消息真正发送出去。
+  void onSendCardOption(String text);
 }

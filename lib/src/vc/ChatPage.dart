@@ -21,6 +21,8 @@ import 'package:qichat_ui_sdk/src/view/File_cell.dart';
 import 'package:qichat_ui_sdk/src/view/message_cell.dart';
 import 'package:qichat_ui_sdk/src/view/image_thumbnail_cell.dart';
 import 'package:qichat_ui_sdk/src/view/text_images_cell.dart';
+import 'package:qichat_ui_sdk/src/view/auto_card_cell.dart';
+import 'package:qichat_ui_sdk/src/util/auto_card_matcher.dart';
 import 'package:qichat_ui_sdk/src/view/evaluation_dialog.dart';
 import 'package:qichat_ui_sdk/src/model/Evaluation.dart';
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
@@ -241,6 +243,34 @@ class _ChatPageState extends State<ChatPage>
     });
   }
 
+  /// 用户手输消息命中关键词时，追加发送一条 MST_AUTO_CARD 卡片消息。
+  /// 卡片体是命中条目的 JSON，本地以「客服侧（左）」插入一条 echo，
+  /// 复用 payloadId 去重机制（回执会把 remoteId 回填到这条 echo 上）。
+  void _maybeSendAutoCard(String input) {
+    final hit = matchAutoCard(input, serviceKeywords);
+    if (hit == null) return;
+
+    final cardJson = jsonEncode(hit.toJson());
+    Constant.instance.chatLib.sendMessage(
+        cardJson, cMessage.MessageFormat.MSG_TEXT, consultId,
+        msgSourceType: MsgSourceType.MST_AUTO_CARD);
+
+    final cardMessage = types.TextMessage(
+      author: _friend,
+      id: "${Constant.instance.chatLib.payloadId}",
+      text: cardJson,
+      metadata: {
+        'msgTime': DateTime.now().millisecondsSinceEpoch,
+        'msgSourceType': 'MST_AUTO_CARD',
+      },
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      status: types.Status.sending,
+    );
+    setState(() {
+      _messages.insert(0, cardMessage);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,7 +374,15 @@ class _ChatPageState extends State<ChatPage>
                 height: 1.5)),
         textMessageBuilder: (message, {int? messageWidth, bool? showName}) {
           var msgSourceType = message.metadata?["msgSourceType"] ?? "";
-            if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER" || message.text.contains("\"imgs\"")) {
+          if (msgSourceType == "MST_AUTO_CARD") {
+            return AutoCardCell(
+              message: message,
+              chatId: _me.id,
+              listener: this,
+              messageWidth: messageWidth ?? 0,
+              theme: _theme,
+            );
+          } else if (msgSourceType == "MST_SYSTEM_CUSTOMER" || msgSourceType == "MST_SYSTEM_WORKER" || message.text.contains("\"imgs\"")) {
             return TextImagesCell(
               message: message,
               chatId: _me.id,
@@ -419,15 +457,17 @@ class _ChatPageState extends State<ChatPage>
               if (_bottomExpanded == expanded) return;
               setState(() => _bottomExpanded = expanded);
             },
-            onSubmitted: (value) {
+            onSubmitted: (value) async {
               final trimmedText = value.trim();
               if (trimmedText.isEmpty) {
                 SmartDialog.showToast("消息不能为空");
                 return;
               }
               final partialText = types.PartialText(text: trimmedText);
-              _handleSendPressed(partialText);
-
+              // 先把用户消息发完并插入本地 echo，再追加卡片，保证卡片排在用户消息之后。
+              await _handleSendPressed(partialText);
+              // 仅对用户手输的消息做关键词匹配，命中则追加发送一张自动卡片。
+              _maybeSendAutoCard(trimmedText);
             },
             onProgress: (progress) {
               // 接收来自 custom_bottom 的进度更新
@@ -1022,7 +1062,9 @@ class _ChatPageState extends State<ChatPage>
     if (msgModel.msgSourceType == "MST_SYSTEM_CUSTOMER") {
       sender = _me;
     } else if (msgModel.msgSourceType == "MST_SYSTEM_WORKER" ||
-        msgModel.msgSourceType == "MST_AI") {
+        msgModel.msgSourceType == "MST_AI" ||
+        msgModel.msgSourceType == "MST_AUTO_CARD") {
+      // 自动卡片虽由用户侧发出，但视觉上作为「客服侧」卡片渲染在左边。
       sender = _friend;
     }
 
@@ -1253,6 +1295,12 @@ class _ChatPageState extends State<ChatPage>
   void onReply(String val, Int64 replyId) {
     (_sendViewKey.currentState as ChatCustomBottomState)
         .showReply(val, replyId);
+  }
+
+  @override
+  void onSendCardOption(String text) {
+    // 走真实发送路径（不再触发关键词匹配，避免点选项又弹卡片）。
+    _handleSendPressed(types.PartialText(text: text));
   }
 
   @override
