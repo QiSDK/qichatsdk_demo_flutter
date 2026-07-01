@@ -1,4 +1,5 @@
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
@@ -6,6 +7,26 @@ import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
 
 import 'model/Entrance.dart';
 import 'model/ServiceKeyword.dart';
+
+/// 宿主处理「卡片跳转」的回调签名。
+///
+/// [jumpUrl] 是卡片配置里的跳转链接，[jumpCategory] 为跳转类型：
+/// `1=小程序`（如 `pages/Withdraw/Record`）、`2=H5`（完整网址）、`3=原生页`
+/// （见 [ServiceKeyword.jumpMiniProgram] 等常量）。宿主据此把用户导航到自己的
+/// 小程序容器 / WebView / 原生页。回调携带聊天页的 [context]，可直接
+/// `Navigator.push`。
+///
+/// 注意：一旦注册处理器，**所有类型**（含 H5）都交给宿主；未注册时 SDK 才会
+/// 用「H5 → 外部浏览器、其余 → 内置模拟页」兜底。
+typedef CardJumpHandler = void Function(
+    BuildContext context, String jumpUrl, int? jumpCategory);
+
+/// 宿主通过 [QiChatUISDK.setCardJumpHandler] 注册的卡片跳转处理器。
+///
+/// 作为库级变量而非 [QiChatConfig] 字段：跳转是「宿主怎么打开页面」的能力，
+/// 与具体商户会话无关，不应被 [QiChatConfig.reset]（登出 / 切商户）清掉。
+/// 为 null 时 SDK 用内置模拟页 `MiniProgramMockPage` 兜底。
+CardJumpHandler? cardJumpHandler;
 
 /// SDK 运行时单例配置。
 ///

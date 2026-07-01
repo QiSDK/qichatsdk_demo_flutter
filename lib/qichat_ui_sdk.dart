@@ -8,7 +8,7 @@
 ///   userId: 666667,
 ///   userName: '王五',
 ///   merchantId: 230,
-///   detectUrls: 'https://csapi.hfxg.xyz,https://...',
+///   detectUrls: 'https://ddd,https://...',
 ///   baseUrlImage: 'https://imagesacc.hfxg.xyz',
 /// );
 ///
@@ -18,4 +18,5 @@
 library qichat_ui_sdk;
 
 export 'src/api/qichat_ui_sdk.dart' show QiChatUISDK;
+export 'src/config.dart' show CardJumpHandler;
 export 'src/model/AppChatTheme.dart' show AppChatTheme, AppChatGradientDirection;

@@ -37,7 +37,7 @@ class QiChatUISDK {
   /// - [userName]：用户名（用于客服端显示）；
   /// - [merchantId]：商户 ID；
   /// - [platformName]：商户名（用于聊天页 AppBar 右侧展示）；
-  /// - [detectUrls]：逗号分隔的线路检测 URL（如 'https://csapi.hfxg.xyz,https://backup'）；
+  /// - [detectUrls]：逗号分隔的线路检测 URL（如 'https://dd.hfxge.xyz,https://backup'）；
   /// - [baseUrlImage]：图片资源 CDN 域名；
   /// - [maxSessionMinutes]：会话最大分钟数（默认 300）；
   /// - [userType]：用户类型（默认 2）；
@@ -98,6 +98,18 @@ class QiChatUISDK {
   static void setAutoCardKeywords(List<Map<String, dynamic>> serviceKeywords) {
     QiChatConfig.current.serviceKeywords =
         serviceKeywords.map((e) => ServiceKeyword.fromJson(e)).toList();
+  }
+
+  /// 注册「卡片跳转」处理器。
+  ///
+  /// 当用户点击带 `jumpUrl`（小程序页面路径，如 `pages/Withdraw/Record`）的自动
+  /// 卡片按钮时回调。宿主在这里把用户导航到真正的小程序容器 / 原生页 / WebView。
+  /// 回调携带聊天页 `context`，可直接 `Navigator.push`。
+  ///
+  /// 不注册（或传 null）时，SDK 用内置模拟页兜底，方便开发期直观演示跳转。
+  /// 该注册与具体商户会话无关，[dispose] / 切商户不会清除，通常只需设置一次。
+  static void setCardJumpHandler(CardJumpHandler? handler) {
+    cardJumpHandler = handler;
   }
 
   static void _initWebViewPlatform() {

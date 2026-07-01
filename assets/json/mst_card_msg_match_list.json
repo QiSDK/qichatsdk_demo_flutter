@@ -20,9 +20,9 @@
           "questionType": 1,
           "category": 2,
           "subject": "请选择提现相关问题",
-          "content": ["提现未到账", "提现失败", "提现审核中", "提现限额"],
+          "content": ["提现未到账",  "提现审核中", "提现限额"],
           "keywords": ["提现", "取款", "出款"],
-          "weight": 100
+          "weight": 90
         },
         {
           "id": 1,
@@ -41,6 +41,7 @@
           "content": "提现一般在2小时内到账，节假日可能延迟",
           "jumpCategory": 1,
           "jumpUrl": "pages/Withdraw/Record",
+          "rightImageUrl": "https://imgjy.yxlady.com/upload/img/jy_jh/20220429024059_22614.jpg",
           "keywords": ["提现未到账", "提现没到", "取款未到账"],
           "weight": 95
         },
@@ -52,6 +53,7 @@
           "content": "常见原因：1.未绑定银行卡 2.银行卡信息错误 3.未满足流水要求",
           "jumpCategory": 1,
           "jumpUrl": "pages/User/BankCard",
+          "rightImageUrl": "https://www.bing.com/th?id=OHR.MasaiGiraffe_ROW6806132366_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
           "keywords": ["提现失败", "提现不成功", "取款失败"],
           "weight": 90
         }

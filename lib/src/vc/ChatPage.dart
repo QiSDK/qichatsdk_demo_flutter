@@ -29,9 +29,13 @@ import 'package:flutter_qichat_sdk/flutter_qichat_sdk.dart';
 import 'dart:math';
 import 'package:flutter_qichat_sdk/src/dartOut/api/common/c_message.pb.dart'
     as cMessage;
+import 'package:url_launcher/url_launcher.dart';
 import '../Constant.dart';
 import '../article_repository.dart';
+import '../config.dart';
+import 'mini_program_mock_page.dart';
 import '../model/AppChatTheme.dart';
+import '../model/ServiceKeyword.dart';
 import '../model/Custom.dart';
 import '../model/MessageItemOperateListener.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1301,6 +1305,52 @@ class _ChatPageState extends State<ChatPage>
   void onSendCardOption(String text) {
     // 走真实发送路径（不再触发关键词匹配，避免点选项又弹卡片）。
     _handleSendPressed(types.PartialText(text: text));
+  }
+
+  @override
+  void onCardJump(String jumpUrl, int? jumpCategory) {
+    if (!mounted) return;
+    // 宿主注册了处理器 → 交给宿主全权决定怎么打开（小程序 / 原生页 / H5）。
+    final handler = cardJumpHandler;
+    if (handler != null) {
+      handler(context, jumpUrl, jumpCategory);
+      return;
+    }
+    // 未注册处理器时 SDK 兜底：
+    // H5 → 直接用系统浏览器 / 外部应用打开；其余类型 → 内置模拟页。
+    if (jumpCategory == ServiceKeyword.jumpH5) {
+      _openH5(jumpUrl);
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => MiniProgramMockPage(
+          jumpUrl: jumpUrl,
+          jumpCategory: jumpCategory,
+          theme: _theme,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openH5(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      // 打开失败静默兜底到模拟页，避免用户点击无反应。
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => MiniProgramMockPage(
+            jumpUrl: url,
+            jumpCategory: ServiceKeyword.jumpH5,
+            theme: _theme,
+          ),
+        ),
+      );
+    }
   }
 
   @override

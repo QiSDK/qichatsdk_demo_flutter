@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
+import '../Constant.dart';
 import '../model/AppChatTheme.dart';
 import '../model/MessageItemOperateListener.dart';
 import '../model/ServiceKeyword.dart';
@@ -83,8 +85,10 @@ class AutoCardCell extends StatelessWidget {
     final titleColor = theme?.leftBubbleTextColor ?? Colors.black87;
     final options = card.options;
     final body = card.contentText;
+    final imageUrl = (card.rightImageUrl ?? '').trim();
 
-    return Column(
+    // 标题 + 正文列（左侧）。
+    final textColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -105,24 +109,70 @@ class AutoCardCell extends StatelessWidget {
             style: TextStyle(fontSize: 13, color: tint, height: 1.4),
           ),
         ],
+      ],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 精准问题可带右侧配图（rightImageUrl）；无图则整行只有文字。
+        if (imageUrl.isEmpty)
+          textColumn
+        else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: textColumn),
+              const SizedBox(width: 10),
+              _rightImage(imageUrl),
+            ],
+          ),
         const SizedBox(height: 4),
         // questionType 1：每个选项一个按钮。
-        ...options.map((opt) => _optionButton(label: opt, sendText: opt, tint: tint)),
-        // questionType 2：无选项数组时给一个按钮（发送 subject）。
+        ...options.map((opt) => _optionButton(label: opt, tint: tint,
+            onPressed: () => listener.onSendCardOption(opt))),
+        // questionType 2：无选项数组时给一个按钮。
+        // hasJump（jumpCategory 非 0 且 jumpUrl 非空）→ 请求跳转；
+        // 否则回退成发送 subject 文本。
         if (options.isEmpty && (card.subject ?? '').isNotEmpty)
-          _optionButton(
-            label: card.subject!,
-            sendText: card.subject!,
-            tint: tint,
-          ),
+          card.hasJump
+              ? _optionButton(
+                  label: card.subject!,
+                  tint: tint,
+                  onPressed: () =>
+                      listener.onCardJump(card.jumpUrl!, card.jumpCategory),
+                )
+              : _optionButton(
+                  label: card.subject!,
+                  tint: tint,
+                  onPressed: () => listener.onSendCardOption(card.subject!),
+                ),
       ],
+    );
+  }
+
+  /// 右侧配图。绝对 URL 直接用；相对路径按 SDK 图片 CDN 前缀补全。
+  /// 加载失败静默隐藏，不影响卡片其余内容。
+  Widget _rightImage(String url) {
+    final full = url.startsWith('http') ? url : '$baseUrlImage$url';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: CachedNetworkImage(
+        imageUrl: full,
+        width: 64,
+        height: 64,
+        fit: BoxFit.cover,
+        errorWidget: (_, __, ___) => const SizedBox.shrink(),
+        placeholder: (_, __) => const SizedBox(width: 64, height: 64),
+      ),
     );
   }
 
   Widget _optionButton({
     required String label,
-    required String sendText,
     required Color tint,
+    required VoidCallback? onPressed,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -138,9 +188,7 @@ class AutoCardCell extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: sendText.isEmpty
-              ? null
-              : () => listener.onSendCardOption(sendText),
+          onPressed: onPressed,
           child: Text(
             label,
             textAlign: TextAlign.center,

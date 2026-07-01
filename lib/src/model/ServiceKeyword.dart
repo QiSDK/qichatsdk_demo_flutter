@@ -8,6 +8,12 @@
 /// - `questionType == 1`：数组，渲染成可点选项按钮（见 [options]）；
 /// - `questionType == 2`：字符串，渲染成正文段落（见 [contentText]）。
 class ServiceKeyword {
+  // jumpCategory 取值（见规范 mst_card_msg.md）：跳转分类。
+  static const int jumpNone = 0; // 无跳转
+  static const int jumpMiniProgram = 1; // 小程序
+  static const int jumpH5 = 2; // H5
+  static const int jumpNative = 3; // 原生页
+
   final int? id;
   final int? questionType;
   final int? category;
@@ -15,8 +21,13 @@ class ServiceKeyword {
 
   /// 原始 content，可能是 `List`（选项）或 `String`（正文）。
   final dynamic content;
+
+  /// 右侧图片链接（仅精准问题可用）。空串 / null 表示无图。
+  final String? rightImageUrl;
   final List<String> keywords;
   final int weight;
+
+  /// 跳转分类，见 [jumpNone] / [jumpMiniProgram] / [jumpH5] / [jumpNative]。
   final int? jumpCategory;
   final String? jumpUrl;
 
@@ -26,6 +37,7 @@ class ServiceKeyword {
     this.category,
     this.subject,
     this.content,
+    this.rightImageUrl,
     this.keywords = const [],
     this.weight = 0,
     this.jumpCategory,
@@ -39,6 +51,7 @@ class ServiceKeyword {
       category: (json['category'] as num?)?.toInt(),
       subject: json['subject'] as String?,
       content: json['content'],
+      rightImageUrl: json['rightImageUrl'] as String?,
       keywords: (json['keywords'] as List?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -57,6 +70,10 @@ class ServiceKeyword {
   /// content 为字符串时返回正文；否则返回空串。
   String get contentText => content is String ? content as String : '';
 
+  /// 是否需要跳转：jumpCategory 非「无」且 jumpUrl 非空。
+  bool get hasJump =>
+      (jumpCategory ?? jumpNone) != jumpNone && (jumpUrl ?? '').isNotEmpty;
+
   /// 原样还原条目 JSON（content 数组/字符串两种形态都保真）——即卡片消息的文本体。
   Map<String, dynamic> toJson() {
     final m = <String, dynamic>{
@@ -68,6 +85,7 @@ class ServiceKeyword {
       'keywords': keywords,
       'weight': weight,
     };
+    if (rightImageUrl != null) m['rightImageUrl'] = rightImageUrl;
     if (jumpCategory != null) m['jumpCategory'] = jumpCategory;
     if (jumpUrl != null) m['jumpUrl'] = jumpUrl;
     return m;

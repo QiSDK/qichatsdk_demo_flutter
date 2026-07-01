@@ -53,7 +53,69 @@ Future<void> main() async {
   // 真实接入时，这里换成宿主自己的 HTTP 请求结果。
   await _loadAutoCardKeywords();
 
+  // demo：宿主接管「卡片跳转」。用户点带 jumpUrl 的卡片按钮时回调到这里。
+  // 真实接入时，这里换成打开你自己的小程序容器 / 原生页 / WebView。
+  // 不注册的话，SDK 会用内置模拟页兜底。
+  QiChatUISDK.setCardJumpHandler(_handleCardJump);
+
   runApp(const MyApp());
+}
+
+/// demo：宿主侧模拟「打开小程序页面」。
+void _handleCardJump(BuildContext context, String jumpUrl, int? jumpCategory) {
+  SmartDialog.showToast('宿主接管：模拟打开小程序 $jumpUrl');
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) =>
+          _MiniProgramDemoPage(jumpUrl: jumpUrl, jumpCategory: jumpCategory),
+    ),
+  );
+}
+
+/// demo：模拟的小程序页面。真实接入时替换成宿主自己的页面 / 容器。
+class _MiniProgramDemoPage extends StatelessWidget {
+  final String jumpUrl;
+  final int? jumpCategory;
+
+  const _MiniProgramDemoPage({required this.jumpUrl, this.jumpCategory});
+
+  @override
+  Widget build(BuildContext context) {
+    final title = jumpUrl.split('/').where((s) => s.isNotEmpty).lastOrNull ??
+        jumpUrl;
+    return Scaffold(
+      appBar: AppBar(title: Text('小程序模拟页 · $title')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.open_in_new, size: 64, color: Colors.deepPurple),
+              const SizedBox(height: 16),
+              const Text('宿主已接管跳转',
+                  style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 12),
+              SelectableText(jumpUrl,
+                  style: const TextStyle(
+                      fontFamily: 'monospace', color: Colors.black87)),
+              if (jumpCategory != null) ...[
+                const SizedBox(height: 8),
+                Text('jumpCategory：$jumpCategory',
+                    style: const TextStyle(color: Colors.grey)),
+              ],
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: const Text('返回聊天'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// 从内置示例 JSON 读取 `result[0].service_keyword` 并设置到 UISDK。
