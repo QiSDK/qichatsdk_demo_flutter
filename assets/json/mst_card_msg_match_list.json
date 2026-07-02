@@ -31,7 +31,7 @@
           "subject": "请选择要咨询的充值类型",
           "content": ["充值未到账", "充值失败", "充值问题咨询"],
           "keywords": ["充值", "冲值", "上分"],
-          "weight": 100
+          "weight": 97
         },
         {
           "id": 5,
@@ -56,6 +56,97 @@
           "rightImageUrl": "https://www.bing.com/th?id=OHR.MasaiGiraffe_ROW6806132366_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
           "keywords": ["提现失败", "提现不成功", "取款失败"],
           "weight": 95
+        },
+
+        {
+          "id": 2,
+          "questionType": 1,
+          "category": 3,
+          "subject": "请选择账户相关问题",
+          "content": ["忘记密码", "账号被冻结", "修改绑定手机", "实名认证"],
+          "keywords": ["账户", "账号", "登录", "登陆"],
+          "weight": 90
+        },
+        {
+          "id": 3,
+          "questionType": 2,
+          "category": 3,
+          "subject": "忘记登录密码怎么办",
+          "content": "点击登录页「忘记密码」，通过绑定手机号验证码即可重置。若手机号已停用，请联系人工客服核实身份。",
+          "jumpCategory": 3,
+          "jumpUrl": "app://account/resetPassword",
+          "rightImageUrl": "",
+          "keywords": ["忘记密码", "密码忘了", "重置密码", "改密码"],
+          "weight": 92
+        },
+        {
+          "id": 8,
+          "questionType": 2,
+          "category": 1,
+          "subject": "充值未到账处理",
+          "content": "充值一般实时到账。若超过10分钟未到，请提供订单号与支付截图，我们将在30分钟内核实处理。",
+          "jumpCategory": 2,
+          "jumpUrl": "https://help.example.com/recharge/notarrive",
+          "rightImageUrl": "https://imgjy.yxlady.com/upload/img/jy_jh/20220429024059_22614.jpg",
+          "keywords": ["充值未到账", "充值没到", "上分没到", "充值不到账"],
+          "weight": 98
+        },
+        {
+          "id": 9,
+          "questionType": 2,
+          "category": 1,
+          "subject": "充值优惠活动说明",
+          "content": "每日首充可享8%赠送，活动细则详见活动页。参与后需完成对应流水方可提现。",
+          "jumpCategory": 3,
+          "jumpUrl": "app://activity/firstRecharge",
+          "rightImageUrl": "https://www.bing.com/th?id=OHR.MasaiGiraffe_ROW6806132366_1920x1200.jpg&rf=LaDigue_1920x1200.jpg",
+          "keywords": ["充值优惠", "首充", "充值活动", "充值赠送"],
+          "weight": 80
+        },
+        {
+          "id": 10,
+          "questionType": 2,
+          "category": 3,
+          "subject": "如何绑定银行卡",
+          "content": "进入「我的-银行卡」，填写持卡人姓名、卡号、预留手机号即可绑定。请务必使用本人实名银行卡。",
+          "jumpCategory": 1,
+          "jumpUrl": "pages/User/BankCard",
+          "rightImageUrl": "",
+          "keywords": ["绑定银行卡", "绑卡", "添加银行卡", "怎么绑卡"],
+          "weight": 70
+        },
+        {
+          "id": 11,
+          "questionType": 2,
+          "category": 4,
+          "subject": "补单进度说明",
+          "content": "补单申请提交后由财务人工核对，一般1-6小时处理完成，高峰期可能延迟，请耐心等待无需重复提交。",
+          "jumpCategory": 0,
+          "jumpUrl": "",
+          "rightImageUrl": "",
+          "keywords": ["补单进度", "补单多久", "补单没处理", "补单审核"],
+          "weight": 60
+        },
+        {
+          "id": 12,
+          "questionType": 2,
+          "category": 3,
+          "subject": "在线客服工作时间",
+          "content": "人工客服每日 09:00 - 24:00 在线，其余时段可留言，客服上线后将第一时间回复您。",
+          "jumpCategory": 0,
+          "jumpUrl": "",
+          "rightImageUrl": "",
+          "keywords": ["客服时间", "人工客服", "客服在吗", "转人工"],
+          "weight": 0
+        },
+        {
+          "id": 13,
+          "questionType": 1,
+          "category": 2,
+          "subject": "请选择提现异常类型",
+          "content": ["提现被拒绝", "提现被冻结", "到账金额不对", "提现手续费咨询"],
+          "keywords": ["提现异常", "提现问题", "提现被拒", "提现冻结"],
+          "weight": 85
         }
       ]
     }
