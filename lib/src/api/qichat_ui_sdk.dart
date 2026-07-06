@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logman/logman.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
@@ -110,6 +111,28 @@ class QiChatUISDK {
   /// 该注册与具体商户会话无关，[dispose] / 切商户不会清除，通常只需设置一次。
   static void setCardJumpHandler(CardJumpHandler? handler) {
     cardJumpHandler = handler;
+  }
+
+  /// 打开「网络日志」调试页面。展示 UISDK 经由 Dio 发出的所有 HTTP 请求
+  /// （请求头 / 请求体 / 响应体 / 状态码），点击可看详情。
+  ///
+  /// 日志由内置 Dio 拦截器（`CustomInterceptors`）通过 logman 自动收集（任意构建
+  /// 均记录，与 Android/iOS 一致）；宿主只需在需要时调用本方法即可，例如挂在
+  /// 设置页的某个隐藏入口后面。与 Android `openNetworkLog` / iOS
+  /// `NetworkLogPresenter.present()` 对齐。
+  static Future<void> openNetworkLog(BuildContext context) {
+    return Logman.instance.openDashboard(context);
+  }
+
+  /// 显示可拖动的「网络日志」悬浮按钮，点击打开 [openNetworkLog] 页面。
+  /// 仅建议在调试期开启。传入的 [context] 需能拿到 Overlay（通常是 App 根 context）。
+  static void showNetworkLogButton(BuildContext context) {
+    Logman.instance.attachOverlay(context: context);
+  }
+
+  /// 隐藏「网络日志」悬浮按钮。
+  static void hideNetworkLogButton() {
+    Logman.instance.removeOverlay();
   }
 
   static void _initWebViewPlatform() {

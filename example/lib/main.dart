@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:logman/logman.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -184,7 +183,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String _lineStatus = "";
   String _versionNo = "";
   int _unread = 0;
-  final Logman _logman = Logman.instance;
   late final int _themeIndex = AppChatTheme.presets.isEmpty
       ? 0
       : Random().nextInt(AppChatTheme.presets.length);
@@ -207,10 +205,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _loadVersion();
 
+    // demo：显示网络日志悬浮按钮，点开可查看 SDK 的 HTTP 请求（对齐 Android/iOS demo）
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (kDebugMode) {
-        _logman.attachOverlay(context: context);
-      }
+      if (mounted) QiChatUISDK.showNetworkLogButton(context);
     });
   }
 

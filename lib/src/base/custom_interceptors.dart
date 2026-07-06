@@ -30,19 +30,17 @@ class CustomInterceptors extends Interceptor {
     var traceHeader = {"x-trace-id": uuid};
     options.headers.addAll(header);
     options.headers.addAll(traceHeader);
-    if (kDebugMode) {
-      _cache[options] = uuid;
-      final sentAt = DateTime.now();
-      final requestRecord = NetworkRequestLogmanRecord(
-        id: uuid,
-        url: options.uri.toString(),
-        method: options.method,
-        headers: options.headers,
-        body: dataToString(options.data),
-        sentAt: sentAt,
-      );
-      _logman.networkRequest(requestRecord);
-    }
+    // 始终记录网络日志（对齐 Android/iOS 端始终采集），供 QiChatUISDK.openNetworkLog 查看
+    _cache[options] = uuid;
+    final requestRecord = NetworkRequestLogmanRecord(
+      id: uuid,
+      url: options.uri.toString(),
+      method: options.method,
+      headers: options.headers,
+      body: dataToString(options.data),
+      sentAt: DateTime.now(),
+    );
+    _logman.networkRequest(requestRecord);
     super.onRequest(options, handler);
   }
 
@@ -51,23 +49,20 @@ class CustomInterceptors extends Interceptor {
     //print(
      //   'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
 
-    if (kDebugMode) {
+    final id = _cache.remove(response.requestOptions);
+    if (id != null) {
       final Map<String, String> responseHeaders = response.headers.map.map(
         (key, value) => MapEntry(key, value.join(', ')),
       );
-      final id = _cache[response.requestOptions];
-      final receivedAt = DateTime.now();
-
       final responseRecord = NetworkResponseLogmanRecord(
-        id: id!,
+        id: id,
         statusCode: response.statusCode,
         headers: responseHeaders,
         body: dataToString(response.data),
-        receivedAt: receivedAt,
-        url: '',
+        receivedAt: DateTime.now(),
+        url: response.requestOptions.uri.toString(),
       );
-
-      //_logman.networkResponse(responseRecord);
+      _logman.networkResponse(responseRecord);
     }
     super.onResponse(response, handler);
   }
@@ -95,24 +90,26 @@ class CustomInterceptors extends Interceptor {
         errorMsg = "未知错误${errCode ?? ''}";
     }
 
-    if (kDebugMode) {
-      if (errorMsg.isNotEmpty){
-        SmartDialog.showToast(errorMsg);
-        print(errorMsg);
-      }
+    if (kDebugMode && errorMsg.isNotEmpty) {
+      SmartDialog.showToast(errorMsg);
+      print(errorMsg);
+    }
+
+    // 始终记录网络日志（对齐 Android/iOS 端始终采集）
+    final id = _cache.remove(err.requestOptions);
+    if (id != null) {
       final Map<String, String>? responseHeaders =
           err.response?.headers.map.map(
         (key, value) => MapEntry(key, value.join(', ')),
       );
-      final id = _cache[err.requestOptions];
 
       final responseRecord = NetworkResponseLogmanRecord(
-        id: id!,
+        id: id,
         statusCode: err.response?.statusCode ?? 0,
         headers: responseHeaders,
         body: dataToString(err.response?.data),
         receivedAt: DateTime.now(),
-        url: '',
+        url: err.requestOptions.uri.toString(),
       );
 
       _logman.networkResponse(responseRecord);
