@@ -118,7 +118,7 @@ class ArticleRepository {
      // msgId = "1331873452448907298";
     }
     var map = {
-      'chatId': 0,
+      'chatId': Constant.instance.chatId,
       "count": l,
       "consultId": consultId.toInt(),
       "userId": userId,

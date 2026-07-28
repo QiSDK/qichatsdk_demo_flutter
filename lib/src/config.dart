@@ -60,6 +60,9 @@ class QiChatConfig {
 
   // 兼容字段：部分模块写过 reportRequest（结构占位用）
   final ReportRequest reportRequest = ReportRequest();
+
+  /// 聊天ID。连接维度：一条 wss 连接对应一个 chatId，跨咨询类型共用，
+  /// 由 SCHi.id 在连接成功时下发。'0' 表示未知。只存内存，不落盘。
   String chatId = '0';
 
   String get baseUrlApi => 'https://$domain';

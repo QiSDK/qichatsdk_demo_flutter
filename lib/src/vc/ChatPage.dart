@@ -974,7 +974,7 @@ class _ChatPageState extends State<ChatPage>
     if (h == null || (h?.list?.length ?? 0) == 0) {
       return;
     }
-    Constant.instance.chatId = h.request?.chatId ?? '0';
+    Constant.instance.updateChatId(h.request?.chatId);
     Iterable<MsgItem> msgItems = h.list!;
     for (var msg in msgItems) {
       if (msg.msgOp == "MSG_OP_DELETE") {

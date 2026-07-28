@@ -237,6 +237,10 @@ class GlobalChatManager
   void receivedMsg(Message msg) {
     print('GlobalChatManager: 收到消息 consultId=${msg.consultId}, msgId=${msg.msgId}');
 
+    // 兜底：正常情况 chatId 已由 connected() 的 SCHi.id 拿到，
+    // 万一 SCHi 没带上，这里从消息里补一个
+    Constant.instance.updateChatId(msg.chatId.toString());
+
     // 获取消息所属的consultId
     int consultId = msg.consultId.toInt();
 
@@ -267,8 +271,11 @@ class GlobalChatManager
 
   @override
   void connected(SCHi c) {
+    // SCHi.id 就是 chatId（后端确认）。这是拉历史之前最早的赋值时机：
+    // connected → assignWorker → queryHistory，比历史请求早一个 HTTP 往返
+    Constant.instance.updateChatId(c.id.toString());
     xToken = c.token;
-    print('GlobalChatManager: 连接成功 token=${c.token}');
+    print('GlobalChatManager: 连接成功 chatId=${c.id} token=${c.token}');
     _notifyConnected(c);
   }
 

@@ -166,6 +166,17 @@ class Constant {
   String get chatId => QiChatConfig.current.chatId;
   set chatId(String v) => QiChatConfig.current.chatId = v;
 
+  /// chatId 的统一写入口，只存内存、不落盘：chatId 跟着 wss 连接走，
+  /// 断线重连会重新下发，缓存到本地反而可能是过期值。
+  /// 服务端在「还不知道是哪条会话」时会给 0/空，这类值不能覆盖已拿到的 chatId。
+  void updateChatId(String? newChatId) {
+    final id = newChatId?.trim() ?? '';
+    if (id.isEmpty || id == '0' || id == chatId) {
+      return;
+    }
+    chatId = id;
+  }
+
   static DateTime converDateToSystemZoneDate(DateTime date) {
     return date.toLocal();
   }
