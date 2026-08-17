@@ -54,7 +54,7 @@ Future<void> main() async {
     userId: 666667,
     userName: '王五',
     merchantId: 230,
-    detectUrls: 'https://csapi.hfxg.xyz,https://backup.example.com',
+    detectUrls: 'https://csh5-3-test.qlbig05.xyz,https://backup.example.com',
     baseUrlImage: 'https://imagesacc.hfxg.xyz',
   );
 

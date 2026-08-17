@@ -18,8 +18,8 @@ class DemoConfig {
   static const int defaultUserId = 666667;
   static const String defaultUserName = '王五';
   static const String defaultDetectUrls =
-      'https://csapi.hfxg.xyz,https://xxx.qixin14.xxx';
-  static const String defaultBaseUrlImage = 'https://imagesacc.hfxg.xyz';
+      'https://csh5-3-test.qlbig05.xyz,https://xxx.qixin14.xxx';
+  static const String defaultBaseUrlImage = 'https://images-3-test.qlbig05.xyz';
   static const int defaultMaxSessionMinutes = 300;
   static const int defaultUserType = 2;
   static const String defaultBackupWebUrl = 'https://www.baidu.com';
