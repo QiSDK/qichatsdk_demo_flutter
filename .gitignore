@@ -144,3 +144,7 @@ app.*.symbols
 
 # FVM Version Cache
 .fvm/
+
+# build artifacts (added 2026-07-28)
+.cxx/
+Pods/
